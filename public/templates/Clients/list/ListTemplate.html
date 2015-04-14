@@ -1,0 +1,12 @@
+<% leadsCollection.forEach(function(client, index){ %>
+<tr data-id="<%=client._id%>">
+    <td class="notForm"><input type="checkbox" value="<%=client._id%>" class="checkbox" /></td>
+    <td><%=startNumber + index + 1%></td>
+    <td><%=client.email%></td>
+    <td><%=client.country%></td>
+    <td><%=client.ip%></td>
+    <td><%=lead.createdBy.user?(lead.createdBy.date + ' (' + lead.createdBy.user.login + ')'):(lead.createdBy.date?lead.createdBy.date:'')%></td>
+    <td><%=client.long%></td>
+    <td><%=client.lang%></td>
+</tr>
+<% }) %>
