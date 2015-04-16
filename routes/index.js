@@ -11,14 +11,14 @@ module.exports = function (app, mainDb) {
     var multipartMiddleware = multipart();
 
     app.get('/', function (req, res, next) {
-        //res.sendfile('index.html');
-        res.send('Ok');
+        res.sendfile('index.html');
+        //res.send('Ok');
     });
 
     // ----------------------------------------------------------
     // Error Handler:
     // ----------------------------------------------------------
-    function notFound (req, res, next) {
+    function notFound(req, res, next) {
         res.status(404);
 
         if (req.accepts('html')) {
@@ -33,7 +33,7 @@ module.exports = function (app, mainDb) {
         res.send(RESPONSES.PAGE_NOT_FOUND);
     };
 
-    function errorHandler (err, req, res, next) {
+    function errorHandler(err, req, res, next) {
         var status = err.status || 500;
 
         if (process.env.NODE_ENV === 'production') {
