@@ -1,67 +1,101 @@
 define([
     'text!templates/main/MainTemplate.html',
     'views/map/mapView',
-    'dataService'
-], function (MainTemplate, mapView, dataService) {
+    'collections/devicesCollection',
+    'views/device/deviceMainListView'
+], function (MainTemplate, mapView, DevisesCollection, deviceMainListView) {
 
     var MainView = Backbone.View.extend({
         el: '#wrapper',
         events: {
-            //'click #loginPanel': 'showSelect',
+            //'click .deviseMainPageCheck': 'updateCheck',
             //'click': 'hideProp'
         },
+
+        stateModel: new Backbone.Model({}),
+
         initialize: function (options) {
-            //this.contentType = options ? options.contentType : null;
+            var devicesData = [
+                {
+                    user: 'sdfsdfsdfafdaffsfdsda',
+                    minderId: 'asdfasdfasfasfdasdf',
+                    deviceId: 'adfasfadfaff asd fa dfa afdsf ',
+                    deviceType: 'Windows',
+                    name: 'My windows phone',
+                    enabledTrackLocation: true,
+                    isPayed: true,
+                    lastLocation: {
+                        long: 10.10,
+                        lat: 10.10,
+                        accuracy: 1200,  // meters
+                        dateTime: new Date()
+                    },
+                    createdAt: new Date(),
+                    updatedAt: new Date()
+                }, {
+                    user: 'sdfsdfsdf',
+                    minderId: 'asdfasdfasfdasdf',
+                    deviceId: 'sdfs asd fa dfa afdsf ',
+                    deviceType: 'ios',
+                    name: 'My new phone',
+                    enabledTrackLocation: true,
+                    isPayed: true,
+                    lastLocation: {
+                        long: 11.10,
+                        lat: 11.10,
+                        accuracy: 1200,  // meters
+                        dateTime: new Date()
+                    },
+                    createdAt: new Date(),
+                    updatedAt: new Date()
+                }, {
+                    user: 'sdfsdfdff',
+                    minderId: 'asdfasd45sfdasdf',
+                    deviceId: 'adfasfadfasdfsff asd fa dfa afdsf ',
+                    deviceType: 'ios',
+                    name: 'LOLOLO',
+                    enabledTrackLocation: true,
+                    isPayed: true,
+                    lastLocation: {
+                        long: 12.10,
+                        lat: 9.10,
+                        accuracy: 1200,  // meters
+                        dateTime: new Date()
+                    },
+                    createdAt: new Date(),
+                    updatedAt: new Date()
+                }, {
+                    user: 'sdfsdfdff',
+                    minderId: 'asdfasd45sfdasdf',
+                    deviceId: 'adfasfadfasdfsff asd fa dfa afdsf ',
+                    deviceType: 'ios',
+                    name: 'WTF',
+                    enabledTrackLocation: true,
+                    isPayed: true,
+                    lastLocation: {
+                        long: 11.10,
+                        lat: 9.10,
+                        accuracy: 1200,  // meters
+                        dateTime: new Date()
+                    },
+                    createdAt: new Date(),
+                    updatedAt: new Date()
+                }
+            ];
+
+            this.devisesCollection = new DevisesCollection(devicesData);
+
             this.render();
             this.mapView = new mapView();
-            //this.collection = new MenuItemsCollection();
-            //this.collection.bind('reset', this.createMenuViews, this);
+            //this.listenTo(this.devisesCollection, 'change', this.render);
         },
-        //hideProp: function (e) {
-        //    if ($(e.target).closest("#loginPanel").length === 0) {
-        //        var select = this.$el.find('#loginSelect');
-        //        select.hide();
-        //        select.prop('hidden', true);
-        //    }
-        //},
-        //createMenuViews: function () {
-        //    var currentRoot = null;
-        //    var currentChildren = null;
-        //    if (this.contentType) {
-        //        currentChildren = this.collection.where({href: this.contentType});
-        //        var currentRootId = currentChildren[0].get("parrent");
-        //        currentRoot = this.collection.where({_id: currentRootId});
-        //    }
-        //    this.leftMenu = new LeftMenuView({
-        //        collection: this.collection,
-        //        currentChildren: currentChildren,
-        //        currentRoot: currentRoot
-        //    });
-        //    this.topMenu = new TopMenuView({
-        //        collection: this.collection.getRootElements(),
-        //        currentRoot: currentRoot,
-        //        leftMenu: this.leftMenu
-        //    });
-        //    this.topMenu.bind('changeSelection', this.leftMenu.setCurrentSection, {leftMenu: this.leftMenu});
-        //    this.topMenu.bind('mouseOver', this.leftMenu.mouseOver, {leftMenu: this.leftMenu});
-        //},
-        //updateMenu: function (contentType) {
-        //    var currentChildren = this.collection.where({href: contentType});
-        //    var currentRootId = currentChildren[0].get("parrent");
-        //    var currentRoot = this.collection.where({_id: currentRootId});
-        //    this.leftMenu.updateLeftMenu(currentChildren, currentRoot);
-        //    this.topMenu.updateTopMenu(currentRoot);
-        //},
-        //showSelect: function (e) {
-        //    var select = this.$el.find('#loginSelect');
-        //    if (select.prop('hidden')) {
-        //        select.show();
-        //        select.prop('hidden', false);
-        //    } else {
-        //        select.hide();
-        //        select.prop('hidden', true);
-        //    }
-        //},
+        renderDevices: function () {
+            var devicesList = this.$el.find('#devicesMainList');
+            this.devisesCollection.map(function (device) {
+                var view = new deviceMainListView({model: device});
+                devicesList.append(view.$el);
+            });
+        },
         render: function () {
             var self = this;
             //dataService.getData('/currentUser', null, function (response, context) {
@@ -84,6 +118,7 @@ define([
             //    }
             //}, this);
             this.$el.html(_.template(MainTemplate));
+            this.renderDevices();
             return this;
         }
     });

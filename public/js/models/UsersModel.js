@@ -1,4 +1,4 @@
-define(['Validation'],function (Validation) {
+define(['validation'],function (Validation) {
     var UserModel = Backbone.Model.extend({
         idAttribute: "_id",
         defaults: {
