@@ -1,9 +1,8 @@
 define([
     'text!templates/main/MainTemplate.html',
     'views/map/mapView',
-    'views/menu/topMenuView',
     'dataService'
-], function (MainTemplate, mapView, TopMenuView, dataService) {
+], function (MainTemplate, mapView, dataService) {
 
     var MainView = Backbone.View.extend({
         el: '#wrapper',
@@ -15,7 +14,6 @@ define([
             //this.contentType = options ? options.contentType : null;
             this.render();
             this.mapView = new mapView();
-            this.topMenuView = new TopMenuView();
             //this.collection = new MenuItemsCollection();
             //this.collection.bind('reset', this.createMenuViews, this);
         },

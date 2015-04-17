@@ -4,22 +4,10 @@ define(['config/config'], function (config) {
         el: '#map',
         initialize: function (options) {
             var self = this;
-
-
             console.log(self);
-
-            //var scriptFile = document.createElement('script');
-            //scriptFile.src = "https://maps.googleapis.com/maps/api/js?v=3.exp";
-            //document.head.appendChild(scriptFile);
-            //scriptFile.onload = function () {
-            //    console.log(self);
-            //    self.initializeMap();
-            //};
             self.initializeMap();
-            //initialize();
-            //this.render();
         },
-
+        stateModel: new Backbone.Model(),
         initializeMap: function () {
             console.log(google.maps.LatLng);
             var mapOptions = {
@@ -27,7 +15,7 @@ define(['config/config'], function (config) {
                 zoom: 8,
                 mapTypeId: google.maps.MapTypeId.ROADMAP
             };
-            var map = new google.maps.Map(document.getElementById("map"),
+            this.map = new google.maps.Map(document.getElementById("map"),
                 mapOptions);
         }
 

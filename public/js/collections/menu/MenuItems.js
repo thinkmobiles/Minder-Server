@@ -16,7 +16,7 @@ define(function () {
         },
         currentModule: "main",
         initialize: function () {
-            console.log('menu items collection init');
+            //console.log('menu items collection init');
         }
     });
 

@@ -2,8 +2,9 @@ define([
     'config/config',
     'collections/menu/MenuItems',
     'text!templates/menu/topMenuTemplate.html',
-    'views/menu/menuItemView'
-], function (config, MenuItemsCollection, topMenuTemplate, menuItemView) {
+    'views/menu/menuItemView',
+    'views/menu/dropDownMenuView'
+], function (config, MenuItemsCollection, topMenuTemplate, menuItemView, DropDownMenuView) {
 
     var MainView = Backbone.View.extend({
         el: '#topMenu',
@@ -11,44 +12,66 @@ define([
             var self = this;
             this.render();
 
-            var collection = new MenuItemsCollection();
-            this.collection = collection;
+            var topMenuLeftItemsCollection = new MenuItemsCollection();
+            this.topMenuLeftItemsCollection = topMenuLeftItemsCollection;
 
-            var menuItemsRaw = [
+            var topMenuRightDropdownItemsCollection = new MenuItemsCollection();
+            this.topMenuRightDropdownItemsCollection = topMenuRightDropdownItemsCollection;
+
+            var topMenuLeftItemsRaw = [
                 {
                     name: "Home",
-                    url: "main",
+                    url: "#main",
                     title: "Home page"
                 }, {
                     name: "Devices",
-                    url: "devices",
+                    url: "#devices",
                     title: "User devices management"
                 }, {
                     name: "User management",
-                    url: "userManagement",
+                    url: "#userManagement",
                     title: "Admin user management"
+                }
+                //{
+                //    name: "Contact us",
+                //    url: "#contactUs",
+                //    title: "press here if you wont contact with us"
+                //}
+            ];
+
+            var topMenuRightDropdownItemsRaw = [
+                {
+                    name: "Profile",
+                    url: "#profile",
+                    title: "User profile"
+                }, {
+                    name: "Billing info",
+                    url: "#billingInfo",
+                    title: "User billing info"
+                }, {
+                    name: "Logout",
+                    url: "#logout",
+                    title: "User logout"
                 }
             ];
 
 
-            collection.add(menuItemsRaw);
+            topMenuLeftItemsCollection.add(topMenuLeftItemsRaw);
+            topMenuRightDropdownItemsCollection.add(topMenuRightDropdownItemsRaw);
 
-            console.log('>>>>> collection', collection);
-
-            collection.map(function (model) {
-                console.log('>>>>> model', model);
+            topMenuLeftItemsCollection.map(function (model) {
                 var view = new menuItemView({model: model});
-                self.$el.append(view.render().el);
+                self.$('#topMenuLeft').append(view.render().el);
             });
 
-            //_.each(collection, function (model) {
-            //    var view = new menuItemView({model: model});
-            //    self.$el.append(view.render().el);
-            //});
+            this.dropDownMenuView = new DropDownMenuView({
+                dropDownName: 'User menu',
+                collection: topMenuRightDropdownItemsCollection
+            });
+            this.$('#topMenuRight').append(this.dropDownMenuView.el);
         },
 
         render: function () {
-            console.log('>>>>>', topMenuTemplate);
             this.$el.html(_.template(topMenuTemplate));
             return this;
         }

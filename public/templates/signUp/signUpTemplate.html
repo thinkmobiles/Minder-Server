@@ -1,0 +1,84 @@
+<div class="panel panel-default">
+    <div class="panel-heading">Sign up</div>
+    <div class="panel-body">
+        <form class="form-horizontal" id="loginForm">
+
+            <% if (errors) { %>
+            <% for(var err in errors) { %>
+            <div class="alert alert-danger textCenter" role="alert"><%= errors[err] %></div>
+            <% } %>
+            <% } %>
+
+            <% if (messages) { %>
+            <% for(var msg in messages) { %>
+            <div class="alert alert-warning textCenter" role="alert"><%= messages[msg] %></div>
+            <% } %>
+            <% } %>
+
+            <div class="form-group">
+                <label for="firstName" class="col-sm-2 control-label">First name</label>
+
+                <div class="col-sm-10">
+                    <input id="firstName" type="text" class="form-control" id="firstName" placeholder="First name"
+                           value="<%= firstName %>">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="lastName" class="col-sm-2 control-label">Last name</label>
+
+                <div class="col-sm-10">
+                    <input id="lastName" type="text" class="form-control" id="lastName" placeholder="Last name"
+                           value="<%= lastName %>">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="inputEmail3" class="col-sm-2 control-label">Email</label>
+
+                <div class="col-sm-10">
+                    <input id="email" type="email" class="form-control" id="inputEmail3" placeholder="Email"
+                           value="<%= email %>">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="inputPassword3" class="col-sm-2 control-label">Password</label>
+
+                <div class="col-sm-10">
+                    <input id="password" type="password" class="form-control" id="inputPassword3"
+                           placeholder="Password" value="<%= password %>">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="inputPassword3" class="col-sm-2 control-label">Confirm password</label>
+
+                <div class="col-sm-10">
+                    <input id="confirmPassword" type="password" class="form-control" id="inputPassword3"
+                           placeholder="Password" value="<%= confirmPassword %>">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <div class="checkbox">
+                        <label>
+                            <input id="iAcceptConditions" type="checkbox" <% if (iAcceptConditions) { %>checked<% } %> >
+                            <a href="#termsAndConditions">I accept the terms and conditions</a>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <button type="submit" class="btn btn-default sendMailButton">Send email</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="panel-footer">
+        <a class="btn btn-default" href="#login" role="button">Back to login</a>
+    </div>
+</div>
