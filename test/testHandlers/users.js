@@ -1,8 +1,8 @@
 var request = require('supertest');
 var expect = require("chai").expect;
 var async = require('async');
-var Config = require('./config');
-var testData = require('./data/testData');
+var Config = require('./../config');
+var testData = require('./../data/testData');
 
 describe('Users', function() {
     var conf = new Config();
@@ -11,7 +11,7 @@ describe('Users', function() {
     var adminAgent = request.agent(baseUrl);
     var userAgent1 = request.agent(baseUrl);
     var userAgent2 = request.agent(baseUrl);
-    var CreateTestData = require('./data/index');
+    var CreateTestData = require('./../data/index');
 
     before(function (done) {
         var createTestData;
@@ -247,9 +247,76 @@ describe('Users', function() {
                         done (err);
                     } else {
                         expect(res.status).to.equal(400);
+                        expect(res.body).to.have.property('error');
+                        expect(res.body.error).contains('UnconfirmedEmail');
                         done();
                     }
                 });
         });
+
+        it('User can signIn by email / pass from web', function (done) {
+            var data = testData.users[0];
+
+            data.pass = '1';
+            userAgent1
+                .post(url)
+                .send(data)
+                .end(function (err, res) {
+                    if (err) {
+                        done (err);
+                    } else {
+                        expect(res.status).to.equal(200);
+                        expect(res.body).to.have.property('success');
+
+                        setTimeout(function () {
+                            userAgent1
+                                .get('/isAuth')
+                                .end(function (err, res) {
+                                    if (err) {
+                                        done(err);
+                                    } else {
+                                        expect(res.status).to.equals(200);
+                                        done();
+                                    }
+                                });
+                        }, 100);
+                    }
+                });
+        });
+
+        it('User can signIn minderId from Mobile', function (done) {
+            var data = testData.users[0];
+            var signInData = {
+                minderId: data.minderId,
+                deviceId: 'device_1'
+            };
+
+            userAgent1
+                .post(url)
+                .set('user-agent', conf.mobileUserAgent)
+                .send(signInData)
+                .end(function (err, res) {
+                    if (err) {
+                        done (err);
+                    } else {
+                        expect(res.status).to.equal(200);
+                        expect(res.body).to.have.property('success');
+
+                        setTimeout(function () {
+                            userAgent1
+                                .get('/isAuth')
+                                .end(function (err, res) {
+                                    if (err) {
+                                        done(err);
+                                    } else {
+                                        expect(res.status).to.equals(200);
+                                        done();
+                                    }
+                                });
+                        }, 100);
+                    }
+                });
+        });
+
     });
 });

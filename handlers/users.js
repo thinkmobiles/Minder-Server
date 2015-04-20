@@ -7,7 +7,7 @@ var mongoose = require('mongoose');
 var REG_EXP = require('../constants/regExp');
 var USER_ROLES = require('../constants/userRoles');
 
-var BadRequests = require('../helpers/badRequests');
+var badRequests = require('../helpers/badRequests');
 var tokenGenerator = require('../helpers/randomPass');
 var logWriter = require('../helpers/logWriter')();
 
@@ -17,7 +17,6 @@ var mailer = require('../helpers/mailer');
 
 var UserHandler = function (db) {
     var session = new SessionHandler(db);
-    var badRequests = new BadRequests();
     var deviceHandler = new DeviceHander(db);
 
     var userSchema = mongoose.Schemas['User'];
@@ -67,7 +66,7 @@ var UserHandler = function (db) {
 
     };
 
-    function validateSignUp(userData, deviceData, callback) {
+    function validateSignUp(userData, deviceData, callback) { //used for signUpMobile, signUpWeb;
         'use strict';
 
         async.parallel([
@@ -160,7 +159,42 @@ var UserHandler = function (db) {
         return shaSum.digest('hex');
     };
 
-    this.signUp = function (req, res, next) {
+    function createUser(userData, callback) {
+        'use strict';
+
+        var encryptedPass;
+        var minderId;
+        var confirmToken;
+        var newUser;
+
+        encryptedPass = getEncryptedPass(userData.pass);
+        minderId = tokenGenerator.generate(12);
+        confirmToken = tokenGenerator.generate();
+
+        userData.minderId = minderId;
+        userData.confirmToken = confirmToken;
+        userData.pass = encryptedPass;
+        userData.role = USER_ROLES.USER;
+
+        newUser = new UserModel(userData);
+
+        newUser.save(function (err, result) {
+            if (err) {
+                if (callback && (typeof callback === 'function')) {
+                    callback(err);
+                }
+            } else {
+                console.log('create user');
+                console.log(result);
+                if (callback && (typeof callback === 'function')) {
+                    callback(null, result);
+                }
+            }
+        });
+
+    };
+
+    function signUpMobile(req, res, next) {
         'use strict';
 
         var options = req.body;
@@ -170,96 +204,113 @@ var UserHandler = function (db) {
         userData = prepateUserData(options);
         userData.pass = options.pass;
 
-        if (deviceHandler.isMobile(req)) {
-            deviceData = deviceHandler.prepareDeviceData(options);
-            deviceData.deviceType = deviceHandler.getDeviceOS(req);
-        }
+        deviceData = deviceHandler.prepareDeviceData(options);
+        deviceData.deviceType = deviceHandler.getDeviceOS(req);
 
         validateSignUp(userData, deviceData, function (err) {
-            var confirmToken;
-            var encryptedPass;
-            var newUser;
-            var newDevice;
-            var minderId;
-
             if (err) {
                 return next(err);
             }
-
-            confirmToken = tokenGenerator.generate();
-            encryptedPass = getEncryptedPass(userData.pass);
 
             async.waterfall([
 
                 //save user:
                 function (cb) {
-                    //userData.minderId = minderId;
-                    userData.confirmToken = confirmToken;
-                    userData.pass = encryptedPass;
-                    userData.role = USER_ROLES.USER;
-
-                    newUser = new UserModel(userData);
-
-                    newUser.save(function (err, result) {
+                    createUser(userData, function (err, userModel) {
                         if (err) {
                             cb(err);
                         } else {
-                            console.log('create user');
-                            console.log(result);
-                            cb(null, result);
+                            cb(null, userModel);
                         }
+
                     });
                 },
 
                 //save device:
                 function (userModel, cb) {
-
-                    console.log('save device');
-                    console.log(userModel);
-
-                    if (deviceData) {
-                        minderId = tokenGenerator.generate(12);
-                        deviceData.minderId = minderId;
-
-                        newDevice = new DeviceModel(deviceData);
-                        newDevice.user = userModel._id;
-                        newDevice.save(function (err, result) {
-                            if (err) {
-                                //TODO: rollback - remove the user;
-                                cb(err);
-                            } else {
-                                cb();
-                            }
-                        });
-
-                    } else {
-                        cb(); //registration from web, deviceData is undefined;
-                    }
+                    deviceHandler.createDevice(deviceData, userModel, function (err, deviceModel) {
+                        if (err) {
+                            cb(err);
+                            //FIXME: remove user (rollback);
+                        } else {
+                            cb(null, userModel, deviceModel);
+                        }
+                    });
                 }
 
-            ], function (err) {
+            ], function (err, user, device) {
                 var resData;
+                var minderId;
 
                 if (err) {
                     return next(err);
                 }
 
-
+                minderId = user.minderId;
                 resData = {
                     success: 'success signUp',
                     message: 'Thank you for registering with Minder. Please check your email and verify account',
                     minderId: minderId
                 };
 
-                if (minderId) {
-                    userData.minderId = minderId
-                }
+                userData.minderId = minderId;
 
                 mailer.emailConfirmation(userData);
 
                 res.status(201).send(resData);
             });
         });
+
+    };
+
+    function signUpWeb(req, res, next) {
+        'use strict';
+
+        var options = req.body;
+        var userData;
+
+        userData = prepateUserData(options);
+        userData.pass = options.pass;
+
+        validateSignUp(userData, null, function (err) {
+            if (err) {
+                return next(err);
+            }
+
+            createUser(userData, function (err, user) {
+                var resData;
+                var minderId;
+
+                if (err) {
+                    return next(err);
+                }
+
+                minderId = user.minderId;
+                resData = {
+                    success: 'success signUp',
+                    message: 'Thank you for registering with Minder. Please check your email and verify account',
+                    minderId: minderId
+                };
+
+                userData.minderId = minderId;
+
+                mailer.emailConfirmation(userData);
+
+                res.status(201).send(resData);
+            });
+        });
+
+    };
+
+    this.signUp = function (req, res, next) {
+        'use strict';
+
+        if (deviceHandler.isMobile(req)) {
+            signUpMobile(req, res, next);
+        } else {
+            signUpWeb(req, res, next);
+        }
+
     };
 
     function signInWeb(req, res, next) {
@@ -276,21 +327,73 @@ var UserHandler = function (db) {
             email: options.email,
             pass: encryptedPass
         }, function (err, user) {
-            console.log('findOne');
-            console.log(user);
+
             if (err) {
                 next(err);
             } else if (user && user.confirmToken) {
                 next(badRequests.UnconfirmedEmail());
             } else {
-                res.status(200).send(user);
+                //res.status(200).send(user);
+                session.register(req, res, user);
             }
+
         });
 
     };
 
     function signInMobile(req, res, next) {
-        res.status(500).send('Not implemented');
+        var options = req.body;
+
+        if (!options.minderId || !options.deviceId) {
+            return next(badRequests.NotEnParams({reqParams: ['minderId', 'deviceId']}));
+        }
+
+        UserModel.findOne({
+            minderId: options.minderId
+        }, function (err, user) {
+
+            if (err) {
+                next(err);
+            } else if (user && user.confirmToken) {
+                next(badRequests.UnconfirmedEmail());
+            } else {
+
+                DeviceModel
+                    .findOne({
+                        deviceId: options.deviceId
+                    }, function (err, device) {
+                        var deviceData;
+
+                        console.log('device');
+                        console.log(device);
+
+                        if (err) {
+                            return next(err);
+                        } else if (device) {
+
+                            if (device.user === user._id) {
+                                session.register(req, res, user);
+                            } else {
+                                next(badRequests.AccessError());
+                            }
+                        } else {
+                            //create device;
+                            deviceData = deviceHandler.prepareDeviceData(options);
+                            deviceData.deviceType = deviceHandler.getDeviceOS(req);
+
+                            deviceHandler.createDevice(deviceData, user, function (err) {
+                                if (err) {
+                                    return next(err);
+                                }
+                                session.register(req, res, user);
+                            }) ;
+                        }
+
+                    });
+
+            }
+
+        });
     };
 
     this.signIn = function (req, res, next) {

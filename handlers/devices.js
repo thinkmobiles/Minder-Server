@@ -1,14 +1,16 @@
 'use strict';
 var DEVICE_OS = require('../constants/deviceOs');
 var async = require('async');
-var BadRequests = require('../helpers/badRequests');
+var mongoose = require('mongoose');
+var badRequests = require('../helpers/badRequests');
 var logWriter = require('../helpers/logWriter')();
 
 var SessionHandler = require('../handlers/sessions');
 
 var DeviceHandler = function (db) {
     var session = new SessionHandler(db);
-    var badRequests = new BadRequests();
+    var deviceSchema = mongoose.Schemas['Device'];
+    var DeviceModel = db.model('Device', deviceSchema);
     var self = this;
 
     function prepareDeviceData(data) {
@@ -48,7 +50,7 @@ var DeviceHandler = function (db) {
 
     this.prepareDeviceData = prepareDeviceData;
 
-    this.getDeviceOS = function(req) {
+    this.getDeviceOS = function (req) {
         var userAgent = req.headers['user-agent'].toLowerCase();
 
         if ((userAgent.indexOf('iphone') !== -1) || (userAgent.indexOf('darwin/14') !== -1) || (userAgent.indexOf('ipad') !== -1)) {
@@ -76,6 +78,27 @@ var DeviceHandler = function (db) {
         }
     };
 
+    this.createDevice = function (deviceData, userModel, callback) {
+        'use strict';
+
+        var newDevice;
+
+        newDevice = new DeviceModel(deviceData);
+        newDevice.user = userModel._id;
+        newDevice.save(function (err, result) {
+
+            if (err) {
+                if (callback && (typeof callback === 'function')) {
+                    callback(err);
+                }
+            } else {
+                if (callback && (typeof callback === 'function')) {
+                    callback(null, result);
+                }
+            }
+
+        });
+    };
 
 };
 

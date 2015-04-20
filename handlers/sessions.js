@@ -6,19 +6,18 @@ var SESSION_USER = 'user';
 
 var Session = function (db) {
 
-    /*this.register = function (req, res, userModel, options) {
+    this.register = function (req, res, userModel, options) {
         var status = (options && options.status) ? options.status : 200;
         var role;
 
-        if (userModel.get('role') === USER_ROLES.SUPER_ADMIN) {
+        if (userModel.get('role') === USER_ROLES.ADMIN) {
             role = SESSION_ADMIN;
-            req.session.lastLogin = new Date();
         } else {
             role = SESSION_USER;
         }
 
         req.session.loggedIn = true;
-        req.session.userId = userModel.id;
+        req.session.userId = userModel._id;
         req.session.userRole = role;
 
         if (process.env.NODE_ENV === 'test') {
@@ -27,10 +26,10 @@ var Session = function (db) {
                 user: userModel
             });
         } else {
-            res.status(status).send({success: "Login successful", userId: userModel.id});
+            res.status(status).send({success: "Login successful", userId: userModel._id});
         }
 
-    };*/
+    };
 
     this.kill = function (req, res, next) {
 

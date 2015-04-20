@@ -1,4 +1,6 @@
-module.exports = function () {
+'use strict';
+
+var BadRequestModule = function () {
     var DEFAULT_ERROR_NAME = 'Error';
     var DEFAULT_ERROR_MESSAGE = 'error';
     var DEFAULT_ERROR_STATUS = 400;
@@ -287,3 +289,5 @@ module.exports = function () {
         UnknownDeviceOS: UnknownDeviceOS
     }
 };
+
+module.exports = new BadRequestModule();

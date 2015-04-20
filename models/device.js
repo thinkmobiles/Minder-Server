@@ -6,7 +6,7 @@ module.exports = (function () {
 
     var deviceSchema = mongoose.Schema({
         user: {type: ObjectId, ref: 'Users'},
-        minderId: {type: String, required: true, unique: true},
+        //minderId: {type: String, required: true, unique: true},
         deviceId: {type: String, required: true, unique: true},
         deviceType: {type: String, required: true},
         name: {type: String, default: ''},
