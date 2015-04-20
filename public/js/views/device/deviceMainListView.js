@@ -14,7 +14,8 @@ define([
         },
 
         events: {
-            'click .deviseMainPageCheck': 'updateCheck'
+            'click .deviseMainPageCheck': 'updateCheck',
+            'click': 'updateCheck'
         },
         updateCheck: function () {
             this.stateModel.set({

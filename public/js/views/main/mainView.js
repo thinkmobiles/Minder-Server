@@ -8,8 +8,8 @@ define([
     var MainView = Backbone.View.extend({
         el: '#wrapper',
         events: {
-            //'click .deviseMainPageCheck': 'updateCheck',
-            //'click': 'hideProp'
+            'click #globalDevicesChecker': 'globalcheckTriger',
+            'click #mapLocateButton': 'locate'
         },
 
         stateModel: new Backbone.Model({}),
@@ -84,39 +84,52 @@ define([
             ];
 
             this.devisesCollection = new DevisesCollection(devicesData);
+            this.deviceViews = [];
 
             this.render();
             this.mapView = new mapView();
+            this.selectedViewsCollection = new Backbone.Collection();
+            this.curentViewsCollection = new Backbone.Collection();
+            //this.listenTo(this.selectedItemsCollection, 'change', this.renderDevices);
+
             //this.listenTo(this.devisesCollection, 'change', this.render);
         },
+
+
         renderDevices: function () {
+            //var self = this;
             var devicesList = this.$el.find('#devicesMainList');
+            //devicesList.html('');
             this.devisesCollection.map(function (device) {
                 var view = new deviceMainListView({model: device});
+                self.listenTo(view.stateModel, 'change', self.itemChecked);
+                this.curentViewsCollection.add(view);
                 devicesList.append(view.$el);
             });
         },
+
+        globalcheckTriger: function () {
+            var checked = this.$el.find('#globalDevicesChecker').prop('checked');
+            var deviceViews = this.deviceViews;
+            for (var i = 0; deviceViews.length > i; i++) {
+                deviceViews[i].model.set({checked: checked});
+            }
+        },
+        itemChecked: function (model) {
+            if (model.get('checked')) {
+                this.selectedItemsCollection.add(model);
+            } else {
+                this.selectedItemsCollection.remove(model);
+            }
+        },
+
+        locate: function () {
+            console.log(this.selectedItemsCollection)
+        },
+
         render: function () {
             var self = this;
-            //dataService.getData('/currentUser', null, function (response, context) {
-            //    if (response && response.profile && response.profile.profileName == 'baned') {
-            //        $('title').text("EasyERP");
-            //        context.$el.find("li#userpage").remove();
-            //        context.$el.find("#top-bar").addClass("banned");
-            //        context.$el.find("#content-holder").append("<div id = 'banned'><div class='icon-banned'></div><div class='text-banned'><h1>Sorry, this user is banned!</h1><p>Please contact the administrator.</p></div></div>");
-            //    }
-            //    if (response.RelatedEmployee) {
-            //        $("#loginPanel .iconEmployee").attr("src", response.RelatedEmployee.imageSrc);
-            //        if (response.RelatedEmployee.name) {
-            //            $("#loginPanel  #userName").text(response.RelatedEmployee.name.first + " " + response.RelatedEmployee.name.last);
-            //        } else {
-            //            $("#loginPanel  #userName").text(response.login);
-            //        }
-            //    } else {
-            //        $("#loginPanel .iconEmployee").attr("src", response.imageSrc);
-            //        $("#loginPanel  #userName").text(response.login);
-            //    }
-            //}, this);
+
             this.$el.html(_.template(MainTemplate));
             this.renderDevices();
             return this;

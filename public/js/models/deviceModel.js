@@ -28,6 +28,15 @@ define(['validation'], function (validation) {
                 }
             });
         },
+        //toJSON: function (data, data2) {
+        //    var jsonData = _.clone(this.attributes);
+        //    console.log('??', jsonData, this.attributes);
+        //    if (jsonData.checked !== undefined) {
+        //        delete jsonData.checked;
+        //    }
+        //    console.log('??-', jsonData, this.attributes);
+        //    return jsonData;
+        //},
 
         validate: function (attrs, options) {
             var errors = [];
