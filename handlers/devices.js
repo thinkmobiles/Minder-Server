@@ -1,0 +1,82 @@
+'use strict';
+var DEVICE_OS = require('../constants/deviceOs');
+var async = require('async');
+var BadRequests = require('../helpers/badRequests');
+var logWriter = require('../helpers/logWriter')();
+
+var SessionHandler = require('../handlers/sessions');
+
+var DeviceHandler = function (db) {
+    var session = new SessionHandler(db);
+    var badRequests = new BadRequests();
+    var self = this;
+
+    function prepareDeviceData(data) {
+        var deviceData = {};
+
+        if (data && data.deviceId) {
+            deviceData.deviceId = data.deviceId;
+        }
+
+        if (data && data.deviceName) {
+            deviceData.deviceName = data.deviceName;
+        }
+
+        if (data && data.deviceType) {
+            deviceData.deviceType = data.deviceType;
+        }
+
+        return deviceData;
+    };
+
+    function validateDeviceData(data, callback) {
+        'use strict';
+
+        if (!data || !data.deviceId || !data.deviceName) {
+            if (callback && (typeof callback === 'function')) {
+                callback(badRequests.NotEnParams({reqParams: ['deviceId', 'deviceName']}));
+            }
+            return;
+        }
+
+        if (callback && (typeof callback === 'function')) {
+            callback();
+        }
+    };
+
+    this.validateDeviceData = validateDeviceData;
+
+    this.prepareDeviceData = prepareDeviceData;
+
+    this.getDeviceOS = function(req) {
+        var userAgent = req.headers['user-agent'].toLowerCase();
+
+        if ((userAgent.indexOf('iphone') !== -1) || (userAgent.indexOf('darwin/14') !== -1) || (userAgent.indexOf('ipad') !== -1)) {
+            return DEVICE_OS.IOS;
+        }
+
+        if (userAgent.indexOf('android') !== -1) {
+            return DEVICE_OS.ANDROID;
+        }
+
+        if (userAgent.indexOf('trident') !== -1) {
+            return DEVICE_OS.WINDOWS_PHONE;
+        }
+
+        return DEVICE_OS.UNKNOWN;
+    };
+
+    this.isMobile = function (req) {
+        var deviceOs = self.getDeviceOS(req);
+
+        if (deviceOs !== DEVICE_OS.UNKNOWN) {
+            return true;
+        } else {
+            return false;
+        }
+    };
+
+
+};
+
+module.exports = DeviceHandler;

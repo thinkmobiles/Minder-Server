@@ -1,5 +1,7 @@
 'use strict';
 
 module.exports = (function () {
-    require('./users.js');
+    require('./device.js');
+    require('./user.js');
+    require('./tariffPlan.js');
 })();

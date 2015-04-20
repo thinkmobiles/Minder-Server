@@ -1,84 +1,63 @@
-/**
- * Created by soundstorm on 14.04.15.
- */
-module.exports = function (app) {
-    var _ = require('../public/js/libs/underscore-min.js');
+'use strict';
+
+var MailerModule = function () {
+    var _ = require('./../public/js/libs/underscore-min.map.1.6.0.js');
     var nodemailer = require("nodemailer");
-    var smtpTransport = require('nodemailer-smtp-transport');
     var fs = require('fs');
+    var FROM = ( process.env.NODE_ENV.mailerUserName ) ? "Minder <" + 'info@minderweb.com' + ">" : "Minder";
 
-    this.forgotPassword = function (options){
+    this.emailConfirmation = function (options) {
         var templateOptions = {
-            name: options.firstname + ' ' + options.lastname,
+            name: options.firstName + ' ' + options.lastName,
             email: options.email,
-            url: 'http://localhost:8823/users/changePassword?forgotToken=' + options.forgotToken
+            minderId: (options.minderId) ? options.minderId : null,
+            url: process.env.HOST + '/confirmEmail/' + options.confirmToken
         };
+
+
+
         var mailOptions = {
-            from: 'Test',
+            from: FROM,
             to: options.email,
-            subject: 'Change password',
+            subject: 'Please verify your MinderWeb account',
             generateTextFromHTML: true,
-            html: _.template(fs.readFileSync('public/templates/mailer/forgotPassword.html', encoding = "utf8"), templateOptions)
+            html: _.template(fs.readFileSync('public/templates/mailer/confirmEmail.html', 'utf8'), templateOptions)
+
         };
 
         deliver(mailOptions);
     };
 
-    this.changePassword = function (options){
-        var templateOptions = {
-            name: options.firstname + ' ' + options.lastname,
-            email: options.email,
-            password: options.password,
-            url: 'http://localhost:8823'
-        };
-        var mailOptions = {
-            from: 'Test',
-            to: options.email,
-            subject: 'Change password',
-            generateTextFromHTML: true,
-            html: _.template(fs.readFileSync('public/templates/mailer/changePassword.html', encoding = "utf8"), templateOptions)
-        };
-
-        deliver(mailOptions);
-    };
-
-    this.sendMemberPassword = function (options){
-        var templateOptions = {
-            name: options.firstname + ' ' + options.lastname,
-            email: options.email,
-            password: options.password,
-            id: options.id
-        };
-        var mailOptions = {
-            from: 'Test',
-            to: options.email,
-            subject: 'Change password',
-            generateTextFromHTML: true,
-            html: _.template(fs.readFileSync('public/templates/mailer/sendMembersPassword.html', encoding = "utf8"), templateOptions)
-        };
-
-        deliver(mailOptions);
-    };
-
-    function deliver(mailOptions, cb) {
-        var transport = nodemailer.createTransport(smtpTransport({
-            service: 'gmail',
+    function deliver(mailOptions, callback) {
+        var user = process.env.mailerUserName;
+        var pass = process.env.mailerPassword;
+        var service = process.env.mailerService;
+        var smtpTransport = nodemailer.createTransport({
+            service: service,
             auth: {
-                user: "gogi.gogishvili",
-                pass: "gogi123456789"
+                user: user,
+                pass: pass
             }
-        }));
+        });
 
-        transport.sendMail(mailOptions, function (err, response) {
+        if (process.env.NODE_ENV !== 'production') {
+            console.log(service, user, pass);
+        }
+
+        smtpTransport.sendMail(mailOptions, function (err, responseResult) {
             if (err) {
-                console.log(err);
-                if (cb && (typeof cb === 'function')) {
-                    cb(err, null);
+                if (callback && typeof callback === 'function') {
+                    callback(err, null);
+                }
+                if (process.env.NODE_ENV !== 'production') {
+                    console.error(err);
                 }
             } else {
-                console.log("Message sent: " + response.message);
-                if (cb && (typeof cb === 'function')) {
-                    cb(null, response);
+                if (callback && typeof callback === 'function') {
+                    callback(null, responseResult);
+                }
+                if (process.env.NODE_ENV !== 'production') {
+                    console.log('Message sent: ' + responseResult.response);
                 }
             }
         });
@@ -86,3 +65,4 @@ module.exports = function (app) {
 
 };
 
+module.exports = new MailerModule();

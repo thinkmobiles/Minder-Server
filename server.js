@@ -1,26 +1,30 @@
 var mongoose = require('mongoose');
+var app;
+var mainDb;
 //var mainAppConfig = require('./config/main').mainApp;
 var dbsObject = {};
 var dbsNames = {};
 
-process.env.NODE_ENV = 'development';
+if (!process.env.NODE_ENV) {
+    process.env.NODE_ENV = 'development';
+}
+
 //require('./config/' + mainAppConfig.NODE_ENV);
 require('./config/' + process.env.NODE_ENV);
 //process.env.NODE_ENV = mainAppConfig.NODE_ENV;
 
 //var mainDb = mongoose.createConnection('localhost', 'minderDB');
-var mainDb = mongoose.createConnection(process.env.DB_HOST, process.env.DB_NAME);
-//var sessionParser = require('./helpers/sessionParser');
+//mainDb = mongoose.createConnection(process.env.DB_HOST, process.env.DB_NAME, {db:{native_parser: true}});
+//mainDb = mongoose.createConnection('mongodb://localhost/minderDev');
 
+mongoose.connect(process.env.DB_HOST, process.env.DB_NAME);
+mainDb = mongoose.connection;
 mainDb.on('error', console.error.bind(console, 'connection error:'));
 mainDb.once('open', function callback () {
     mainDb.dbsObject = dbsObject;
-    console.log('Connection to mainDB is success');
+    console.log('Connection to ' + process.env.DB_HOST +'/' + process.env.DB_NAME + ' is success');
 
-    //require('./models/index.js');
-
-    //var SaasSchema = mongoose.Schemas['Saas'];
-    //var Saas = mainDb.model('Saas', SaasSchema);
+    require('./models/index.js');
 
     var sessionSchema = mongoose.Schema({
         _id: String,
@@ -29,8 +33,7 @@ mainDb.once('open', function callback () {
     }, {collection: 'sessions'});
 
     var main = mainDb.model('sessions', sessionSchema);
-    var app;
-    var port = process.env.PORT || 8090;
+    var port = process.env.PORT || 8877;
 
     main.find().exec(function (err, result) {
         var dbsForConnect;
@@ -63,7 +66,6 @@ mainDb.once('open', function callback () {
 
     app = require('./app')(mainDb, dbsNames);
 
-
     app.listen(port, function () {
         console.log('==============================================================');
         console.log('|| server start success on port=' + port + ' in ' + process.env.NODE_ENV + ' version ||');
@@ -71,3 +73,6 @@ mainDb.once('open', function callback () {
     });
 });
 
+module.exports = {
+    db: mainDb
+};
