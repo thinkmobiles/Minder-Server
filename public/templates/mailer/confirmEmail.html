@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+    <div class="pm-text">
+        <p>Hi Dear  <b><%=name %></b>!
+
+        <% if (minderId) {%>
+            <br>
+            Your <span class="il">Minder</span> ID is: <%=minderId %>
+            <br><br><br>
+        <% } %>
+
+        <br>To verify you MinderWeb account please click on link below<br><a href="<%=url%>" target="_blank"><%=url%></a> <br> <br> <br>If you have received this in error, please delete this email</p>
+
+    </div>
+</body>
+</html>

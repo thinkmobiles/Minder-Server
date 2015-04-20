@@ -1,20 +1,35 @@
 'use strict';
 
-module.exports = function (app, mainDb) {
-    var RESPONSES = require('../constants/responses');
+var RESPONSES = require('../constants/responses');
+var fs = require("fs");
+var logWriter = require('../helpers/logWriter')();
+var SessionHandler = require('../handlers/sessions');
+var UserHandler = require('../handlers/users');
 
-    var fs = require("fs");
-    var logWriter = require('../helpers/logWriter')();
+module.exports = function (app, mainDb) {
     var mongoose = mainDb.mongoose;
 
     var multipart = require('connect-multiparty');
     var multipartMiddleware = multipart();
+
+    var session = new SessionHandler();
+    var users = new UserHandler(mainDb);
+
+    app.use(function (req, res, next) {
+        if (process.env.NODE_ENV === 'development') {
+            console.log('user-agent:', req.headers['user-agent']);
+        }
+        next();
+    });
 
     app.get('/', function (req, res, next) {
         res.sendfile('index.html');
         //res.send('Ok');
     });
 
+    app.get('/isAuth', session.isAuthenticatedUser);
+    app.post('/signUp', users.signUp);
+    app.post('/signIn', users.signIn);
     // ----------------------------------------------------------
     // Error Handler:
     // ----------------------------------------------------------
