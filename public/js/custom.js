@@ -1,4 +1,4 @@
-define(['libs/date.format', 'common'], function (dateformat, common) {
+define(['common'], function (common) {
 
     var runApplication = function (success) {
         if (!Backbone.history.fragment) {
@@ -202,16 +202,6 @@ define(['libs/date.format', 'common'], function (dateformat, common) {
 
         return length;
     };
-
-
-    function applyDefaultSettings(chartControl) {
-        chartControl.setImagePath("/crm_backbone_repo/images/");
-        chartControl.setEditable(false);
-        chartControl.showTreePanel(false);
-        chartControl.showContextMenu(false);
-        chartControl.showDescTask(true, 'd,s-f');
-        chartControl.showDescProject(true, 'n,d');
-    }
 
     return {
         runApplication: runApplication,

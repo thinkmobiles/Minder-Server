@@ -5,7 +5,7 @@ define(function () {
                 callback(response, context);
             } else callback(response);
         });
-    }
+    };
     var postData = function(url, data, callback){
         $.ajax({
             url: url,
@@ -18,7 +18,7 @@ define(function () {
                 callback(null, jxhr)
             }
         });
-    }
+    };
     return {
         getData:getData,
         postData:postData
