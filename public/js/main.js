@@ -71,5 +71,8 @@ require(['app'], function (app) {
         }
     };
 
+
+
+
     app.initialize();
 });

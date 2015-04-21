@@ -1,15 +1,18 @@
 define([
     'text!templates/main/MainTemplate.html',
     'views/map/mapView',
+    'views/map/markerView',
     'collections/devicesCollection',
-    'views/device/deviceMainListView'
-], function (MainTemplate, mapView, DevisesCollection, deviceMainListView) {
+    'views/device/deviceMainListView',
+    'views/customElements/paginationView'
+], function (MainTemplate, MapView, markerView, DevisesCollection, deviceMainListView, PaginationView) {
 
     var MainView = Backbone.View.extend({
         el: '#wrapper',
         events: {
-            'click #globalDevicesChecker': 'globalcheckTriger',
-            'click #mapLocateButton': 'locate'
+            'click #globalDevicesChecker': 'globalCheckTrigger',
+            'click #mapLocateButton': 'locate',
+            'submit #searchForm': 'search'
         },
 
         stateModel: new Backbone.Model({}),
@@ -84,47 +87,103 @@ define([
             ];
 
             this.devisesCollection = new DevisesCollection(devicesData);
-            this.deviceViews = [];
+            this.selectedDevicesCollection = new Backbone.Collection();
+            this.curnetMarkersOnMap = [];
+            this.views = [];
 
             this.render();
-            this.mapView = new mapView();
-            this.selectedViewsCollection = new Backbone.Collection();
-            this.curentViewsCollection = new Backbone.Collection();
-            //this.listenTo(this.selectedItemsCollection, 'change', this.renderDevices);
+            this.mapView = new MapView();
+            this.PaginationView = new PaginationView();
+            this.$el.find('#pagination').append(this.PaginationView.$el);
 
-            //this.listenTo(this.devisesCollection, 'change', this.render);
+            App.map = this.mapView.map;
+        },
+
+        search: function () {
+            console.log('search');
         },
 
 
         renderDevices: function () {
-            //var self = this;
+            var _this = this;
             var devicesList = this.$el.find('#devicesMainList');
             //devicesList.html('');
+            _.each(this.views, function (view) {
+                _this.stopListening(view.stateModel);
+                view.remove();
+            });
+
             this.devisesCollection.map(function (device) {
+                var selected = false;
+                var selectedDevice = _this.selectedDevicesCollection.find(function (model) {
+                    if (model.cid === device.cid) return true;
+                });
+
                 var view = new deviceMainListView({model: device});
-                self.listenTo(view.stateModel, 'change', self.itemChecked);
-                this.curentViewsCollection.add(view);
+
+                if (selectedDevice) {
+                    view.stateModel.set({checked: true});
+                }
+
+                _this.listenTo(view.stateModel, 'change', _this.itemChecked);
+                _this.views.push(view);
                 devicesList.append(view.$el);
             });
         },
 
-        globalcheckTriger: function () {
+        globalCheckTrigger: function () {
             var checked = this.$el.find('#globalDevicesChecker').prop('checked');
-            var deviceViews = this.deviceViews;
-            for (var i = 0; deviceViews.length > i; i++) {
-                deviceViews[i].model.set({checked: checked});
-            }
+            _.each(this.views, function (view) {
+                view.stateModel.set({checked: checked});
+            });
+
         },
         itemChecked: function (model) {
             if (model.get('checked')) {
-                this.selectedItemsCollection.add(model);
+                console.log('>>>==', model);
+                this.selectedDevicesCollection.add(this.devisesCollection.find(function (device) {
+                    if (device.cid === model.get('deviceCid')) return true;
+                }));
             } else {
-                this.selectedItemsCollection.remove(model);
+                this.selectedDevicesCollection.remove(this.devisesCollection.find(function (device) {
+                    if (device.cid === model.get('deviceCid')) return true;
+                }));
             }
         },
 
         locate: function () {
-            console.log(this.selectedItemsCollection)
+            var _this = this;
+            _.each(this.curnetMarkersOnMap, function (view) {
+                view.removeMarker();
+                view.remove();
+            });
+            this.curnetMarkersOnMap = [];
+            this.selectedDevicesCollection.map(function (model) {
+                var view = new markerView({model: model});
+                _this.curnetMarkersOnMap.push(view);
+            });
+
+
+            if (this.curnetMarkersOnMap.length < 2) {
+                console.log('>>>>>>>>>>', this.curnetMarkersOnMap.length);
+                if (this.curnetMarkersOnMap.length === 1) {
+                    console.log('>>>>>___1');
+                    App.map.setZoom(11);
+                    App.map.setCenter(this.curnetMarkersOnMap[0].marker.position);
+                } else {
+                    console.log('>>>>>___0');
+                    App.map.setZoom(1);
+                }
+            } else {
+                console.log('>>>>>___> ');
+                var bounds = new google.maps.LatLngBounds();
+                _.each(_this.curnetMarkersOnMap, function (view) {
+                    bounds.extend(view.marker.position);
+                });
+                App.map.fitBounds(bounds);
+            }
+
+            console.log(this.selectedDevicesCollection);
         },
 
         render: function () {

@@ -3,14 +3,35 @@
 <div class="row" id="mainPageContainer">
     <div class="col-md-3" id="mapLeftPanel">
         <div id="mainPageTopControls">
-            <input id="globalDevicesChecker" type="checkbox">
+
+            <form class="form-inline" id="searchForm">
+                <div class="checkbox">
+                    <label>
+                        <input id="globalDevicesChecker" type="checkbox">
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label class="sr-only" for="search">Email address</label>
+                    <input type="text" class="form-control" id="search" placeholder="Search...">
+                </div>
+
+                <button type="submit" class="btn btn-default" id="searchButton">search</button>
+            </form>
+
+
             Top Controls
         </div>
         <div id="devicesMainList">
 
         </div>
         <div id="mainPageBottomControls">
-            <button class="btn btn-success" id="mapLocateButton">locate</button>
+            <div>
+                <button class="btn btn-success" id="mapLocateButton">locate</button>
+            </div>
+            <div id="pagination">
+
+            </div>
         </div>
     </div>
     <div class="col-md-9" id="map">
