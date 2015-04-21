@@ -328,13 +328,18 @@ var UserHandler = function (db) {
         }, function (err, user) {
 
             if (err) {
-                next(err);
-            } else if (user && user.confirmToken) {
-                next(badRequests.UnconfirmedEmail());
-            } else {
-                //res.status(200).send(user);
-                session.register(req, res, user);
+                return next(err);
             }
+
+            if (!user) {
+                return next(badRequests.NotFound());
+            }
+
+            if (user && user.confirmToken) {
+                return next(badRequests.UnconfirmedEmail());
+            }
+
+            session.register(req, res, user);
 
         });
 
