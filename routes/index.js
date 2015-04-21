@@ -13,7 +13,7 @@ module.exports = function (app, mainDb) {
     var multipartMiddleware = multipart();
 
     var session = new SessionHandler();
-    var users = new UserHandler(mainDb);
+    var userHandler = new UserHandler(mainDb);
 
     app.use(function (req, res, next) {
         if (process.env.NODE_ENV === 'development') {
@@ -24,17 +24,16 @@ module.exports = function (app, mainDb) {
 
     app.get('/', function (req, res, next) {
         res.sendfile('index.html');
-        //res.send('Ok');
     });
 
     app.get('/isAuth', session.isAuthenticatedUser);
-    app.post('/signUp', users.signUp);
-    app.post('/signIn', users.signIn);
-    app.get('/confirmEmail/:confirmToken', users.confirmEmail);
-    app.get('/successConfirm', function (req, res, next) {
-        //res.render('successConfirm.html');
-        res.status(200).send('Confirmed');
-    });
+    app.post('/signUp', userHandler.signUp);
+    app.post('/signIn', userHandler.signIn);
+    app.post('/signOut', session.kill);
+    app.get('/confirmEmail/:confirmToken', userHandler.confirmEmail);
+
+
+
     // ----------------------------------------------------------
     // Error Handler:
     // ----------------------------------------------------------
