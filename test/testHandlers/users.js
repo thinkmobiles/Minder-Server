@@ -1,8 +1,8 @@
 var request = require('supertest');
 var expect = require("chai").expect;
 var async = require('async');
-var Config = require('./config');
-var testData = require('./data/testData');
+var Config = require('./../config');
+var testData = require('./../data/testData');
 
 describe('Users', function() {
     var conf = new Config();
@@ -11,7 +11,7 @@ describe('Users', function() {
     var adminAgent = request.agent(baseUrl);
     var userAgent1 = request.agent(baseUrl);
     var userAgent2 = request.agent(baseUrl);
-    var CreateTestData = require('./data/index');
+    var CreateTestData = require('./../data/index');
 
     before(function (done) {
         var createTestData;
@@ -235,7 +235,7 @@ describe('Users', function() {
     describe('/signIn', function () {
         var url = '/signIn';
 
-        it('User can\'t sign in with unconfirmed email', function (done) {
+        it('User can\'t signIn with unconfirmed email', function (done) {
             var data = testData.users[1];
 
             data.pass = '1';
@@ -247,9 +247,146 @@ describe('Users', function() {
                         done (err);
                     } else {
                         expect(res.status).to.equal(400);
+                        expect(res.body).to.have.property('error');
+                        expect(res.body.error).contains('UnconfirmedEmail');
                         done();
                     }
                 });
         });
+
+        it('User can\'t signIn with invalid minderId', function (done) {
+            var signInData = {
+                minderId: 'foo',
+                deviceId: 'device_1'
+            };
+
+            userAgent1
+                .post(url)
+                .set('user-agent', conf.mobileUserAgent)
+                .send(signInData)
+                .end(function (err, res) {
+                    if (err) {
+                        done (err);
+                    } else {
+                        expect(res.status).to.equal(400);
+                        expect(res.body).to.have.property('error');
+                        expect(res.body.error).to.contains('minderId');
+
+                        setTimeout(function () {
+                            userAgent1
+                                .get('/isAuth')
+                                .end(function (err, res) {
+                                    if (err) {
+                                        done(err);
+                                    } else {
+                                        expect(res.status).to.equals(401);
+                                        done();
+                                    }
+                                });
+                        }, 100);
+                    }
+                });
+        });
+
+        it('User can signIn by email / pass from web', function (done) {
+            var data = testData.users[0];
+
+            data.pass = '1';
+            userAgent1
+                .post(url)
+                .send(data)
+                .end(function (err, res) {
+                    if (err) {
+                        done (err);
+                    } else {
+                        expect(res.status).to.equal(200);
+                        expect(res.body).to.have.property('success');
+
+                        setTimeout(function () {
+                            userAgent1
+                                .get('/isAuth')
+                                .end(function (err, res) {
+                                    if (err) {
+                                        done(err);
+                                    } else {
+                                        expect(res.status).to.equals(200);
+                                        done();
+                                    }
+                                });
+                        }, 100);
+                    }
+                });
+        });
+
+        it('User can signIn minderId from Mobile', function (done) {
+            var data = testData.users[0];
+            var signInData = {
+                minderId: data.minderId,
+                deviceId: 'device_1'
+            };
+
+            userAgent1
+                .post(url)
+                .set('user-agent', conf.mobileUserAgent)
+                .send(signInData)
+                .end(function (err, res) {
+                    if (err) {
+                        done (err);
+                    } else {
+                        expect(res.status).to.equal(200);
+                        expect(res.body).to.have.property('success');
+
+                        setTimeout(function () {
+                            userAgent1
+                                .get('/isAuth')
+                                .end(function (err, res) {
+                                    if (err) {
+                                        done(err);
+                                    } else {
+                                        expect(res.status).to.equals(200);
+                                        done();
+                                    }
+                                });
+                        }, 100);
+                    }
+                });
+        });
+
+    });
+
+    describe('/confirmEmail', function () {
+
+        it('User can\'t confirm with invalid confirmToken', function (done) {
+            var token = 'foo';
+            var url = '/confirmEmail/' + token;
+
+            userAgent1
+                .get(url)
+                .end(function(err, res) {
+                    if (err) {
+                        done(err);
+                    } else {
+                        expect(res.status).to.equals(200);
+                        done();
+                    }
+                });
+        });
+
+        it('User can confirm with valid confirmToken', function (done) {
+            var token = testData.users[2].confirmToken;
+            var url = '/confirmEmail/' + token;
+
+            userAgent1
+                .get(url)
+                .end(function(err, res) {
+                    if (err) {
+                        done(err);
+                    } else {
+                        expect(res.status).to.equals(200);
+                        done();
+                    }
+                });
+        });
+
     });
 });

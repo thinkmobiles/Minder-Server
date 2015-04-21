@@ -6,6 +6,7 @@ module.exports = (function () {
     var ObjectId = mongoose.Schema.Types.ObjectId;
 
     var userSchema = mongoose.Schema({
+        minderId: {type: String, required: true, unique: true},
         email: {type: String, require: true, unique: true},
         pass: {type: String, default: ''},
         confirmToken: {type: String},
