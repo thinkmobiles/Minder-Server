@@ -8,20 +8,20 @@ define([
     var View = Backbone.View.extend({
         el: '#wrapper',
         initialize: function (options) {
+            this.stateModel = new Backbone.Model({
+                email: '',
+                password: '',
+                confirmPassword: '',
+                firstName: '',
+                lastName: '',
+                iAcceptConditions: false,
+                errors: false,
+                messages: false
+            });
             this.listenTo(this.stateModel, 'change', this.render);
             this.render();
         },
 
-        stateModel: new Backbone.Model({
-            email: '',
-            password: '',
-            confirmPassword: '',
-            firstName: '',
-            lastName: '',
-            iAcceptConditions: false,
-            errors: false,
-            messages: false
-        }),
 
         events: {
             "submit #loginForm": "sendMail",
@@ -85,19 +85,23 @@ define([
                 type: "POST",
                 data: {
                     email: stateModelUpdate.email,
-                    password: stateModelUpdate.password,
+                    pass: stateModelUpdate.password,
                     firstName: stateModelUpdate.firstName,
                     lastName: stateModelUpdate.lastName
                 },
                 success: function (response) {
                     self.stateModel.set({
-                        password: null,
-                        confirmPassword: null
+                        password: '',
+                        confirmPassword: '',
+                        email: '',
+                        firstName: '',
+                        lastName: '',
+                        iAcceptConditions: false
                     });
-                    router.navigate("login", {trigger: true});
+                    App.router.navigate("login", {trigger: true});
                 },
-                error: function () {
-                    // TODO
+                error: function (err) {
+                    self.errorNotification(err);
                     self.stateModel.set({
                         errors: ["Error"],
                         password: null,
