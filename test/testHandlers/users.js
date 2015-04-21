@@ -235,7 +235,7 @@ describe('Users', function() {
     describe('/signIn', function () {
         var url = '/signIn';
 
-        it('User can\'t sign in with unconfirmed email', function (done) {
+        it('User can\'t signIn with unconfirmed email', function (done) {
             var data = testData.users[1];
 
             data.pass = '1';
@@ -250,6 +250,40 @@ describe('Users', function() {
                         expect(res.body).to.have.property('error');
                         expect(res.body.error).contains('UnconfirmedEmail');
                         done();
+                    }
+                });
+        });
+
+        it('User can\'t signIn with invalid minderId', function (done) {
+            var signInData = {
+                minderId: 'foo',
+                deviceId: 'device_1'
+            };
+
+            userAgent1
+                .post(url)
+                .set('user-agent', conf.mobileUserAgent)
+                .send(signInData)
+                .end(function (err, res) {
+                    if (err) {
+                        done (err);
+                    } else {
+                        expect(res.status).to.equal(400);
+                        expect(res.body).to.have.property('error');
+                        expect(res.body.error).to.contains('minderId');
+
+                        setTimeout(function () {
+                            userAgent1
+                                .get('/isAuth')
+                                .end(function (err, res) {
+                                    if (err) {
+                                        done(err);
+                                    } else {
+                                        expect(res.status).to.equals(401);
+                                        done();
+                                    }
+                                });
+                        }, 100);
                     }
                 });
         });

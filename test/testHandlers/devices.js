@@ -37,10 +37,29 @@ describe('Devices', function() {
     });
 
     describe('PUT /location', function () {
-        var url = '/location';
+        var url = '/devices/locate';
 
-        it('User can\'t update location without param "location"', function (done) {
-            done();
+        it('User can\'t update location if not logined', function (done) {
+            var data = {
+                minderId: 'minder_1',
+                deviceId: 'dev_1',
+                location: {
+                    long: 60.321,
+                    lat: 29.987
+                }
+            };
+
+            userAgent2
+                .put(url)
+                .send(data)
+                .end(function (err, res) {
+                    if (err) {
+                        done(err);
+                    } else {
+                        expect(res.status).to.equals(401);
+                        done();
+                    }
+                });
         });
     });
 

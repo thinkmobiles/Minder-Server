@@ -6,14 +6,11 @@ var logWriter = require('../helpers/logWriter')();
 var SessionHandler = require('../handlers/sessions');
 var UserHandler = require('../handlers/users');
 
-module.exports = function (app, mainDb) {
-    var mongoose = mainDb.mongoose;
-
-    var multipart = require('connect-multiparty');
-    var multipartMiddleware = multipart();
-
+module.exports = function (app, db) {
     var session = new SessionHandler();
-    var userHandler = new UserHandler(mainDb);
+    var userHandler = new UserHandler(db);
+    var usersRouter;
+    var devicesRouter;
 
     app.use(function (req, res, next) {
         if (process.env.NODE_ENV === 'development') {
@@ -32,6 +29,11 @@ module.exports = function (app, mainDb) {
     app.post('/signOut', session.kill);
     app.get('/confirmEmail/:confirmToken', userHandler.confirmEmail);
 
+    /*var usersRouter = require('./users')(app);
+    app.use('/users', usersRouter);*/
+
+    devicesRouter = require('./devices')(db);
+    app.use('/devices', devicesRouter);
 
 
     // ----------------------------------------------------------

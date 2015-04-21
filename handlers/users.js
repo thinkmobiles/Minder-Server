@@ -354,45 +354,48 @@ var UserHandler = function (db) {
         }, function (err, user) {
 
             if (err) {
-                next(err);
-            } else if (user && user.confirmToken) {
-                next(badRequests.UnconfirmedEmail());
-            } else {
+                return next(err);
+            }
 
-                DeviceModel
-                    .findOne({
-                        deviceId: options.deviceId
-                    }, function (err, device) {
-                        var deviceData;
+            if (!user) {
+                return next(badRequests.SignInError({message: 'Incorrect minderId'}));
+            }
 
-                        console.log('device');
-                        console.log(device);
+            if (user && user.confirmToken) {
+                return next(badRequests.UnconfirmedEmail());
+            }
 
-                        if (err) {
-                            return next(err);
-                        } else if (device) {
+            DeviceModel
+                .findOne({
+                    deviceId: options.deviceId
+                }, function (err, device) {
+                    var deviceData;
 
-                            if (device.user === user._id) {
-                                session.register(req, res, user);
-                            } else {
-                                next(badRequests.AccessError());
-                            }
+                    if (err) {
+                        return next(err);
+                    } else if (device) {
+
+                        if (device.user.toString() === user._id.toString()) {
+                            session.register(req, res, user);
                         } else {
-                            //create device;
-                            deviceData = deviceHandler.prepareDeviceData(options);
-                            deviceData.deviceType = deviceHandler.getDeviceOS(req);
-
-                            deviceHandler.createDevice(deviceData, user, function (err) {
-                                if (err) {
-                                    return next(err);
-                                }
-                                session.register(req, res, user);
-                            });
+                            next(badRequests.AccessError());
                         }
 
-                    });
+                    } else {
+                        //create device;
+                        deviceData = deviceHandler.prepareDeviceData(options);
+                        deviceData.deviceType = deviceHandler.getDeviceOS(req);
 
-            }
+                        deviceHandler.createDevice(deviceData, user, function (err) {
+
+                            if (err) {
+                                return next(err);
+                            }
+
+                            session.register(req, res, user);
+                        });
+                    }
+                });
 
         });
     };

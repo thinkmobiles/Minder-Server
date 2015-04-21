@@ -78,7 +78,7 @@ var DeviceHandler = function (db) {
         }
     };
 
-    this.createDevice = function (deviceData, userModel, callback) {
+    this.createDevice = function(deviceData, userModel, callback) {
         'use strict';
 
         var newDevice;
@@ -98,6 +98,44 @@ var DeviceHandler = function (db) {
             }
 
         });
+    };
+
+    this.setLocation = function(req, res, next) {
+        'use strict';
+
+        var options = req.body;
+        var criteria;
+        var update;
+
+        if (!options.deviceId || !options.location || !options.long || !options.lat) {
+            return next(badRequests.NotEnParams({reqParams: ['deviceId', 'location', 'location.long', 'locatin.lat']}));
+        }
+
+        criteria = {
+            deviceId: options.deviceId
+        };
+        update = {
+            lastLocation: {
+                long: options.location.long,
+                lat: options.location.lat,
+                dateTime: new Date()
+            }
+        };
+
+        DeviceModel
+            .findOneAndUpdate(criteria, update, function (err, device) {
+                if (err) {
+                    return next (err);
+                }
+
+                if (!device) {
+                    return next(badRequests.NotFound());
+                }
+
+                res.status(200).send({success: 'updated'});
+            });
+
+        res.status(500).send({error: 'NotImplemented'});
     };
 
 };
