@@ -19,9 +19,6 @@ module.exports = function (db) {
         return shaSum.digest('hex');
     };
 
-    console.log('users');
-    console.log(data);
-
     this.createUsers = function (callback) {
         var users = data.users || [];
         var userId = 1;

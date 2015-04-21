@@ -185,8 +185,6 @@ var UserHandler = function (db) {
                     callback(err);
                 }
             } else {
-                console.log('create user');
-                console.log(result);
                 if (callback && (typeof callback === 'function')) {
                     callback(null, result);
                 }

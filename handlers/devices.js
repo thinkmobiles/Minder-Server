@@ -107,8 +107,8 @@ var DeviceHandler = function (db) {
         var criteria;
         var update;
 
-        if (!options.deviceId || !options.location || !options.long || !options.lat) {
-            return next(badRequests.NotEnParams({reqParams: ['deviceId', 'location', 'location.long', 'locatin.lat']}));
+        if (!options.deviceId || !options.location || !options.location.long || !options.location.lat) {
+            return next(badRequests.NotEnParams({reqParams: ['deviceId', 'location', 'location.long', 'location.lat']}));
         }
 
         criteria = {
@@ -131,11 +131,10 @@ var DeviceHandler = function (db) {
                 if (!device) {
                     return next(badRequests.NotFound());
                 }
-
+                
                 res.status(200).send({success: 'updated'});
             });
 
-        res.status(500).send({error: 'NotImplemented'});
     };
 
 };
