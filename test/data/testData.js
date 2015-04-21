@@ -19,6 +19,14 @@ var TestDataModule = function () {
         confirmToken: 'qwerty',
         firstName: 'unconfirmedFirstName',
         lastName: 'unconfirmedLastName'
+    }, {
+        _id: '55312b475bcd9d3016000003',
+        minderId: 'minder_3',
+        email: 'test_will_be_confirmed@test.com',
+        pass: '1',
+        confirmToken: 'willBeConfirmed',
+        firstName: 'test',
+        lastName: 'willBeConfirmed'
     }];
 
     this.devices = [{

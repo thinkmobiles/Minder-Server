@@ -23,6 +23,7 @@ var UserHandler = function (db) {
     var UserModel = db.model('User', userSchema);
     var deviceSchema = mongoose.Schemas['Device'];
     var DeviceModel = db.model('Device', deviceSchema);
+    var self = this;
 
     function prepateUserData(data) {
         var userData = {};
@@ -125,7 +126,7 @@ var UserHandler = function (db) {
             //is exists deviceId
             function (cb) {
                 if (deviceData) {
-                    DeviceModel.find({deviceId: deviceData.deviceId}, function(err, docs) {
+                    DeviceModel.find({deviceId: deviceData.deviceId}, function (err, docs) {
                         if (err) {
                             cb(err);
                         } else if (docs && docs.length) {
@@ -386,7 +387,7 @@ var UserHandler = function (db) {
                                     return next(err);
                                 }
                                 session.register(req, res, user);
-                            }) ;
+                            });
                         }
 
                     });
@@ -404,6 +405,49 @@ var UserHandler = function (db) {
             signInWeb(req, res, next);
         }
     };
+
+    this.confirmEmail = function (req, res, next) {
+        var confirmToken = req.params.confirmToken;
+        var condition = {
+            confirmToken: confirmToken
+        };
+        var update = {
+            confirmToken: null
+        };
+
+        UserModel.findOneAndUpdate(condition, update, function (err, userModel) {
+            if (err) {
+                return self.renderError(err, req, res);
+            }
+
+            if (!userModel) {
+                return self.renderError(badRequests.NotFound(), req, res);
+            }
+
+            res.render('successConfirm');
+
+            //res.redirect(process.env.HOST + '/successConfirm');
+
+            //return res.status(500).send('NotImplementedYet');
+            /*//FIXME: update the userModel:
+            userModel
+                .save({confirmToken: null}, function (err, user) {
+                    if (err) {
+                        return self.renderError(err, req, res);
+                    }
+
+                    res.redirect(process.env.HOST + '/successConfirm');
+
+                });*/
+
+        });
+
+    };
+
+    this.renderError = function (err, req, res) {
+        res.render('errorTemplate', {error: err});
+    };
+
 };
 
 module.exports = UserHandler;

@@ -30,6 +30,11 @@ module.exports = function (app, mainDb) {
     app.get('/isAuth', session.isAuthenticatedUser);
     app.post('/signUp', users.signUp);
     app.post('/signIn', users.signIn);
+    app.get('/confirmEmail/:confirmToken', users.confirmEmail);
+    app.get('/successConfirm', function (req, res, next) {
+        //res.render('successConfirm.html');
+        res.status(200).send('Confirmed');
+    });
     // ----------------------------------------------------------
     // Error Handler:
     // ----------------------------------------------------------

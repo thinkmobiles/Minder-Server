@@ -39,10 +39,16 @@ module.exports = function (mainDb, dbsNames) {
     app.set('dbsObject', dbsObject);
     app.set('dbsNames', dbsNames);
 
-    app.engine('html', consolidate.swig);
+    /*app.engine('html', consolidate.swig);
     app.set('view engine', 'html');
-    app.set('views', __dirname + '/views');
+    app.set('views', __dirname + '/views');*/
+
+    app.use(express.static(__dirname + '/public'));
+    app.engine('html', consolidate.swig);
+    app.set('views', __dirname + '/public/static');
+    app.set('view engine', 'html');
     app.use(logger('dev'));
+
     //app.use(subDomainParser);
 
     app.use(bodyParser.json({strict: false, inflate: false, limit: 1024 * 1024 * 200}));

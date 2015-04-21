@@ -319,4 +319,40 @@ describe('Users', function() {
         });
 
     });
+
+    describe('/confirmEmail', function () {
+
+        it('User can\'t confirm with invalid confirmToken', function (done) {
+            var token = 'foo';
+            var url = '/confirmEmail/' + token;
+
+            userAgent1
+                .get(url)
+                .end(function(err, res) {
+                    if (err) {
+                        done(err);
+                    } else {
+                        expect(res.status).to.equals(200);
+                        done();
+                    }
+                });
+        });
+
+        it('User can confirm with valid confirmToken', function (done) {
+            var token = testData.users[2].confirmToken;
+            var url = '/confirmEmail/' + token;
+
+            userAgent1
+                .get(url)
+                .end(function(err, res) {
+                    if (err) {
+                        done(err);
+                    } else {
+                        expect(res.status).to.equals(200);
+                        done();
+                    }
+                });
+        });
+
+    });
 });
