@@ -88,7 +88,7 @@ define(
         };
 
         var errorMessages = {
-            invalidNameMsg: "field value is incorrect. field can not contain '~ < > ^ * ₴' signs only a-z A-Z 0-9",
+            invalidNameMsg: "field value is incorrect. field can not contain '~ < > ^ * ₴' signs only a-z A-Z",
             invalidLoginMsg: "field value is incorrect. It should contain only the following symbols: A-Z, a-z, 0-9, _ @",
             notNumberMsg: "field should contain a valid integer value",
             invalidCountryMsg: "field should contain only letters, whitespaces and '-' sign",
@@ -467,7 +467,7 @@ define(
                     errorArray.push([fieldName, errorMessages.invalidCharsMsg].join(' '));
                     return;
                 }
-                if (fieldValue.length < 3) {
+                if (fieldValue.length < 4) {
                     errorArray.push([fieldName, errorMessages.minLengthMsg(3)].join(' '));
                     return;
                 }

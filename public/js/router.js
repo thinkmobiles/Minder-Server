@@ -19,7 +19,8 @@ define([
             "forgotPassword": "forgotPassword",
             "signUp": "signUp",
             "termsAndConditions": "termsAndConditions",
-            "contactUs": "contactUs",
+            //"contactUs": "contactUs",
+            "profile": "profile",
             "*any": "any"
         },
 
@@ -76,6 +77,9 @@ define([
         },
         contactUs: function () {
             this.loadWrapperView('contactUs');
+        },
+        profile: function () {
+            this.loadWrapperView('profile');
         }
     });
 
