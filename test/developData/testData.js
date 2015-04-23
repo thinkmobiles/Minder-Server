@@ -8,7 +8,7 @@ var TestDataModule = function () {
         _id: '55312b475bcd9d3016000001',
         minderId: 'minder_1',
         email: 'test@test.com',
-        pass: '1',
+        pass: '1234',
         firstName: 'existsFirstName',
         lastName: 'existsLastName'
     }, {
@@ -31,12 +31,13 @@ var TestDataModule = function () {
 
     this.devices = [];
 
-    for (var i = 0, device = {}; i < 50; i++) {
+    for (var i = 0, device = {}; i < 500; i++) {
         device = {
             deviceId: 'dev_' + i,
             deviceName: 'Test Device ' + i,
             deviceType: DEVICE_OS.WINDOWS_PHONE,
             user: self.users[0]._id,
+            name: 'Device name ' + i,
             lastLocation: {
                 lat: (Math.random() * 10),
                 long: (Math.random() * 10),

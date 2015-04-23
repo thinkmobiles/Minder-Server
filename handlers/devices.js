@@ -138,11 +138,17 @@ var DeviceHandler = function (db) {
     };
 
     this.getDevices = function (req, res, next) {
+
         var params = req.query;
 
+        console.log('>>>>>>>', params);
+
         console.log(params);
-        var criteria = {};
+        var criteria = {
+            user: req.session.userId
+        };
         var skip = 0;
+        var query;
 
         params.page = parseInt(params.page) || 1;
         params.count = parseInt(params.count) || 10;
@@ -152,32 +158,57 @@ var DeviceHandler = function (db) {
         }
 
         if (params.name) {
-            criteria.name = params.name;
+            criteria.name = new RegExp(params.name.trim(), "i");
         }
 
-        if (params.isPayed === 'true') criteria.isPayed = true;
-        if (params.isPayed === 'false') criteria.isPayed = false;
-        if (params.enabledTrackLocation === 'true') criteria.enabledTrackLocation = true;
-        if (params.enabledTrackLocation === 'false') criteria.enabledTrackLocation = false;
+        //if (params.name) {
+        //    criteria.name = {
+        //        $in: [new RegExp(params.name.trim(), "i")]
+        //    };
+        //}
 
-        console.log(params, skip);
 
-        DeviceModel.find(criteria)
-            .limit(params.count)
-            .skip(skip)
-            .exec(function (err, devices) {
-                if (err) {
-                    return next(err);
-                }
-                res.status(200).send(devices);
-            });
+        if (params.isPayed === 'true') {
+            criteria.isPayed = true;
+        }
+        if (params.isPayed === 'false') {
+            criteria.isPayed = false;
+        }
+        if (params.enabledTrackLocation === 'true') {
+            criteria.enabledTrackLocation = true;
+        }
+        if (params.enabledTrackLocation === 'false') {
+            criteria.enabledTrackLocation = false;
+        }
+        if (params.devices) {
+            criteria._id = {
+                $in: params.devices
+            };
+        }
+
+        //console.log(criteria);
+
+        query = DeviceModel.find(criteria);
+        if (!params.devices) {
+            query.sort('name');
+            query.limit(params.count);
+            query.skip(skip);
+        }
+        query.exec(function (err, devices) {
+            if (err) {
+                return next(err);
+            }
+            res.status(200).send(devices);
+        });
     };
 
     this.countDevices = function (req, res, next) {
         var params = req.query;
 
         console.log(params);
-        var criteria = {};
+        var criteria = {
+            user: req.session.userId
+        };
         var skip = 0;
 
         params.page = parseInt(params.page) || 1;
@@ -188,7 +219,7 @@ var DeviceHandler = function (db) {
         }
 
         if (params.name) {
-            criteria.name = params.name;
+            criteria.name = new RegExp(params.name.trim(), "i");
         }
 
         if (params.isPayed === 'true') criteria.isPayed = true;

@@ -6,7 +6,7 @@ define([
 ], function (template, Custom, validation, Communication) {
 
     var forgotPasswordView = Backbone.View.extend({
-        el: '#wrapper',
+        //el: '#wrapper',
         initialize: function (options) {
             this.listenTo(this.stateModel, 'change', this.render);
             this.render();

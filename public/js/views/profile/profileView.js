@@ -6,7 +6,7 @@ define([
 ], function (router, template, Custom, validation) {
 
     var View = Backbone.View.extend({
-        el: '#wrapper',
+        //el: '#wrapper',
         initialize: function (options) {
             this.listenTo(this.stateModel, 'change', this.render);
             this.render();
@@ -31,6 +31,10 @@ define([
         render: function (options) {
             this.$el.html(_.template(template, this.stateModel.toJSON()));
             return this;
+        },
+
+        afterUpend: function () {
+
         },
 
         changeProfile: function (event) {

@@ -18,6 +18,7 @@ define([
             }
         },
         render: function () {
+            var _this = this;
             if (!this.marker) {
                 this.marker = new google.maps.Marker({
                     map: App.map,
@@ -31,9 +32,12 @@ define([
                 });
             }
             var location = this.model.get('lastLocation');
-            console.log('>>location', this.model);
             this.marker.setPosition(new google.maps.LatLng(location.lat, location.long));
-            console.log('marker render', this);
+            google.maps.event.addListener(_this.marker, 'click', function () {
+                //App.mapInfowindowView.infowindow.open(_this.marker.get('map'), _this.marker);
+
+                App.mapInfowindowView.setDeviceInfowindow(_this.model, _this.marker);
+            });
             return this;
         }
     });

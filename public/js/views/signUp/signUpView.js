@@ -6,7 +6,7 @@ define([
 ], function (router, template, Custom, validation) {
 
     var View = Backbone.View.extend({
-        el: '#wrapper',
+        //el: '#wrapper',
         initialize: function (options) {
             this.stateModel = new Backbone.Model({
                 email: '',
@@ -101,7 +101,7 @@ define([
                     App.router.navigate("login", {trigger: true});
                 },
                 error: function (err) {
-                    self.errorNotification(err);
+                    App.error(err);
                     self.stateModel.set({
                         errors: ["Error"],
                         password: null,

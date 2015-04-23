@@ -6,7 +6,8 @@ define([
         initialize: function (options) {
             this.stateModel = new Backbone.Model({
                 checked: false,
-                deviceCid: this.model.cid
+                deviceCid: this.model.cid,
+                detail: options.detail || false
             });
             this.listenTo(this.stateModel, 'change', this.render);
             this.listenTo(this.model, 'change', this.render);

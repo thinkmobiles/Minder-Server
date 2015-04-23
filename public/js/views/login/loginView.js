@@ -6,7 +6,7 @@ define([
 ], function (LoginTemplate, Custom, validation, Communication) {
 
     var LoginView = Backbone.View.extend({
-        el: '#wrapper',
+        //el: '#wrapper',
         initialize: function (options) {
             this.stateModel = new Backbone.Model({
                 email: '',
@@ -30,6 +30,8 @@ define([
         },
 
         login: function (event) {
+            event.stopImmediatePropagation();
+            //consle.log('login');
             var self = this;
             var errors = [];
             var messages = [];
@@ -76,13 +78,21 @@ define([
                         messages: false,
                         email: ''
                     });
+                    App.sessionData.set({
+                        authorized: true,
+                        admin: false
+                    });
                     App.router.navigate("main", {trigger: true});
                 },
                 error: function (err) {
-                    self.errorNotification(err);
+                    App.sessionData.set({
+                        authorized: false,
+                        admin: false
+                    });
+                    App.error(err);
                     console.log(err);
                     self.stateModel.set({
-                        errors: [err],
+                        errors: [err.responseJSON.error],
                         password: null
                     });
                 }
