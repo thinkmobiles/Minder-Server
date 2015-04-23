@@ -1,22 +1,34 @@
-define(['config/config'], function (config) {
+define([
+    'config/config',
+    'views/customElements/mapInfowindow'
+], function (config, MapInfowindow) {
 
     var MainView = Backbone.View.extend({
         el: '#map',
         initialize: function (options) {
             var self = this;
-            console.log(self);
             self.initializeMap();
         },
         stateModel: new Backbone.Model(),
         initializeMap: function () {
-            console.log(google.maps.LatLng);
+            console.log('map init', document.getElementById("map"));
+            var _this = this;
             var mapOptions = {
-                center: new google.maps.LatLng(-34.397, 150.644),
-                zoom: 8,
+                center: new google.maps.LatLng(0, 0),
+                zoom: 2,
                 mapTypeId: google.maps.MapTypeId.ROADMAP
             };
-            this.map = new google.maps.Map(document.getElementById("map"),
-                mapOptions);
+            this.map = new google.maps.Map(document.getElementById("map"), mapOptions);
+            App.map = this.map;
+
+            google.maps.event.addDomListener(window, "resize", function () {
+                var center = _this.map.getCenter();
+                google.maps.event.trigger(_this.map, "resize");
+                _this.map.setCenter(center);
+            });
+
+            this.mapInfowindowView = new MapInfowindow();
+            App.mapInfowindowView = this.mapInfowindowView;
         }
 
         //render: function () {

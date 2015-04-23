@@ -16,10 +16,14 @@ define([
             "home": "any",
             "login": "login",
             "main": "main",
+            "main/page/:page": "main",
             "forgotPassword": "forgotPassword",
             "signUp": "signUp",
+            "billingInfo": "billingInfo",
             "termsAndConditions": "termsAndConditions",
             //"contactUs": "contactUs",
+            "devices": "devices",
+            "devices/page/:page": "devices",
             "profile": "profile",
             "*any": "any"
         },
@@ -30,19 +34,35 @@ define([
             //this.footerView = new FooterView();
         },
 
-        loadWrapperView: function (name) {
+        loadWrapperView: function (name, params) {
             var self = this;
             require(['views/' + name + '/' + name + 'View'], function (View) {
-                self[name + 'View'] = new View();
-                self.changeWrapperView(self[name + 'View']);
+                if (!self[name + 'View']) {
+                    self[name + 'View'] = new View();
+                }
+                self.changeWrapperView(self[name + 'View'], params);
             });
         },
 
-        changeWrapperView: function (wrapperView) {
+        changeWrapperView: function (wrapperView, params) {
             if (this.wrapperView) {
                 this.wrapperView.undelegateEvents();
+                $('#wrapper').html('');
             }
+
+            $('#wrapper').html(wrapperView.el);
+            wrapperView.delegateEvents();
+
             this.wrapperView = wrapperView;
+
+
+            if (wrapperView.afterUpend) {
+                wrapperView.afterUpend();
+            }
+
+            if (wrapperView.setParams) {
+                wrapperView.setParams(params);
+            }
         },
 
         changeView: function (view) {
@@ -52,12 +72,21 @@ define([
             $(document).trigger("resize");
             this.view = view;
         },
-
-        main: function (contentType) {
-            this.loadWrapperView('main');
+        checkLogin: function () {
+            if (!App.sessionData.get('authorized')) {
+                App.router.navigate("login", {trigger: true});
+                this.loadWrapperView('login');
+            }
+            return !App.sessionData.get('authorized');
+        },
+        main: function (page) {
+            if (page) page = parseInt(page);
+            if (this.checkLogin()) return;
+            this.loadWrapperView('main', {page: page});
         },
 
         any: function () {
+            if (this.checkLogin()) return;
             this.loadWrapperView('main');
         },
 
@@ -79,94 +108,19 @@ define([
             this.loadWrapperView('contactUs');
         },
         profile: function () {
+            if (this.checkLogin()) return;
             this.loadWrapperView('profile');
+        },
+        billingInfo: function () {
+            if (this.checkLogin()) return;
+            this.loadWrapperView('billingInfo');
+        },
+        devices: function (page) {
+            if (page) page = parseInt(page);
+            if (this.checkLogin()) return;
+            this.loadWrapperView('devices', {page: page});
         }
     });
 
     return appRouter;
 });
-
-
-//define([
-//    'views/main/MainView',
-//    'views/login/LoginView',
-//    'views/forgotPassword/forgotPasswordView',
-//    'views/signUp/signUpView',
-//    'views/termsAndConditions/termsAndConditionsView',
-//    'views/contactUs/contactUsView',
-//    'custom',
-//    'views/menu/topMenuView',
-//    'views/menu/footerView',
-//    'common'
-//], function (mainView, loginView, forgotPasswordView, signUpView, termsAndConditions, contactUs, custom, TopMenuView, FooterView, common) {
-//
-//    var appRouter = Backbone.Router.extend({
-//
-//        wrapperView: null,
-//        mainView: null,
-//        topBarView: null,
-//        view: null,
-//
-//        routes: {
-//            "home": "any",
-//            "login": "login",
-//            "main": "main",
-//            "forgotPassword": "forgotPassword",
-//            "signUp": "signUp",
-//            "termsAndConditions": "termsAndConditions",
-//            "contactUs": "contactUs",
-//            "*any": "any"
-//        },
-//
-//        initialize: function () {
-//            console.log('router init');
-//            this.topMenuView = new TopMenuView();
-//            //this.footerView = new FooterView();
-//        },
-//
-//        changeWrapperView: function (wrapperView) {
-//            if (this.wrapperView) {
-//                this.wrapperView.undelegateEvents();
-//            }
-//            this.wrapperView = wrapperView;
-//        },
-//
-//        changeView: function (view) {
-//            if (this.view) {
-//                this.view.undelegateEvents();
-//            }
-//            $(document).trigger("resize");
-//            this.view = view;
-//        },
-//
-//        main: function (contentType) {
-//            this.mainView = new mainView({contentType: contentType});
-//            this.changeWrapperView(this.mainView);
-//        },
-//
-//        any: function () {
-//            this.mainView = new mainView();
-//            this.changeWrapperView(this.mainView);
-//        },
-//
-//        login: function () {
-//            this.changeWrapperView(new loginView());
-//        },
-//
-//        forgotPassword: function () {
-//            this.changeWrapperView(new forgotPasswordView());
-//        },
-//
-//        signUp: function () {
-//            this.changeWrapperView(new signUpView());
-//        },
-//        termsAndConditions: function () {
-//            this.changeWrapperView(new termsAndConditions());
-//        },
-//        contactUs: function () {
-//            this.changeWrapperView(new contactUs());
-//        }
-//    });
-//
-//    return appRouter;
-//});

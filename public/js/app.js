@@ -2,15 +2,19 @@
 define([
     'router',
     'communication',
-    'custom',
+    'custom'
 ], function (Router, Communication, Custom) {
 
     var initialize = function () {
+        App.sessionData = new Backbone.Model({
+            authorized: false,
+            admin: false
+        });
         var appRouter = new Router();
-
-        appRouter.checkLogin = Communication.checkLogin;
-        //Communication.checkLogin(Custom.runApplication);
+        App.router = appRouter;
         Backbone.history.start();
+        Communication.checkLogin(Custom.runApplication);
+
     };
     return {
         initialize: initialize

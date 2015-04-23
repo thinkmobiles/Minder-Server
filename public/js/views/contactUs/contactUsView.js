@@ -6,7 +6,7 @@ define([
 ], function (template, ContactMap, Custom, validation) {
 
     var View = Backbone.View.extend({
-        el: '#wrapper',
+        //el: '#wrapper',
         initialize: function () {
             this.listenTo(this.stateModel, 'change', this.render);
             this.render();

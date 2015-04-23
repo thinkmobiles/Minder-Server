@@ -3,7 +3,7 @@ define([
 ], function (template) {
 
     var View = Backbone.View.extend({
-        el: '#wrapper',
+        //el: '#wrapper',
         initialize: function () {
             this.render();
         },

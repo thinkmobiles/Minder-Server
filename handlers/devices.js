@@ -78,7 +78,7 @@ var DeviceHandler = function (db) {
         }
     };
 
-    this.createDevice = function(deviceData, userModel, callback) {
+    this.createDevice = function (deviceData, userModel, callback) {
         'use strict';
 
         var newDevice;
@@ -100,7 +100,7 @@ var DeviceHandler = function (db) {
         });
     };
 
-    this.setLocation = function(req, res, next) {
+    this.setLocation = function (req, res, next) {
         'use strict';
 
         var options = req.body;
@@ -125,17 +125,118 @@ var DeviceHandler = function (db) {
         DeviceModel
             .findOneAndUpdate(criteria, update, function (err, device) {
                 if (err) {
-                    return next (err);
+                    return next(err);
                 }
 
                 if (!device) {
                     return next(badRequests.NotFound());
                 }
-                
+
                 res.status(200).send({success: 'updated'});
             });
 
     };
+
+    this.getDevices = function (req, res, next) {
+
+        var params = req.query;
+
+        console.log('>>>>>>>', params);
+
+        console.log(params);
+        var criteria = {
+            user: req.session.userId
+        };
+        var skip = 0;
+        var query;
+
+        params.page = parseInt(params.page) || 1;
+        params.count = parseInt(params.count) || 10;
+
+        if (params.page > 1) {
+            skip = (params.page - 1 ) * params.count;
+        }
+
+        if (params.name) {
+            criteria.name = new RegExp(params.name.trim(), "i");
+        }
+
+        //if (params.name) {
+        //    criteria.name = {
+        //        $in: [new RegExp(params.name.trim(), "i")]
+        //    };
+        //}
+
+
+        if (params.isPayed === 'true') {
+            criteria.isPayed = true;
+        }
+        if (params.isPayed === 'false') {
+            criteria.isPayed = false;
+        }
+        if (params.enabledTrackLocation === 'true') {
+            criteria.enabledTrackLocation = true;
+        }
+        if (params.enabledTrackLocation === 'false') {
+            criteria.enabledTrackLocation = false;
+        }
+        if (params.devices) {
+            criteria._id = {
+                $in: params.devices
+            };
+        }
+
+        //console.log(criteria);
+
+        query = DeviceModel.find(criteria);
+        if (!params.devices) {
+            query.sort('name');
+            query.limit(params.count);
+            query.skip(skip);
+        }
+        query.exec(function (err, devices) {
+            if (err) {
+                return next(err);
+            }
+            res.status(200).send(devices);
+        });
+    };
+
+    this.countDevices = function (req, res, next) {
+        var params = req.query;
+
+        console.log(params);
+        var criteria = {
+            user: req.session.userId
+        };
+        var skip = 0;
+
+        params.page = parseInt(params.page) || 1;
+        params.count = parseInt(params.count) || 10;
+
+        if (params.page > 1) {
+            skip = (params.page - 1 ) * params.count;
+        }
+
+        if (params.name) {
+            criteria.name = new RegExp(params.name.trim(), "i");
+        }
+
+        if (params.isPayed === 'true') criteria.isPayed = true;
+        if (params.isPayed === 'false') criteria.isPayed = false;
+        if (params.enabledTrackLocation === 'true') criteria.enabledTrackLocation = true;
+        if (params.enabledTrackLocation === 'false') criteria.enabledTrackLocation = false;
+
+        console.log(params, skip);
+
+        DeviceModel.count(criteria)
+            .exec(function (err, devices) {
+                if (err) {
+                    return next(err);
+                }
+                res.status(200).send({count: devices});
+            });
+    }
 
 };
 

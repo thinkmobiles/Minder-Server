@@ -1,0 +1,48 @@
+<div class="panel panel-default">
+    <div class="panel-heading">Billing Info</div>
+    <div class="panel-body">
+        <table class="table">
+            <tbody>
+            <tr>
+                <% _.each(collection, function(item){%>
+                <td>
+                    <div class="tariffPlan">
+                        <%= item.name %>
+                    </div>
+                    <div class="tariffPlanInfo">
+                        <%= item.description %>
+                    </div>
+                </td>
+                <% }) %>
+            </tr>
+            </tbody>
+        </table>
+        <p>
+            <span>Current plan: </span>T1 <br>
+            <span>Number of devices:</span>1-4 <br>
+            <span> Plan cost per device:</span>$2.50 <br>
+
+        </p>
+
+        <p>
+            <span># of subscribed devices in this month:</span> 3 <br>
+            <span># of current subscribed devices:</span> 3 <br>
+        </p>
+
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" id="renewal" <% if(renewal) {%>checked<% } %> > Renewal
+                    </label>
+                </div>
+            </div>
+            <div class="panel-footer">
+                <button class="btn btn-default" id="chanelRenewal">Chanel</button>
+                <button class="btn btn-default" id="saveRenewal">Save</button>
+            </div>
+        </div>
+
+
+    </div>
+</div>

@@ -20,13 +20,19 @@ require.config({
         less: './libs/less.min',
         templates: '../templates',
         text: './libs/text',
+        moment: './libs/moment',
         common: 'common'
     },
     shim: {
         'ajaxForm': ['jQuery'],
         'Bootstrap': ['jQuery'],
         'Backbone': ['Underscore', 'jQuery'],
-        'app': ['Backbone', 'less', 'ajaxForm', 'Bootstrap']
+        'app': ['Backbone', 'less', 'ajaxForm', 'Bootstrap', 'moment']
+    },
+    config: {
+        moment: {
+            noGlobal: true
+        }
     }
 });
 
@@ -53,7 +59,7 @@ require(['app'], function (app) {
 
     };
 
-    Backbone.View.prototype.errorNotification = function (xhr) {
+    App.error = function (xhr) {
         if (xhr) {
             if (xhr.status === 401 || xhr.status === 403) {
                 if (xhr.status === 401) {
@@ -70,6 +76,7 @@ require(['app'], function (app) {
             }
         }
     };
+
 
     app.initialize();
 });

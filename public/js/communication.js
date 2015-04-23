@@ -1,7 +1,7 @@
 // Filename: communication.js
 define(function () {
     var checkLogin = function (callback) {
-        var url = "/account/authenticated";
+        var url = "/isAuth";
         $.ajax({
             url: url,
             type: "GET",

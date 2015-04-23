@@ -1,1 +1,6 @@
+<% if(action) { %>
+<a class="action" title="<%= title %>"> <%= name %> </a>
+<% } else { %>
 <a href="<%= url %>" title="<%= title %>"> <%= name %> </a>
+<% } %>
+

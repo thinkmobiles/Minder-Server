@@ -6,28 +6,22 @@ define([
 ], function (LoginTemplate, Custom, validation, Communication) {
 
     var LoginView = Backbone.View.extend({
-        el: '#wrapper',
+        //el: '#wrapper',
         initialize: function (options) {
-            //if (options && options.dbs) {
-            //    this.render(options);
-            //} else {
-            //    this.render();
-            //}
+            this.stateModel = new Backbone.Model({
+                email: '',
+                password: '',
+                errors: false,
+                messages: false
+            });
             this.listenTo(this.stateModel, 'change', this.render);
             this.render();
         },
 
-        stateModel: new Backbone.Model({
-            email: '',
-            password: '',
-            errors: false,
-            messages: false
-        }),
 
         events: {
             "submit #loginForm": "login",
-            "click .login-button": "login",
-            //"click .remember-me": "checkClick"
+            "click .login-button": "login"
         },
 
         render: function (options) {
@@ -35,16 +29,9 @@ define([
             return this;
         },
 
-        //checkClick: function (event) {
-        //    this.$el.find(".remember-me").toggleClass("active");
-        //    if (this.$el.find("#urem").attr("checked")) {
-        //        this.$el.find("#urem").removeAttr("checked");
-        //    } else {
-        //        this.$el.find("#urem").attr("checked", "checked");
-        //    }
-        //},
-
         login: function (event) {
+            event.stopImmediatePropagation();
+            //consle.log('login');
             var self = this;
             var errors = [];
             var messages = [];
@@ -76,23 +63,36 @@ define([
                 this.stateModel.set(stateModelUpdate);
                 return this;
             }
+            console.log(stateModelUpdate);
             $.ajax({
-                url: "/login",
+                url: "/signIn",
                 type: "POST",
                 data: {
                     email: stateModelUpdate.email,
-                    password: stateModelUpdate.password
+                    pass: stateModelUpdate.password
                 },
                 success: function (response) {
-                    // TODO
                     self.stateModel.set({
-                        password: null
+                        password: '',
+                        errors: false,
+                        messages: false,
+                        email: ''
                     });
-                    router.navigate("login", {trigger: true});
+                    App.sessionData.set({
+                        authorized: true,
+                        admin: false
+                    });
+                    App.router.navigate("main", {trigger: true});
                 },
-                error: function () {
+                error: function (err) {
+                    App.sessionData.set({
+                        authorized: false,
+                        admin: false
+                    });
+                    App.error(err);
+                    console.log(err);
                     self.stateModel.set({
-                        errors: ["Such user doesn't registered"],
+                        errors: [err.responseJSON.error],
                         password: null
                     });
                 }
