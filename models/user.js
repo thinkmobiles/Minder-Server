@@ -8,7 +8,7 @@ module.exports = (function () {
     var userSchema = mongoose.Schema({
         minderId: {type: String, required: true, unique: true},
         email: {type: String, require: true, unique: true},
-        pass: {type: String, default: ''},
+        pass: {type: String},
         confirmToken: {type: String},
         forgotToken: {type: String},
         firstName: {type: String, default: ''},

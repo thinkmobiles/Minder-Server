@@ -27,10 +27,11 @@ module.exports = function (app, db) {
     app.post('/signUp', userHandler.signUp);
     app.post('/signIn', userHandler.signIn);
     app.post('/signOut', session.kill);
+    app.get('/currentUser', session.authenticatedUser, userHandler.getCurrentUser);
     app.get('/confirmEmail/:confirmToken', userHandler.confirmEmail);
 
-    /*var usersRouter = require('./users')(app);
-    app.use('/users', usersRouter);*/
+    usersRouter = require('./users')(app);
+    app.use('/users', usersRouter);
 
     devicesRouter = require('./devices')(db);
     app.use('/devices', devicesRouter);
@@ -66,7 +67,7 @@ module.exports = function (app, db) {
             if (status !== 401) {
                 logWriter.log('', err.message + '\n' + err.stack);
             }
-            res.status(status).send({error: err.message + '\n' + err.stack});
+            res.status(status).send({error: err.message, stack: err.stack});
         }
     };
 

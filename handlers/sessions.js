@@ -26,7 +26,7 @@ var Session = function (db) {
                 user: userModel
             });
         } else {
-            res.status(status).send({success: "Login successful", userId: userModel._id});
+            res.status(status).send({success: "Login successful", user: userModel});
         }
 
     };
@@ -60,8 +60,8 @@ var Session = function (db) {
         }
     };
 
-    this.authenticatedSuperAdmin = function (req, res, next) {
-        if (req.session && req.session.userId && req.session.loggedIn && req.session.userRole === SESSION_ADMIN) {
+    this.authenticatedAdmin = function (req, res, next) {
+        if (req.session && req.session.userId && req.session.loggedIn && (req.session.userRole === SESSION_ADMIN)) {
             next();
         } else {
             var err = new Error('Forbidden');
@@ -70,8 +70,8 @@ var Session = function (db) {
         }
     };
 
-    this.isAuthenticatedSuperAdmin = function (req, res, next) {
-        if (req.session && req.session.userId && req.session.loggedIn && req.session.userRole === SESSION_ADMIN) {
+    this.isAuthenticatedAdmin = function (req, res, next) {
+        if (req.session && req.session.userId && req.session.loggedIn && (req.session.userRole === SESSION_ADMIN)) {
             res.status(200).send();
         } else {
             var err = new Error('Forbidden');
@@ -80,8 +80,8 @@ var Session = function (db) {
         }
     };
 
-    this.isSuperAdmin = function (req) {
-        if (req.session && req.session.userId && req.session.loggedIn && req.session.userRole === SESSION_ADMIN) {
+    this.isAdmin = function (req) {
+        if (req.session && req.session.userId && req.session.loggedIn && (req.session.userRole === SESSION_ADMIN)) {
             return true;
         } else {
             return false;

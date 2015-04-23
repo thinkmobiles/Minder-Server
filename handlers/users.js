@@ -315,24 +315,30 @@ var UserHandler = function (db) {
     function signInWeb(req, res, next) {
         var options = req.body;
         var encryptedPass;
+        var query;
+        var fields;
 
         if (!options.email || !options.pass) {
             return next(badRequests.NotEnParams({reqParams: ['email', 'pass']}));
         }
 
         encryptedPass = getEncryptedPass(options.pass);
-
-        UserModel.findOne({
+        query = {
             email: options.email,
             pass: encryptedPass
-        }, function (err, user) {
+        };
+        fields = {
+            pass: false
+        };
+
+        UserModel.findOne(query, fields, function (err, user) {
 
             if (err) {
                 return next(err);
             }
 
             if (!user) {
-                return next(badRequests.NotFound());
+                return next(badRequests.SignInError());
             }
 
             if (user && user.confirmToken) {
@@ -452,6 +458,30 @@ var UserHandler = function (db) {
 
     this.renderError = function (err, req, res) {
         res.render('errorTemplate', {error: err});
+    };
+
+    this.getCurrentUser = function (req, res, next) {
+        var userId = req.session.userId;
+        var query = {
+            _id: userId
+        };
+        var fields = {
+            pass: false
+        };
+
+        UserModel.findOne(query, fields, function (err, user) {
+
+            if (err) {
+                return next(err);
+            }
+
+            if (!user) {
+                return next(badRequests.NotFound());
+            }
+
+            res.status(200).send(user);
+
+        });
     };
 
 };
