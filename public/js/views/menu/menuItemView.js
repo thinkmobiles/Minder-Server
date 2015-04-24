@@ -31,7 +31,8 @@ define([
                     console.log('logout success');
                     App.sessionData.set({
                         authorized: false,
-                        admin: false
+                        admin: false,
+                        user: null
                     });
                 },
                 error: function (err) {

@@ -8,7 +8,8 @@ define([
     var initialize = function () {
         App.sessionData = new Backbone.Model({
             authorized: false,
-            admin: false
+            admin: false,
+            user:null
         });
         var appRouter = new Router();
         App.router = appRouter;

@@ -17,10 +17,11 @@
             </tr>
             </tbody>
         </table>
+
         <p>
-            <span>Current plan: </span>T1 <br>
-            <span>Number of devices:</span>1-4 <br>
-            <span> Plan cost per device:</span>$2.50 <br>
+            <span>Current plan: </span><%= userPlan.name %><br>
+            <span>Number of devices:</span><%= userPlan.minDevices %>-<%= userPlan.maxDevices %><br>
+            <span> Plan cost per device:</span>$<%= userPlan.cost %><br>
 
         </p>
 

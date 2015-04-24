@@ -67,11 +67,13 @@ define([
             $.ajax({
                 url: "/signIn",
                 type: "POST",
+                dataType: 'json',
                 data: {
                     email: stateModelUpdate.email,
                     pass: stateModelUpdate.password
                 },
                 success: function (response) {
+                    console.log('LOGIN', response);
                     self.stateModel.set({
                         password: '',
                         errors: false,
@@ -80,14 +82,16 @@ define([
                     });
                     App.sessionData.set({
                         authorized: true,
-                        admin: false
+                        admin: false,
+                        user: response.user
                     });
                     App.router.navigate("main", {trigger: true});
                 },
                 error: function (err) {
                     App.sessionData.set({
                         authorized: false,
-                        admin: false
+                        admin: false,
+                        user: null
                     });
                     App.error(err);
                     console.log(err);

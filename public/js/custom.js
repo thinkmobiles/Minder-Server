@@ -1,15 +1,16 @@
 define(['common'], function (common) {
 
-    var runApplication = function (success) {
-        if (success) {
+    var runApplication = function (err, data) {
+        if (!err) {
             var url = (App.requestedURL === null) ? Backbone.history.fragment : App.requestedURL;
-            console.log('______', url);
+            console.log('______', url, data);
             //if ((url === "") || (url === "login")) url = 'main';
 
             //Backbone.history.fragment = "";
             App.sessionData.set({
                 authorized: true,
-                admin: false
+                admin: !!data.role,
+                user: data
             });
             // Backbone.history.navigate(url, {trigger: true});
 
@@ -19,7 +20,8 @@ define(['common'], function (common) {
             Backbone.history.fragment = "";
             App.sessionData.set({
                 authorized: false,
-                admin: false
+                admin: false,
+                user: null
             });
             Backbone.history.navigate("login", {trigger: true});
         }

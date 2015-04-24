@@ -8,20 +8,18 @@ define([
         initialize: function (options) {
             this.stateModel = new Backbone.Model({
                 renewal: false
+                //TODO
             });
 
 
             this.collection = new TariffPlansCollection();
 
-            this.listenTo(this.stateModel, 'change', this.render);
-            this.listenTo(this.collection, 'change', this.render);
-            this.listenTo(this.collection, 'sort', this.render);
-            this.listenTo(this.collection, 'sync', this.render);
+
             //this.collection.on('all', function (e) {
             //    console.log('event', e);
             //});
 
-            this.render();
+
             this.collection.set([
                 {
                     name: 'T1',
@@ -65,6 +63,24 @@ define([
                     updatedAt: new Date()
                 }
             ]);
+            var userPlan = this.collection.find(function (model) {
+                console.log(App.sessionData.get('user'));
+                console.log(model.get('name'));
+                if (model.get('name') === App.sessionData.get('user').currentPlan) {
+                    return true;
+                }
+            });
+            if (userPlan) {
+                this.stateModel.set({
+                    userPlan: userPlan
+                })
+            }
+            console.log('.....', userPlan)
+            this.render();
+            this.listenTo(this.stateModel, 'change', this.render);
+            this.listenTo(this.collection, 'change', this.render);
+            this.listenTo(this.collection, 'sort', this.render);
+            this.listenTo(this.collection, 'sync', this.render);
 
         },
 
