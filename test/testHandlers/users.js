@@ -188,7 +188,6 @@ describe('Users', function() {
                     if (err) {
                         done(err);
                     } else {
-                        console.error(res.body);
                         expect(res.status).to.equal(400);
 
                         expect(res.body).to.have.property('error');
@@ -286,7 +285,6 @@ describe('Users', function() {
                     if (err) {
                         done(err);
                     } else {
-                        console.log(res.body);
                         expect(res.status).to.equal(201);
                         done();
                     }

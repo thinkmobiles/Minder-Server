@@ -15,6 +15,7 @@ module.exports = function (db) {
     //router.get('/', session.authenticatedUser, deviceHandler.getDevices);
     router.get('/', deviceHandler.getDevices);
     router.get('/count', deviceHandler.countDevices);
-
+    router.get('/:id', deviceHandler.getDevice);
+    router.put('/:id', deviceHandler.updateDevice);
     return router;
 };

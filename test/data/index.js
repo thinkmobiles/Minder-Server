@@ -68,10 +68,11 @@ module.exports = function (db) {
                     function (device, cb) {
                         var newDevice = new DeviceModel(device);
 
-                        newDevice.save(function (err) {
+                        newDevice.save(function (err, savedDevice) {
                             if (err) {
                                 cb(err);
                             } else {
+                                device._id = savedDevice._id;
                                 cb();
                             }
                         });

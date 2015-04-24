@@ -8,7 +8,7 @@ var logWriter = require('../helpers/logWriter')();
 var SessionHandler = require('../handlers/sessions');
 
 var DeviceHandler = function (db) {
-    //var session = new SessionHandler(db);
+    var session = new SessionHandler(db);
     var deviceSchema = mongoose.Schemas['Device'];
     var DeviceModel = db.model('Device', deviceSchema);
     var self = this;
@@ -236,7 +236,42 @@ var DeviceHandler = function (db) {
                 }
                 res.status(200).send({count: devices});
             });
+    };
+
+    this.getDevice = function (req, res, next) {
+        var userId = req.session.userId;
+        var devId = req.params.id;
+        var criteria = {
+            _id: devId
+        };
+
+        DeviceModel
+            .findOne(criteria)
+            .exec(function (err, device) {
+                var ownerId;
+
+                if (err) {
+                    next(err);
+                } else if (!device) {
+                    next(badRequests.NotFound());
+                } else {
+
+                    ownerId = device.user.toString();
+
+                    if (session.isAdmin(req) || (ownerId === userId)) {
+                        res.status(200).send(device);
+                    } else {
+                        next(badRequests.AccessError());
+                    }
+                }
+            });
+
     }
+
+    this.updateDevice = function (req, res, next) {
+        res.status(500).send('Not implemented');
+
+    };
 
 };
 

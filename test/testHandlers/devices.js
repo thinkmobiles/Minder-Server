@@ -38,6 +38,35 @@ describe('Devices', function() {
 
     describe('Test Session', function () {
 
+        it('admin can signIn', function (done) {
+            var signInData = testData.admins[0];
+            signInData.pass = '1q2w3e4r';
+
+            adminAgent
+                .post('/signIn')
+                .send(signInData)
+                .end(function (err, res) {
+                    if (err) {
+                        done(err);
+                    } else {
+                        expect(res.status).to.equals(200);
+
+                        setTimeout(function () {
+                            adminAgent
+                                .get('/isAuth')
+                                .expect(200) //Status code
+                                .end(function (err, res) {
+                                    if (err) {
+                                        done(err);
+                                    } else {
+                                        done(null);
+                                    }
+                                });
+                        }, 200);
+                    }
+                });
+        });
+
         it('User1 can signIn', function (done) {
             var signInData = testData.users[0];
             signInData.pass = '1';
@@ -159,7 +188,6 @@ describe('Devices', function() {
                     if (err) {
                         done(err);
                     } else {
-                        console.log(res.body);
                         expect(res.status).to.equals(200);
                         expect(res.body).to.have.property('success');
                         done();
@@ -169,4 +197,23 @@ describe('Devices', function() {
 
     });
 
+    describe('GET /users/:id', function() {
+
+        it ('Admin can get devices by id', function (done) {
+            var devId = testData.devices[0]._id.toString();
+            var url = '/devices/' + devId;
+
+            adminAgent
+                .get(url)
+                .end(function (err, res) {
+                    console.log(res);
+                    expect(res.status).to.equals(200);
+                    expect(res.body).to.be.instanceOf(Object);
+                    expect(res.body).to.have.property('_id');
+                    expect(res.body._id).to.equals(devId);
+                    done();
+                });
+        });
+
+    });
 });
