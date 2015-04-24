@@ -10,6 +10,7 @@ describe('Users', function() {
     var baseUrl = conf.baseUrl;
     var adminAgent = request.agent(baseUrl);
     var userAgent1 = request.agent(baseUrl);
+    var offlineUser = request.agent(baseUrl);
     var userAgent2 = request.agent(baseUrl);
     var CreateTestData = require('./../data/index');
 
@@ -36,7 +37,69 @@ describe('Users', function() {
         }, 2000);
     });
 
-    describe('/signUp', function (){
+    describe('Test Session', function () {
+
+        it('admin can signIn', function (done) {
+            var signInData = testData.admins[0];
+            signInData.pass = '1q2w3e4r';
+
+            adminAgent
+                .post('/signIn')
+                .send(signInData)
+                .end(function (err, res) {
+                    if (err) {
+                        done(err);
+                    } else {
+                        expect(res.status).to.equals(200);
+
+                        setTimeout(function () {
+                            adminAgent
+                                .get('/isAuth')
+                                .expect(200) //Status code
+                                .end(function (err, res) {
+                                    if (err) {
+                                        done(err);
+                                    } else {
+                                        done(null);
+                                    }
+                                });
+                        }, 200);
+                    }
+                });
+        });
+
+        it('User1 can signIn', function (done) {
+            var signInData = testData.users[0];
+            signInData.pass = '1';
+
+            userAgent1
+                .post('/signIn')
+                .send(signInData)
+                .end(function (err, res) {
+                    if (err) {
+                        done(err);
+                    } else {
+                        expect(res.status).to.equals(200);
+
+                        setTimeout(function () {
+                            userAgent1
+                                .get('/isAuth')
+                                .expect(200) //Status code
+                                .end(function (err, res) {
+                                    if (err) {
+                                        done(err);
+                                    } else {
+                                        done(null);
+                                    }
+                                });
+                        }, 200);
+                    }
+                });
+        });
+
+    });
+
+    describe('POST /signUp', function (){
         var url = '/signUp';
 
         it('User can\'t signUp without email', function (done) {
@@ -232,14 +295,14 @@ describe('Users', function() {
 
     });
 
-    describe('/signIn', function () {
+    describe('POST /signIn', function () {
         var url = '/signIn';
 
         it('User can\'t signIn with unconfirmed email', function (done) {
             var data = testData.users[1];
 
             data.pass = '1';
-            userAgent1
+            offlineUser
                 .post(url)
                 .send(data)
                 .end(function (err, res) {
@@ -248,7 +311,7 @@ describe('Users', function() {
                     } else {
                         expect(res.status).to.equal(400);
                         expect(res.body).to.have.property('error');
-                        expect(res.body.error).contains('UnconfirmedEmail');
+                        expect(res.body.error).contains('Please confirm your account');
                         done();
                     }
                 });
@@ -260,7 +323,7 @@ describe('Users', function() {
                 deviceId: 'device_1'
             };
 
-            userAgent1
+            offlineUser
                 .post(url)
                 .set('user-agent', conf.mobileUserAgent)
                 .send(signInData)
@@ -271,19 +334,7 @@ describe('Users', function() {
                         expect(res.status).to.equal(400);
                         expect(res.body).to.have.property('error');
                         expect(res.body.error).to.contains('minderId');
-
-                        setTimeout(function () {
-                            userAgent1
-                                .get('/isAuth')
-                                .end(function (err, res) {
-                                    if (err) {
-                                        done(err);
-                                    } else {
-                                        expect(res.status).to.equals(401);
-                                        done();
-                                    }
-                                });
-                        }, 100);
+                        done();
                     }
                 });
         });
@@ -301,19 +352,7 @@ describe('Users', function() {
                     } else {
                         expect(res.status).to.equal(200);
                         expect(res.body).to.have.property('success');
-
-                        setTimeout(function () {
-                            userAgent1
-                                .get('/isAuth')
-                                .end(function (err, res) {
-                                    if (err) {
-                                        done(err);
-                                    } else {
-                                        expect(res.status).to.equals(200);
-                                        done();
-                                    }
-                                });
-                        }, 100);
+                        done();s
                     }
                 });
         });
@@ -335,26 +374,14 @@ describe('Users', function() {
                     } else {
                         expect(res.status).to.equal(200);
                         expect(res.body).to.have.property('success');
-
-                        setTimeout(function () {
-                            userAgent1
-                                .get('/isAuth')
-                                .end(function (err, res) {
-                                    if (err) {
-                                        done(err);
-                                    } else {
-                                        expect(res.status).to.equals(200);
-                                        done();
-                                    }
-                                });
-                        }, 100);
+                        done();
                     }
                 });
         });
 
     });
 
-    describe('/confirmEmail', function () {
+    describe('GET /confirmEmail', function () {
 
         it('User can\'t confirm with invalid confirmToken', function (done) {
             var token = 'foo';
@@ -389,4 +416,19 @@ describe('Users', function() {
         });
 
     });
+
+    describe('GET /users', function (){
+        it('Admin can get the users', function (done) {
+            var url = '/users?count=2&page=1';
+            adminAgent
+                .get(url)
+                .end(function (err, res) {
+                    expect(res.status).to.equals(200);
+                    expect(res.body).to.be.instanceOf(Array);
+                    expect(res.body).to.have.length(2);
+                    done();
+                });
+        });
+    });
+
 });

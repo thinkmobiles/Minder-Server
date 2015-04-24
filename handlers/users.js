@@ -11,8 +11,10 @@ var badRequests = require('../helpers/badRequests');
 var tokenGenerator = require('../helpers/randomPass');
 var logWriter = require('../helpers/logWriter')();
 
-var SessionHandler = require('../handlers/sessions');
-var DeviceHander = require('../handlers/devices');
+//var SessionHandler = require('../handlers/sessions');
+var SessionHandler = require('./sessions');
+//var DeviceHander = require('../handlers/devices');
+var DeviceHander = require('./devices');
 var mailer = require('../helpers/mailer');
 
 var UserHandler = function (db) {
@@ -460,8 +462,7 @@ var UserHandler = function (db) {
         res.render('errorTemplate', {error: err});
     };
 
-    this.getCurrentUser = function (req, res, next) {
-        var userId = req.session.userId;
+    this.getUserById = function (userId, options, callback) {
         var query = {
             _id: userId
         };
@@ -472,15 +473,106 @@ var UserHandler = function (db) {
         UserModel.findOne(query, fields, function (err, user) {
 
             if (err) {
-                return next(err);
+                if (callback && (typeof callback === 'function')) {
+                    callback(err);
+                }
+                return;
             }
 
             if (!user) {
-                return next(badRequests.NotFound());
+                if (callback && (typeof callback === 'function')) {
+                    callback(badRequests.NotFound());
+                }
+                return;
             }
 
-            res.status(200).send(user);
+            if (callback && (typeof callback === 'function')) {
+                callback(null, user);
+            }
 
+        });
+
+    };
+
+    this.getCurrentUser = function (req, res, next) {
+        var userId = req.session.userId;
+
+        self.getUserById(userId, null, function (err, user) {
+            if (err) {
+                next(err);
+            } else {
+                res.status(200).send(user);
+            }
+        });
+    };
+
+    this.getUser = function (req, res, next) {
+        var userId = req.params.id;
+
+        self.getUserById(userId, null, function (err, user) {
+            if (err) {
+                next(err);
+            } else {
+                res.status(200).send(user);
+            }
+        });
+    }
+
+    this.getUsers = function (req, res, next) {
+        var options = req.query;
+        var page;
+        var count;
+        var query;
+        var fields;
+        var searchTerm;
+        var criteria;
+
+        if (options && options.count) {
+            count = parseInt(options.count);
+        } else {
+            count = 10;
+        }
+
+        if (options && options.page) {
+            page = (parseInt(options.page) - 1) * count;
+        } else {
+            page = 1;
+        }
+
+        criteria = {};
+        fields = {
+            pass: false
+        };
+
+        query = UserModel
+            .find(criteria, fields)
+            .sort('email')
+            .limit(count)
+            .skip(page);
+
+        query.exec(function (err, users) {
+            if (err) {
+                next(err);
+            } else {
+                res.status(200).send(users);
+            }
+        });
+
+    };
+
+    this.getUsersCount = function (req, res, next) {
+        var options = req.query;
+        var criteria = {};
+        var query;
+
+        query = UserModel.count(criteria);
+
+        query.exec(function (err, count) {
+            if (err) {
+                next(err);
+            } else {
+                res.status(200).send({count: count});
+            }
         });
     };
 

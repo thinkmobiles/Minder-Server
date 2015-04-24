@@ -3,6 +3,7 @@
 var async = require('async');
 var crypto = require("crypto");
 var mongoose = require('mongoose');
+var _ = require('lodash');
 var USER_ROLES = require('../../constants/userRoles');
 
 module.exports = function (db) {
@@ -21,13 +22,14 @@ module.exports = function (db) {
 
     this.createUsers = function (callback) {
         var users = data.users || [];
-        var userId = 1;
+        var admins = data.admins || [];
+        var adminsAndUsers = _.union(admins, users);
 
         UserModel.remove({}, function (err) {
             if (err) {
                 callback(err);
             } else {
-                async.eachSeries(users,
+                async.eachSeries(adminsAndUsers,
                     function (user, cb) {
                         var newUser;
                         var encrPass = getEncryptedPass(user.pass);

@@ -33,7 +33,7 @@ describe('Devices', function() {
                 }
             });
 
-        }, 2000);
+        }, 500);
     });
 
     describe('Test Session', function () {
@@ -113,7 +113,7 @@ describe('Devices', function() {
                     } else {
                         expect(res.status).to.equals(400);
                         expect(res.body).to.have.property('error');
-                        expect(res.body.error).to.contains('NotEnoughIncomingParameters');
+                        expect(res.body.error).to.contains('Not enough incoming parameters');
 
                         done();
                     }
@@ -135,7 +135,7 @@ describe('Devices', function() {
                     } else {
                         expect(res.status).to.equals(400);
                         expect(res.body).to.have.property('error');
-                        expect(res.body.error).to.contains('NotEnoughIncomingParameters');
+                        expect(res.body.error).to.contains('Not enough incoming parameters');
 
                         done();
                     }

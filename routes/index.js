@@ -30,7 +30,7 @@ module.exports = function (app, db) {
     app.get('/currentUser', session.authenticatedUser, userHandler.getCurrentUser);
     app.get('/confirmEmail/:confirmToken', userHandler.confirmEmail);
 
-    usersRouter = require('./users')(app);
+    usersRouter = require('./users')(db);
     app.use('/users', usersRouter);
 
     devicesRouter = require('./devices')(db);

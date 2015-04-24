@@ -4,6 +4,14 @@ var DEVICE_OS = require('../../constants/deviceOs');
 var TestDataModule = function () {
     var self = this;
 
+    this.admins = [{
+        minderId: 'minder_admin',
+        email: 'admin@admin.com',
+        pass: '1q2w3e4r',
+        firstName: 'admin',
+        lastName: 'admin'
+    }];
+
     this.users = [{
         _id: '55312b475bcd9d3016000001',
         minderId: 'minder_1',

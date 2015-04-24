@@ -8,7 +8,7 @@ var logWriter = require('../helpers/logWriter')();
 var SessionHandler = require('../handlers/sessions');
 
 var DeviceHandler = function (db) {
-    var session = new SessionHandler(db);
+    //var session = new SessionHandler(db);
     var deviceSchema = mongoose.Schemas['Device'];
     var DeviceModel = db.model('Device', deviceSchema);
     var self = this;
