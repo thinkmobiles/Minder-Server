@@ -138,17 +138,15 @@ var DeviceHandler = function (db) {
     };
 
     this.getDevices = function (req, res, next) {
-
+        var userId = req.session.userId;
         var params = req.query;
-
-        console.log('>>>>>>>', params);
-
-        console.log(params);
-        var criteria = {
-            user: req.session.userId
-        };
+        var criteria = {};
         var skip = 0;
         var query;
+
+        if (!session.isAdmin(req)) {
+            criteria.user = userId;
+        }
 
         params.page = parseInt(params.page) || 1;
         params.count = parseInt(params.count) || 10;
@@ -160,13 +158,6 @@ var DeviceHandler = function (db) {
         if (params.name) {
             criteria.name = new RegExp(params.name.trim(), "i");
         }
-
-        //if (params.name) {
-        //    criteria.name = {
-        //        $in: [new RegExp(params.name.trim(), "i")]
-        //    };
-        //}
-
 
         if (params.isPayed === 'true') {
             criteria.isPayed = true;
@@ -189,11 +180,13 @@ var DeviceHandler = function (db) {
         //console.log(criteria);
 
         query = DeviceModel.find(criteria);
+
         if (!params.devices) {
             query.sort('name');
             query.limit(params.count);
             query.skip(skip);
         }
+
         query.exec(function (err, devices) {
             if (err) {
                 return next(err);
