@@ -233,9 +233,9 @@ var DeviceHandler = function (db) {
 
     this.getDevice = function (req, res, next) {
         var userId = req.session.userId;
-        var devId = req.params.id;
+        var id = req.params.id;
         var criteria = {
-            _id: devId
+            _id: id
         };
 
         DeviceModel
@@ -263,9 +263,9 @@ var DeviceHandler = function (db) {
     this.updateDevice = function (req, res, next) {
         var options = req.body;
         var userId = req.session.userId;
-        var devId = req.params.id;
+        var id = req.params.id;
         var criteria = {
-            _id: devId
+            _id: id
         };
         var update = {};
 
@@ -293,6 +293,31 @@ var DeviceHandler = function (db) {
                 }
             });
 
+    };
+
+    this.removeDevice = function (req, res, next) {
+        var id = req.params.id;
+        var userId = req.session.userId;
+
+        var criteria = {
+            _id: id
+        };
+
+        if (!session.isAdmin(req)) {
+            criteria.user = userId;
+        }
+
+        DeviceModel.findOneAndRemove(criteria, function (err, result) {
+            if (err) {
+                next(err);
+            } else if (!result) {
+                next(badRequests.NotFound());
+            } else {
+                res.status(200).send({success: 'removed'});
+            }
+        });
+
+        //res.status(500).send('Not implemented');
     };
 
 };

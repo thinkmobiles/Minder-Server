@@ -285,4 +285,48 @@ describe('Devices', function() {
         });
 
     });
+
+    describe('DELETE /device/:id', function() {
+        it('Admin can delete the device by id', function(done) {
+            var devId = testData.devices[1]._id.toString();
+            var url = '/devices/' + devId;
+
+            adminAgent
+                .delete(url)
+                .end(function (err, res) {
+                    expect(res.status).to.equals(200);
+                    expect(res.body).to.be.instanceOf(Object);
+                    expect(res.body).to.have.property('success');
+                    done();
+                });
+        });
+
+        it('User can delete the device by id', function(done) {
+            var devId = testData.devices[2]._id.toString();
+            var url = '/devices/' + devId;
+
+            userAgent1
+                .delete(url)
+                .end(function (err, res) {
+                    expect(res.status).to.equals(200);
+                    expect(res.body).to.be.instanceOf(Object);
+                    expect(res.body).to.have.property('success');
+                    done();
+                });
+        });
+
+        it('User can delete the device by id', function(done) {
+            var devId = testData.devices[3]._id.toString();
+            var url = '/devices/' + devId;
+
+            userAgent2
+                .delete(url)
+                .end(function (err, res) {
+                    expect(res.status).to.equals(400);
+                    expect(res.body).to.have.property('error');
+                    done();
+                });
+        });
+
+    });
 });

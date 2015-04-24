@@ -53,6 +53,21 @@ var TestDataModule = function () {
         deviceName: 'Test Device 1',
         deviceType: DEVICE_OS.WINDOWS_PHONE,
         user: self.users[0]._id
+    }, {
+        deviceId: 'dev_2',
+        deviceName: 'Will be deleted by Admin',
+        deviceType: DEVICE_OS.WINDOWS_PHONE,
+        user: self.users[0]._id
+    }, {
+        deviceId: 'dev_3',
+        deviceName: 'Will be deleted by owner',
+        deviceType: DEVICE_OS.WINDOWS_PHONE,
+        user: self.users[0]._id
+    }, {
+        deviceId: 'dev_4',
+        deviceName: 'Another device. But it will not removed via another user',
+        deviceType: DEVICE_OS.WINDOWS_PHONE,
+        user: self.users[0]._id
     }];
 
 };

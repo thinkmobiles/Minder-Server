@@ -12,10 +12,11 @@ module.exports = function (db) {
     var deviceHandler = new DeviceHandler(db);
 
     router.put('/locate', session.authenticatedUser, deviceHandler.setLocation);
-    //router.get('/', session.authenticatedUser, deviceHandler.getDevices);
     router.get('/', deviceHandler.getDevices);
     router.get('/count', deviceHandler.countDevices);
     router.get('/:id', deviceHandler.getDevice);
     router.put('/:id', deviceHandler.updateDevice);
+    router.delete('/:id', deviceHandler.removeDevice);
+
     return router;
 };
