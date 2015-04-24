@@ -16,9 +16,16 @@ define([
             if (this.marker) {
                 this.marker.setMap(null);
             }
+            if (this.circle) {
+                this.circle.setMap(null);
+            }
         },
         render: function () {
             var _this = this;
+            if (!this.psition) {
+                var location = this.model.get('lastLocation');
+                this.psition = new google.maps.LatLng(location.lat, location.long);
+            }
             if (!this.marker) {
                 this.marker = new google.maps.Marker({
                     map: App.map,
@@ -31,11 +38,23 @@ define([
                     title: this.model.get('name')
                 });
             }
-            var location = this.model.get('lastLocation');
-            this.marker.setPosition(new google.maps.LatLng(location.lat, location.long));
-            google.maps.event.addListener(_this.marker, 'click', function () {
-                //App.mapInfowindowView.infowindow.open(_this.marker.get('map'), _this.marker);
+            if (this.model.get('accuracy')) {
+                if (!this.circle) {
+                    this.circle = new google.maps.Circle({
+                        strokeColor: '#FF0000',
+                        strokeOpacity: 0.8,
+                        strokeWeight: 1,
+                        fillColor: '#FF0000',
+                        fillOpacity: 0.25,
+                        map: App.map,
+                        center: this.psition,
+                        radius: this.model.get('accuracy')
+                    });
+                }
+            }
+            this.marker.setPosition(this.psition);
 
+            google.maps.event.addListener(_this.marker, 'click', function () {
                 App.mapInfowindowView.setDeviceInfowindow(_this.model, _this.marker);
             });
             return this;

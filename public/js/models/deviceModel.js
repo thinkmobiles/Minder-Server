@@ -1,7 +1,10 @@
 define(['validation'], function (validation) {
     var Model = Backbone.Model.extend({
         idAttribute: "_id",
-
+        url: function () {
+            return "/devices/" + this.get('_id');
+            //return this.get('id');
+        },
         //defaults: {
         //    user: {type: ObjectId, ref: 'Users'},
         //    minderId: {type: String, required: true, unique: true},
@@ -65,9 +68,10 @@ define(['validation'], function (validation) {
 
             if (errors.length > 0)
                 return errors;
-        }
+        },
         //urlRoot: function () {
-        //    return "/devices";
+        //    //return "/device/" + this.get('_id');
+        //    return this.get('id');
         //}
     });
     return Model;

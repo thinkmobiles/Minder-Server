@@ -31,7 +31,7 @@ define([
 
             this.devisesCollection = new DevisesCollection();
 
-            this.listenTo(this.devisesCollection, 'sync', this.renderDevices);
+            this.listenTo(this.devisesCollection, 'sync remove', this.renderDevices);
             this.listenTo(this.devisesCollection, 'change', this.renderDevices);
             this.listenTo(this.stateModel, 'change:params', this.handleParams);
 
@@ -58,6 +58,7 @@ define([
             if (!App.map) {
                 this.mapView = new MapView();
             }
+            this.renderDevices();
         },
 
         search: function (event) {

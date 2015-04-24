@@ -9,7 +9,7 @@ define([
         },
 
         initialize: function () {
-            //console.log('menu items collection init');
+
         }
     });
 

@@ -7,7 +7,9 @@ define([
             this.stateModel = new Backbone.Model({
                 checked: false,
                 deviceCid: this.model.cid,
-                detail: options.detail || false
+                detail: options.detail || false,
+                edit: options.edit || false,
+                del: options.del || false
             });
             this.listenTo(this.stateModel, 'change', this.render);
             this.listenTo(this.model, 'change', this.render);
@@ -16,12 +18,19 @@ define([
 
         events: {
             'click .deviseMainPageCheck': 'updateCheck',
-            'click': 'updateCheck'
+            'click .delete': 'deleteDevice'
+
         },
         updateCheck: function () {
             this.stateModel.set({
                 checked: this.$el.find('.deviseMainPageCheck').prop('checked')
             });
+        },
+        deleteDevice: function () {
+            console.log('deleteDevice');
+            if (window.confirm("Delete?")) {
+                this.model.destroy();
+            }
         },
         render: function (options) {
             var data = this.stateModel.toJSON();

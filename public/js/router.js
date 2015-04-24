@@ -23,6 +23,7 @@ define([
             "termsAndConditions": "termsAndConditions",
             //"contactUs": "contactUs",
             "devices": "devices",
+            "device/:id": "device",
             "devices/page/:page": "devices",
             "profile": "profile",
             "*any": "any"
@@ -119,6 +120,10 @@ define([
             if (page) page = parseInt(page);
             if (this.checkLogin()) return;
             this.loadWrapperView('devices', {page: page});
+        },
+        device: function (id) {
+            if (this.checkLogin()) return;
+            this.loadWrapperView('device', {id: id});
         }
     });
 
