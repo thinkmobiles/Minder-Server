@@ -9,6 +9,7 @@ describe('Devices', function() {
     var db = conf.db;
     var baseUrl = conf.baseUrl;
     var adminAgent = request.agent(baseUrl);
+    var noSessionAgent = request.agent(baseUrl);
     var userAgent1 = request.agent(baseUrl);
     var userAgent2 = request.agent(baseUrl);
     var CreateTestData = require('./../data/index');
@@ -96,6 +97,23 @@ describe('Devices', function() {
                 });
         });
 
+        it('User2 can signIn', function (done) {
+            var signInData = testData.users[3];
+            signInData.pass = '1';
+
+            userAgent2
+                .post('/signIn')
+                .send(signInData)
+                .end(function (err, res) {
+                    if (err) {
+                        done(err);
+                    } else {
+                        expect(res.status).to.equals(200);
+                        done();
+                    }
+                });
+        });
+
     });
 
     describe('PUT /location', function () {
@@ -111,7 +129,7 @@ describe('Devices', function() {
                 }
             };
 
-            userAgent2
+            noSessionAgent
                 .put(url)
                 .send(data)
                 .end(function (err, res) {
@@ -206,11 +224,62 @@ describe('Devices', function() {
             adminAgent
                 .get(url)
                 .end(function (err, res) {
-                    console.log(res);
                     expect(res.status).to.equals(200);
                     expect(res.body).to.be.instanceOf(Object);
                     expect(res.body).to.have.property('_id');
                     expect(res.body._id).to.equals(devId);
+                    done();
+                });
+        });
+
+        it ('User can get the device by id', function (done) {
+            var devId = testData.devices[0]._id.toString();
+            var url = '/devices/' + devId;
+
+            userAgent1
+                .get(url)
+                .end(function (err, res) {
+                    expect(res.status).to.equals(200);
+                    expect(res.body).to.be.instanceOf(Object);
+                    expect(res.body).to.have.property('_id');
+                    expect(res.body._id).to.equals(devId);
+                    done();
+                });
+        });
+
+        it ('User can\'t get other users device', function (done) {
+            var devId = testData.devices[0]._id.toString();
+            var url = '/devices/' + devId;
+
+            userAgent2
+                .get(url)
+                .end(function (err, res) {
+                    expect(res.status).to.equals(400);
+                    expect(res.body).to.have.property('error');
+                    done();
+                });
+        });
+
+    });
+
+    describe('PUT /users/:id', function() {
+
+        it ('Admin can update the device', function (done) {
+            var devId = testData.devices[0]._id.toString();
+            var url = '/devices/' + devId;
+
+            var data = {
+                name: 'new name'
+            };
+
+            adminAgent
+                .put(url)
+                .send(data)
+                .end(function (err, res) {
+                    expect(res.status).to.equals(200);
+                    expect(res.body).to.be.instanceOf(Object);
+                    expect(res.body).to.have.property('success');
+                    expect(res.body).to.have.property('model');
                     done();
                 });
         });

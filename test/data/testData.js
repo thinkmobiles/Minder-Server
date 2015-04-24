@@ -38,6 +38,14 @@ var TestDataModule = function () {
         confirmToken: 'willBeConfirmed',
         firstName: 'test',
         lastName: 'willBeConfirmed'
+    }, {
+        _id: '55312b475bcd9d3016000004',
+        minderId: 'minder_4',
+        email: 'validUser@test.com',
+        pass: '1',
+        confirmToken: '',
+        firstName: 'valid',
+        lastName: 'user'
     }];
 
     this.devices = [{

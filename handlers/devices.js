@@ -265,11 +265,40 @@ var DeviceHandler = function (db) {
                     }
                 }
             });
-
-    }
+    };
 
     this.updateDevice = function (req, res, next) {
-        res.status(500).send('Not implemented');
+        var options = req.body;
+        var userId = req.session.userId;
+        var devId = req.params.id;
+        var criteria = {
+            _id: devId
+        };
+        var update = {};
+
+        if (options.name) {
+            update.name = options.name;
+        }
+
+        if (!Object.keys(update).length) {
+            return next(badRequests.NotEnParams({reqParams: ['name']}));
+        }
+
+        if (!session.isAdmin(req)) {
+            criteria.user = userId;
+        }
+
+        DeviceModel
+            .findOneAndUpdate(criteria, update)
+            .exec(function (err, device) {
+                if (err) {
+                    next(err);
+                } else if (!device) {
+                    next(badRequests.NotFound());
+                } else {
+                    res.status(200).send({success: 'updated', model: device});
+                }
+            });
 
     };
 
