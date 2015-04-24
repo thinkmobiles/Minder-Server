@@ -10,7 +10,7 @@ var Session = function (db) {
         var status = (options && options.status) ? options.status : 200;
         var role;
 
-        if (userModel.get('role') === USER_ROLES.ADMIN) {
+        if (userModel.role === USER_ROLES.ADMIN) {
             role = SESSION_ADMIN;
         } else {
             role = SESSION_USER;

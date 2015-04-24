@@ -1,6 +1,8 @@
 'use strict';
 
 var DEVICE_OS = require('../../constants/deviceOs');
+var USER_ROLES = require('../../constants/userRoles');
+
 var TestDataModule = function () {
     var self = this;
 
@@ -9,7 +11,8 @@ var TestDataModule = function () {
         email: 'admin@admin.com',
         pass: '1q2w3e4r',
         firstName: 'admin',
-        lastName: 'admin'
+        lastName: 'admin',
+        role: USER_ROLES.ADMIN
     }];
 
     this.users = [{

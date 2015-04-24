@@ -420,6 +420,7 @@ describe('Users', function() {
     describe('GET /users', function (){
         it('Admin can get the users', function (done) {
             var url = '/users?count=2&page=1';
+
             adminAgent
                 .get(url)
                 .end(function (err, res) {
@@ -429,6 +430,25 @@ describe('Users', function() {
                     done();
                 });
         });
+    });
+
+    describe('GET /users/:id', function() {
+
+        it ('Admin can get users by id', function (done){
+            var userId = testData.users[0]._id;
+            var url = '/users/' + userId;
+
+            adminAgent
+                .get(url)
+                .end(function (err, res) {
+                    expect(res.status).to.equals(200);
+                    expect(res.body).to.be.instanceOf(Object);
+                    expect(res.body).to.have.property('_id');
+                    expect(res.body._id).to.equals(userId);
+                    done();
+                });
+        });
+
     });
 
 });
