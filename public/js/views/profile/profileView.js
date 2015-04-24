@@ -8,28 +8,36 @@ define([
     var View = Backbone.View.extend({
         //el: '#wrapper',
         initialize: function (options) {
+            this.setDefaultStateModel();
             this.listenTo(this.stateModel, 'change', this.render);
             this.render();
         },
 
-        stateModel: new Backbone.Model({
-            email: '',
-            password: '',
-            newPassword: '',
-            confirmPassword: '',
-            firstName: '',
-            lastName: '',
-            errors: false,
-            messages: false
-        }),
 
         events: {
             "submit #profileForm": "changeProfile",
             "click .profileFormSubmit": "changeProfile"
         },
 
+        setDefaultStateModel: function () {
+            var user = App.sessionData.toJSON().user;
+            this.stateModel = new Backbone.Model({
+                email: user.email || '',
+                password: '',
+                newPassword: '',
+                confirmPassword: '',
+                firstName: user.firstName || '',
+                lastName: user.lastName || '',
+                errors: false,
+                messages: false
+            })
+        },
+
         render: function (options) {
-            this.$el.html(_.template(template, this.stateModel.toJSON()));
+            var data = App.sessionData.toJSON().user;
+            data = _.extend(data, this.stateModel.toJSON());
+            console.log('profile Data', data);
+            this.$el.html(_.template(template, data));
             return this;
         },
 

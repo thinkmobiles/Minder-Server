@@ -9,11 +9,11 @@ define([
         App.sessionData = new Backbone.Model({
             authorized: false,
             admin: false,
-            user:null
+            user: null
         });
         var appRouter = new Router();
         App.router = appRouter;
-        Backbone.history.start();
+        Backbone.history.start({silent: true});
         Communication.checkLogin(Custom.runApplication);
 
     };

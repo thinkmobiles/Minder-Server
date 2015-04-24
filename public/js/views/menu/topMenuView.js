@@ -60,7 +60,7 @@ define([
                 title: "User logout",
                 action: 'logout',
                 authorized: true,
-                administrator: true
+                administrator: false
             }
         ],
 
@@ -106,13 +106,14 @@ define([
 
             });
 
-            var view = new DropDownMenuView({
-                dropDownName: 'User menu',
-                collection: _this.topMenuRightDropdownItemsCollection
-            });
-            this.views.push(view);
-            this.$('#topMenuRight').append(view.el);
-
+            if (App.sessionData.get('authorized')) {
+                var view = new DropDownMenuView({
+                    dropDownName: 'User menu',
+                    collection: _this.topMenuRightDropdownItemsCollection
+                });
+                this.views.push(view);
+                this.$('#topMenuRight').append(view.el);
+            }
 
             return this;
         },

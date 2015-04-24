@@ -70,11 +70,11 @@ define([
                     return true;
                 }
             });
-            if (userPlan) {
-                this.stateModel.set({
-                    userPlan: userPlan
-                })
-            }
+
+            this.stateModel.set({
+                userPlan: userPlan
+            })
+
             console.log('.....', userPlan)
             this.render();
             this.listenTo(this.stateModel, 'change', this.render);
