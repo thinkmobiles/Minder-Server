@@ -273,6 +273,10 @@ var DeviceHandler = function (db) {
             update.name = options.name;
         }
 
+        if (options.enabledTrackLocation !== undefined) {
+            //TODO check if isPayed for enabledTrackLocation = true;
+        }
+
         if (!Object.keys(update).length) {
             return next(badRequests.NotEnParams({reqParams: ['name']}));
         }

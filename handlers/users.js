@@ -27,7 +27,7 @@ var UserHandler = function (db) {
     var DeviceModel = db.model('Device', deviceSchema);
     var self = this;
 
-    function prepateUserData(data) {
+    function prepareUserData(data) {
         var userData = {};
 
         if (data && data.email) {
@@ -202,7 +202,7 @@ var UserHandler = function (db) {
         var userData;
         var deviceData;
 
-        userData = prepateUserData(options);
+        userData = prepareUserData(options);
         userData.pass = options.pass;
 
         deviceData = deviceHandler.prepareDeviceData(options);
@@ -270,7 +270,7 @@ var UserHandler = function (db) {
         var options = req.body;
         var userData;
 
-        userData = prepateUserData(options);
+        userData = prepareUserData(options);
         userData.pass = options.pass;
 
         validateSignUp(userData, null, function (err) {
@@ -302,7 +302,30 @@ var UserHandler = function (db) {
         });
 
     };
+    
+    function updateUserProfile(userId, options, callback) {
+        var update = prepareUserData(options);
+        var criteria = {
+            _id: userId
+        };
 
+        UserModel.findOneAndUpdate(criteria, update, function (err, user) {
+            if (err) {
+                if (callback && (typeof callback === 'function')) {
+                    callback(err);
+                }
+            } else if (!user) {
+                if (callback && (typeof callback === 'function')) {
+                    callback(badRequests.NotFound());
+                }
+            } else {
+                if (callback && (typeof callback === 'function')) {
+                    callback(null, user);
+                }
+            }
+        });
+    }
+    
     this.signUp = function (req, res, next) {
         'use strict';
 
@@ -572,6 +595,19 @@ var UserHandler = function (db) {
                 next(err);
             } else {
                 res.status(200).send({count: count});
+            }
+        });
+    };
+
+    this.updateUser = function (req, res, next) {
+        var userId = req.params.id;
+        var options = req.body;
+        
+        updateUserProfile(userId, options, function (err, user) {
+            if (err) {
+                next(err);
+            } else {
+                res.status(200).send({success: 'udpated', model: user});
             }
         });
     };

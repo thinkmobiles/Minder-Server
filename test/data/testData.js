@@ -41,7 +41,7 @@ var TestDataModule = function () {
     }, {
         _id: '55312b475bcd9d3016000004',
         minderId: 'minder_4',
-        email: 'validUser@test.com',
+        email: 'valid_user@test.com',
         pass: '1',
         confirmToken: '',
         firstName: 'valid',
