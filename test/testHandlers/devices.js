@@ -97,7 +97,7 @@ describe('Devices', function() {
                 });
         });
 
-        it('User2 can signIn', function (done) {
+        /*it('User2 can signIn', function (done) {
             var signInData = testData.users[3];
             signInData.pass = '1';
 
@@ -112,7 +112,7 @@ describe('Devices', function() {
                         done();
                     }
                 });
-        });
+        });*/
 
     });
 
