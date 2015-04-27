@@ -34,6 +34,12 @@ module.exports = function (app, db) {
     app.get('/currentUser', session.authenticatedUser, userHandler.getCurrentUser);
     app.get('/confirmEmail/:confirmToken', userHandler.confirmEmail);
     app.put('/profile', userHandler.updateCurrentUserProfile);
+    app.post('/forgotPassword', function (req, res) {
+        res.status(500).send({error: 'Not implemented'});
+    });
+    app.post('/resetPassword', function (req, res) {
+        res.status(500).send({error: 'Not implemented'});
+    });
 
     usersRouter = require('./users')(db);
     app.use('/users', usersRouter);
