@@ -3,7 +3,7 @@
         <form class="form-inline" id="searchForm">
             <div class="checkbox">
                 <label>
-                    <input id="globalDevicesChecker" type="checkbox">
+                    <input id="globalDevicesChecker" type="checkbox" <% if (checked) { %>checked<% } %>>
                 </label>
             </div>
 
@@ -16,6 +16,25 @@
         </form>
     </div>
     <div class="row" id="devicesList">
+        <table class="table">
+            <tbody>
+            <% for (i in devices) { %>
+            <tr class="<% if (devices[i].selected) { %> active <% } %>">
+                <td>
+                    <input type="checkbox" name="device" class="deviceCheckbox" value="<%= devices[i].device._id %>" <% if(devices[i].selected) { %>checked<% } %> >
+                </td>
+                <td><%= devices[i].device.name %></td>
+                <td>
+                    <a class="btn btn-default" href="#device/<%= devices[i].device._id %>">edit</a>
+                </td>
+                <td>
+                    <button class="btn btn-default delete" value="<%= devices[i].device._id %>">delete</button>
+                </td>
+            </tr>
+            <% } %>
+            </tbody>
+        </table>
+
 
     </div>
     <div class="row" id="bottomMenu">
@@ -30,8 +49,98 @@
 </div>
 <div class="col-md-4">
     <div class="panel panel-default">
-        <div class="panel-body">
-            Basic panel example
+        <div class="panel-body proceedSubscription">
+            <div>
+                <b>Plan</b> <br>
+                <%= calculations.plan %>
+            </div>
+            <div>
+                <b>Number of devices</b> <br>
+                <%= selectedDevicesCount %> of <%= calculations.maxDevices %>
+            </div>
+            <div>
+                <b>Days left</b> <br>
+                <%= calculations.daysLeft %>
+            </div>
+            <div>
+                <b>Total cost</b> <br>
+                <%= calculations.costForThisMonth %>$
+            </div>
+            <button type="button" class="btn btn-success" id="proceedSubscription">
+                Proceed subscription
+            </button>
+            <div>
+                <img src="images/credit-card.png" class="col-md-12 logos">
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+            </div>
+            <div class="modal-body">
+
+
+                <form>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" class="form-control" id="email" placeholder="Email">
+                    </div>
+                    <div class="form-group">
+                        <label for="cardNumber">Card number</label>
+                        <input type="text" class="form-control" id="cardNumber" placeholder="Card number">
+                    </div>
+                    <div>
+                        <img src="/images/credit-card.png" class="col-md-12 logos">
+                    </div>
+                    <div class="form-group">
+                        <label for="cardNumber">Card Expiration</label>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <select class="form-control" id="month">
+                                    <option></option>
+                                    <% for (month in monthArray) { %>
+                                    <option value="<%= monthArray[month].value %>"><%= monthArray[month].name %>
+                                    </option>
+                                    <% } %>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <select class="form-control" id="year">
+                                    <option></option>
+                                    <% for (month in yearArray) { %>
+                                    <option value="<%= yearArray[month].value %>"><%= yearArray[month].name %></option>
+                                    <% } %>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="cardSecurityCode">Card security code</label>
+                            <input type="text" class="form-control" id="cardSecurityCode"
+                                   placeholder="Card security code">
+                            <span>
+                                <img src="/images/cvv.png">
+                            </span>
+                        </div>
+                    </div>
+
+                </form>
+
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save changes</button>
+            </div>
         </div>
     </div>
 </div>

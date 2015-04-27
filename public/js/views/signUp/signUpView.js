@@ -2,8 +2,9 @@ define([
     'router',
     'text!templates/signUp/signUpTemplate.html',
     'custom',
-    'validation'
-], function (router, template, Custom, validation) {
+    'validation',
+    'config/config'
+], function (router, template, Custom, validation, config) {
 
     var View = Backbone.View.extend({
         //el: '#wrapper',
@@ -30,7 +31,15 @@ define([
 
         render: function (options) {
             this.$el.html(_.template(template, this.stateModel.toJSON()));
+            var elem = this.$el.find('#captcha').get()[0];
+            grecaptcha.render(elem, {
+                sitekey: config.recaptchaSyteKay
+            });
             return this;
+        },
+
+        afterUpend: function () {
+            this.render()
         },
 
         sendMail: function (event) {

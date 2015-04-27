@@ -21,6 +21,10 @@ define([
         },
         setDeviceInfowindow: function (model, marker) {
             var _this = this;
+            this.stateModel.set({
+                //updatedAt: model.get('updatedAt')
+                updatDate: moment(model.get('updatedAt')).format('YYYY/MM/DD HH:mm:ss')
+            });
             if (model.get('address')) {
                 _this.stateModel.set({
                     address: model.get('address')
@@ -31,10 +35,6 @@ define([
                 return;
             }
 
-            this.stateModel.set({
-                //updatedAt: model.get('updatedAt')
-                updatedAt: moment(model.get('updatedAt')).format('YYYY/MM/DD HH:mm:ss')
-            });
 
             //var data = model.toJSON();
             //data = _.extend(data, this.stateModel.toJSON());

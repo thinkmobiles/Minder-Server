@@ -4,7 +4,7 @@
             <input class="deviseMainPageCheck" type="checkbox" <% if (checked) { %>checked<% } %> >
             <h4><%= name%></h4>
         </label>
-        <% if(detail){ %>
+        <% if (detail) { %>
         <span class="detailStatus">
             <% if(enabledTrackLocation){ %>
             <span class="active">Active</span>
@@ -12,10 +12,17 @@
             <span class="inactive">Inactive</span>
             <% } %>
         </span>
-
+        <% } %>
+        <% if(edit) { %>
         <span class="detailButtons">
-            <button class="btn btn-default">edit</button>
+            <a class="btn btn-default" href="#device/<%= _id %>">edit</a>
         </span>
         <% } %>
+        <% if(del) { %>
+        <span class="detailButtons">
+            <button class="btn btn-default delete" >delete</button>
+        </span>
+        <% } %>
+
     </div>
 </div>
