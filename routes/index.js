@@ -33,6 +33,7 @@ module.exports = function (app, db) {
     });
     app.get('/currentUser', session.authenticatedUser, userHandler.getCurrentUser);
     app.get('/confirmEmail/:confirmToken', userHandler.confirmEmail);
+    app.put('/profile', userHandler.updateCurrentUserProfile);
 
     usersRouter = require('./users')(db);
     app.use('/users', usersRouter);

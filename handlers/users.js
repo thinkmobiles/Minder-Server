@@ -612,6 +612,21 @@ var UserHandler = function (db) {
         });
     };
 
+    this.updateCurrentUserProfile = function (req, res, next) {
+        var userId = req.session.userId;
+        var options = req.body;
+
+        updateUserProfile(userId, options, function (err, user) {
+            if (err) {
+                next(err);
+            } else {
+                res.status(200).send({success: 'udpated', model: user});
+            }
+        });
+        //res.status(500).send('Not implemented');
+    };
+
+
 };
 
 module.exports = UserHandler;

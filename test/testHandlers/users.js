@@ -473,4 +473,27 @@ describe('Users', function() {
         });
     });
 
+    describe('PUT /profile', function () {
+        it('User can update the profile', function (done) {
+            var url = '/profile';
+            var data = {
+                lastName: 'new_last_name'
+            };
+
+            userAgent1
+                .put(url)
+                .send(data)
+                .end(function (err, res) {
+                    if (err) {
+                        done(err);
+                    } else {
+                        expect(res.status).to.equals(200);
+                        expect(res.body).to.be.instanceOf(Object);
+                        expect(res.body).to.have.property('success');
+                        done();
+                    }
+                });
+        });
+    });
+
 });
