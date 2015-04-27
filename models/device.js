@@ -10,8 +10,10 @@ module.exports = (function () {
         deviceId: {type: String, required: true, unique: true},
         deviceType: {type: String, required: true},
         name: {type: String, default: ''},
-        enabledTrackLocation: {type: Boolean, required: true, default: false},
-        isPayed: {type: Boolean, required: true, default: false},
+        //enabledTrackLocation: {type: Boolean, required: true, default: false},
+        //isPayed: {type: Boolean, required: true, default: false},
+        //deviceStatus = subscribed | active | deleted
+        status: {type: String, required: true, default: 'active'}, // active | deleted | subscribed
         lastLocation: {
             long: {type: Number, default: null},
             lat: {type: Number, default: null},
