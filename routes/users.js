@@ -14,6 +14,7 @@ module.exports = function (db) {
     router.get('/', session.authenticatedAdmin, userHandler.getUsers);
     router.get('/count', userHandler.getUsersCount);
     router.get('/:id', userHandler.getUser);
+    router.put('/:id', session.authenticatedAdmin, userHandler.updateUser);
 
     return router;
 };

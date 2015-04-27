@@ -449,4 +449,28 @@ describe('Users', function() {
 
     });
 
+    describe('PUT /users/:id', function () {
+        it('Admin can update the users profile', function (done) {
+            var userId = testData.users[0]._id;
+            var url = '/users/' + userId;
+            var data = {
+                firstName: 'new_first_name'
+            };
+
+            adminAgent
+                .put(url)
+                .send(data)
+                .end(function (err, res) {
+                    if (err) {
+                        done(err);
+                    } else {
+                        expect(res.status).to.equals(200);
+                        expect(res.body).to.be.instanceOf(Object);
+                        expect(res.body).to.have.property('success');
+                        done();
+                    }
+                });
+        });
+    });
+
 });
