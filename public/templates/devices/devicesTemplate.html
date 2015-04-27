@@ -16,6 +16,25 @@
         </form>
     </div>
     <div class="row" id="devicesList">
+        <table class="table">
+            <tbody>
+            <% for (i in devices) { %>
+            <tr class="<% if (devices[i].selected) { %> active <% } %>">
+                <td>
+                    <input type="checkbox" name="device" class="deviceCheckbox" value="<%= devices[i].device._id %>" <% if(devices[i].selected) { %>checked<% } %> >
+                </td>
+                <td><%= devices[i].device.name %></td>
+                <td>
+                    <a class="btn btn-default" href="#device/<%= devices[i].device._id %>">edit</a>
+                </td>
+                <td>
+                    <button class="btn btn-default delete" value="<%= devices[i].device._id %>">delete</button>
+                </td>
+            </tr>
+            <% } %>
+            </tbody>
+        </table>
+
 
     </div>
     <div class="row" id="bottomMenu">
@@ -31,7 +50,22 @@
 <div class="col-md-4">
     <div class="panel panel-default">
         <div class="panel-body proceedSubscription">
-            <%= selectedDevicesCount %>
+            <div>
+                <b>Plan</b> <br>
+                <%= calculations.plan %>
+            </div>
+            <div>
+                <b>Number of devices</b> <br>
+                <%= selectedDevicesCount %> of <%= calculations.maxDevices %>
+            </div>
+            <div>
+                <b>Days left</b> <br>
+                <%= calculations.daysLeft %>
+            </div>
+            <div>
+                <b>Total cost</b> <br>
+                <%= calculations.costForThisMonth %>$
+            </div>
             <button type="button" class="btn btn-success" id="proceedSubscription">
                 Proceed subscription
             </button>
