@@ -78,7 +78,6 @@ define([
                 messages.push('terms and conditions is not checked');
             }
 
-            console.log(this.stateModel.toJSON());
             if (errors.length > 0 || messages.length > 0) {
                 if (errors.length > 0) {
                     stateModelUpdate.errors = errors;

@@ -27,7 +27,6 @@ define([
             });
         },
         deleteDevice: function () {
-            console.log('deleteDevice');
             if (window.confirm("Delete?")) {
                 this.model.destroy();
             }

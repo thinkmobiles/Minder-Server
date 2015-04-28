@@ -11,6 +11,7 @@ module.exports = function (app, db) {
     var userHandler = new UserHandler(db);
     var usersRouter;
     var devicesRouter;
+    var tariffPlansRouter;
 
     app.use(function (req, res, next) {
         if (process.env.NODE_ENV === 'development') {
@@ -46,6 +47,10 @@ module.exports = function (app, db) {
 
     devicesRouter = require('./devices')(db);
     app.use('/devices', devicesRouter);
+
+    tariffPlansRouter = require('./tariffPlan')(db);
+    app.use('/tariffPlans', tariffPlansRouter);
+
 
 
     // ----------------------------------------------------------

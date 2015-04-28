@@ -16,7 +16,9 @@ module.exports = function (db) {
     router.get('/count', deviceHandler.countDevices);
     router.get('/:id', deviceHandler.getDevice);
     router.put('/:id', deviceHandler.updateDevice);
-    router.delete('/:id', deviceHandler.removeDevice);
+    //router.delete('/:id', deviceHandler.removeDevice);
+    router.patch('/:id', deviceHandler.setDeleted);
+    router.post('/getLocations', deviceHandler.getDevicesLocation);
 
     return router;
 };

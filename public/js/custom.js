@@ -2,7 +2,6 @@ define(['common'], function (common) {
 
     var runApplication = function (err, data) {
         var url = (App.requestedURL === null) ? Backbone.history.fragment : App.requestedURL;
-        console.log('______', url, data);
         if ((url === "") || (url === "login")) url = 'main';
         if (Backbone.history.fragment) {
             Backbone.history.fragment = '';

@@ -11,8 +11,7 @@ define([
             'submit #searchForm': 'search',
             'click #proceedSubscription': 'proceedSubscription',
             'click .deviceCheckbox': 'deviceCheck',
-            'click .setDelete': 'deviceDelete',
-            'click .setActive': 'deviceActivate'
+            'click .delete': 'deviceDelete'
         },
 
         initialize: function (options) {
@@ -38,9 +37,6 @@ define([
                 _this.calculatePlan();
                 _this.render();
             });
-            //this.selectedDevicesCollection.on('all', function (e) {
-            //    console.log('>>', e, _this.selectedDevicesCollection.length);
-            //});
             App.sessionData.on('change:date change:tariffPlans sync', function () {
                 if (App.sessionData.get('date')) {
                     _this.generateDropdown();
@@ -55,8 +51,6 @@ define([
                 onPage: 10,
                 padding: 2,
                 page: 1,
-                ends: true,
-                steps: true,
                 url: 'devices/page'
             });
             this.render();
@@ -78,23 +72,7 @@ define([
         deviceDelete: function (event) {
             this.devisesCollection.map(function (model) {
                 if (model.id === event.target.value) {
-                    model.save({
-                        status:'deleted'
-                    },{
-                        patch: true
-                    });
-                }
-            });
-        },
-        deviceActivate: function (event) {
-            this.devisesCollection.map(function (model) {
-                if (model.id === event.target.value) {
-                    model.save({
-                        status:'active'
-                    },{
-                        patch: true
-                    });
-                    console.log(model.toJSON())
+                    model.destroy();
                 }
             });
         },
@@ -131,14 +109,11 @@ define([
             var date = App.sessionData.get('date');
             if (!plans && !date) return;
             var user = App.sessionData.get('user');
-            var plan;
-
 
             var result = window.costCounter({
-                date: date,
+                date:date,
                 plans: plans,
                 user: user,
-                //plan:plan,
                 selectedDevicesCount: this.selectedDevicesCollection.length
             });
 

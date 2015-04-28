@@ -1,6 +1,6 @@
 define([
     'router',
-    'text!templates/profile/profileTemplate.html',
+    'text!templates/resetPassword/resetPasswordTemplate.html',
     'custom',
     'validation'
 ], function (router, template, Custom, validation) {
@@ -15,19 +15,15 @@ define([
 
 
         events: {
-            "submit #profileEditForm": "changeProfile",
-            "click .profileFormSubmit": "changeProfile"
+            "submit #resetPasswordForm": "resetPassword",
+            "click .resetPasswordFormSubmit": "resetPassword"
         },
 
         setDefaultStateModel: function () {
-            var user = App.sessionData.toJSON().user;
             this.stateModel = new Backbone.Model({
-                email: user.email || '',
                 password: '',
                 newPassword: '',
                 confirmPassword: '',
-                firstName: user.firstName || '',
-                lastName: user.lastName || '',
                 errors: false,
                 messages: false
             })
@@ -41,38 +37,36 @@ define([
         },
 
         afterUpend: function () {
-
+            this.stateModel.set({
+                password: '',
+                newPassword: '',
+                confirmPassword: '',
+                errors: false,
+                messages: false
+            });
         },
 
-        changeProfile: function (event) {
-            event.preventDefault();
-
+        resetPassword: function (event) {
             var self = this;
             var errors = [];
             var messages = [];
             var stateModelUpdate = {
                 errors: false,
                 messages: false,
-                email: this.$el.find("#email").val().trim(),
-                firstName: this.$el.find("#firstName").val().trim(),
-                lastName: this.$el.find("#lastName").val().trim(),
                 password: this.$el.find("#password").val().trim(),
                 newPassword: this.$el.find("#newPassword").val().trim(),
                 confirmPassword: this.$el.find("#confirmPassword").val().trim()
             };
 
+            event.preventDefault();
+
             this.stateModel.set(stateModelUpdate);
 
-            validation.checkEmailField(messages, true, stateModelUpdate.email, 'Email');
-            validation.checkNameField(messages, true, stateModelUpdate.firstName, 'First name');
-            validation.checkNameField(messages, true, stateModelUpdate.lastName, 'Last name');
-            if(stateModelUpdate.newPassword || stateModelUpdate.password){
-                validation.checkPasswordField(messages, true, stateModelUpdate.password, 'Password');
-                validation.checkPasswordField(messages, true, stateModelUpdate.newPassword, 'New password');
-                validation.checkPasswordField(messages, true, stateModelUpdate.confirmPassword, 'Confirm password');
-                if (stateModelUpdate.newPassword !== stateModelUpdate.confirmPassword) {
-                    messages.push('New password is not equal to confirm password');
-                }
+            validation.checkPasswordField(messages, true, stateModelUpdate.newPassword, 'New password');
+            validation.checkPasswordField(messages, true, stateModelUpdate.confirmPassword, 'Confirm password');
+
+            if (stateModelUpdate.newPassword !== stateModelUpdate.confirmPassword) {
+                messages.push('New password is not equal to confirm password');
             }
 
             if (errors.length > 0 || messages.length > 0) {
@@ -85,19 +79,12 @@ define([
                 this.stateModel.set(stateModelUpdate);
                 return this;
             }
-            var data = {
-                email: stateModelUpdate.email,
-                password: stateModelUpdate.password,
-                firstName: stateModelUpdate.firstName,
-                lastName: stateModelUpdate.lastName
-            };
-            if(stateModelUpdate.newPasswor){
-                data.newPasswor = stateModelUpdate.newPasswor;
-            }
             $.ajax({
-                url: "/profile",
-                type: "PUT",
-                data:data,
+                url: "/resetPassword",
+                type: "POST",
+                data: {
+                    password: stateModelUpdate.newPassword
+                },
                 success: function (response) {
                     self.stateModel.set({
                         password: '',
@@ -106,8 +93,8 @@ define([
                         errors: false,
                         messages: false
                     });
-                    alert('Profile updated successfully');
-                    App.router.navigate("main", {trigger: true});
+                    alert('Password updated successfully');
+                    App.router.navigate("login", {trigger: true});
                 },
                 error: function () {
                     // TODO

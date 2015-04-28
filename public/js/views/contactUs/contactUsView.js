@@ -86,8 +86,6 @@ define([
             if (stateModelUpdate.query.length < 10) {
                 messages.push('Query is to short or empty');
             }
-
-            console.log(this.stateModel.toJSON());
             if (errors.length > 0 || messages.length > 0) {
                 if (errors.length > 0) {
                     stateModelUpdate.errors = errors;

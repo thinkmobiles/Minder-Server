@@ -1,27 +1,25 @@
-<nav class="navbar navbar-default">
-    <div class="container-fluid">
-        <!-- Brand and toggle get grouped for better mobile display -->
-        <div class="navbar-header">
-            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
-                    data-target="#bs-example-navbar-collapse-1">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <a class="navbar-brand" href="#">Minder</a>
-        </div>
-
-        <!-- Collect the nav links, forms, and other content for toggling -->
-        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-            <ul class="nav navbar-nav" id="topMenuLeft">
-
-            </ul>
-            <ul class="nav navbar-nav navbar-right" id="topMenuRight">
-
-            </ul>
-        </div>
-        <!-- /.navbar-collapse -->
+<nav class="navBar topMenu">
+    <div id="logo">
+        logo
     </div>
-    <!-- /.container-fluid -->
+    <div class="menu">
+        <% for (i in top) { %>
+        <div class="menuItem topMenuItem">
+            <a href="<%= top[i].url %>"><%= top[i].name %></a>
+        </div>
+        <% } %>
+    </div>
+    <div class="dropDown">
+        User
+        <div class="dropContent">
+            <% for (i in dropDown) { %>
+            <div class="menuItem topMenuItem">
+                <a  href="<%= dropDown[i].url %>"><%= dropDown[i].name %></a>
+            </div>
+            <% } %>
+            <div class="menuItem dropDownMenuItem">
+                <a id="logOut">Log out</a>
+            </div>
+        </div>
+    </div>
 </nav>

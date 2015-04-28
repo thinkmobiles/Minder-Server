@@ -11,7 +11,6 @@ define([
         },
         stateModel: new Backbone.Model(),
         initializeMap: function () {
-            console.log('map init', document.getElementById("map"));
             var _this = this;
             var mapOptions = {
                 center: new google.maps.LatLng(0, 0),

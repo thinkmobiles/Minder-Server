@@ -52,7 +52,6 @@ define([
             if (stateModelUpdate.password.length < 4) {
                 messages.push('Password must be longer than 3 characters');
             }
-            console.log(this.stateModel.toJSON());
             if (errors.length > 0 || messages.length > 0) {
                 if (errors.length > 0) {
                     stateModelUpdate.errors = errors;
@@ -63,7 +62,6 @@ define([
                 this.stateModel.set(stateModelUpdate);
                 return this;
             }
-            console.log(stateModelUpdate);
             $.ajax({
                 url: "/signIn",
                 type: "POST",
@@ -73,7 +71,6 @@ define([
                     pass: stateModelUpdate.password
                 },
                 success: function (response) {
-                    console.log('LOGIN', response);
                     self.stateModel.set({
                         password: '',
                         errors: false,

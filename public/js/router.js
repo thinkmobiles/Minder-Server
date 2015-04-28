@@ -19,8 +19,11 @@ define([
             "main/page/:page": "main",
             "forgotPassword": "forgotPassword",
             "signUp": "signUp",
+            "resetPassword/:token": "resetPassword",
             "billingInfo": "billingInfo",
             "termsAndConditions": "termsAndConditions",
+            "userManagement": "userManagement",
+            "userManagement/:page": "userManagement",
             //"contactUs": "contactUs",
             "devices": "devices",
             "device/:id": "device",
@@ -30,7 +33,6 @@ define([
         },
 
         initialize: function () {
-            console.log('router init');
             this.topMenuView = new TopMenuView();
             //this.footerView = new FooterView();
         },
@@ -124,6 +126,17 @@ define([
         device: function (id) {
             if (this.checkLogin()) return;
             this.loadWrapperView('device', {id: id});
+        },
+        resetPassword: function (token) {
+            this.loadWrapperView('resetPassword', {token: token});
+        },
+        userManagement: function (page) {
+            if (this.checkLogin()) return;
+            if (!App.sessionData.get('admin')) {
+                return
+            }
+            if (page) page = parseInt(page);
+            this.loadWrapperView('userManagement', {page: page});
         }
     });
 

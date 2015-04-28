@@ -40,35 +40,6 @@ define(['validation'], function (validation) {
         //    console.log('??-', jsonData, this.attributes);
         //    return jsonData;
         //},
-
-        validate: function (attrs, options) {
-            var errors = [];
-
-            validation.checkNameField(errors, true, attrs.name, 'Name');
-
-            //if (options.editMode == false) {
-            //    Validation.checkLoginField(errors, true, attrs.login, "Login");
-            //    Validation.checkEmailField(errors, false, attrs.email, "Email");
-            //    Validation.checkPasswordField(errors, true, attrs.pass, "Password");
-            //    Validation.checkPasswordField(errors, true, options.confirmPass, "Confirm password");
-            //    Validation.checkPasswordField(errors, true, attrs.oldpass, "Old password");
-            //    Validation.comparePasswords(errors, attrs.pass, options.confirmPass);
-            //}
-            //else if (options.editMode == true) {
-            //    Validation.checkLoginField(errors, true, attrs.login, "Login");
-            //    Validation.checkEmailField(errors, false, attrs.email, "Email");
-            //}
-            //else {
-            //    Validation.checkLoginField(errors, true, attrs.login, "Login");
-            //    Validation.checkEmailField(errors, false, attrs.email, "Email");
-            //    Validation.checkPasswordField(errors, true, attrs.pass, "Password");
-            //    Validation.checkPasswordField(errors, true, options.confirmPass, "Confirm password");
-            //    Validation.comparePasswords(errors, attrs.pass, options.confirmPass);
-            //}
-
-            if (errors.length > 0)
-                return errors;
-        },
         //urlRoot: function () {
         //    //return "/device/" + this.get('_id');
         //    return this.get('id');

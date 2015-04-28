@@ -54,7 +54,6 @@ define([
 
 
             this.collection.map(function (model) {
-                console.log('>>>>>>', model.get('administrator') === App.sessionData.get('admin'));
                 if (model.get('administrator') === App.sessionData.get('admin') && App.sessionData.get('authorized')) {
                     var view = new menuItemView({model: model});
                     _this.views.push(view);

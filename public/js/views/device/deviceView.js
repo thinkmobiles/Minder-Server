@@ -47,7 +47,6 @@ define([
                 _this.render();
             });
             this.listenTo(this.model, 'sync', function () {
-                console.log('model.changed', this.model.changed);
                 if (this.model.changed.success) {
                     _this.afterUpend();
                     if (window.history) {
@@ -58,7 +57,6 @@ define([
                 }
 
             });
-            console.log(device.toJSON());
             this.render();
         },
 
@@ -79,9 +77,6 @@ define([
             if (this.model) {
                 data = _.extend(this.model.toJSON(), data);
             }
-            console.log('data', data);
-            //this.$el.html(_.template(template, data));
-            //this.$el.html(_.template(template, this.model.toJSON()));
             this.$el.html(_.template(template, data));
             return this;
         }
