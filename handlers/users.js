@@ -200,20 +200,39 @@ var UserHandler = function (db) {
 
         var options = req.body;
         var userData;
-        var deviceData;
 
         userData = prepareUserData(options);
         userData.pass = options.pass;
 
-        deviceData = deviceHandler.prepareDeviceData(options);
-        deviceData.deviceType = deviceHandler.getDeviceOS(req);
-
-        validateSignUp(userData, deviceData, function (err) {
+        validateSignUp(userData, null, function (err) {
             if (err) {
                 return next(err);
             }
 
-            async.waterfall([
+            createUser(userData, function (err, userModel) {
+                var resData;
+                var minderId;
+
+                if (err) {
+                    return next(err);
+                }
+
+                minderId = userModel.minderId;
+                resData = {
+                    success: 'success signUp',
+                    message: 'Thank you for registering with Minder. Please check your email and verify account',
+                    minderId: minderId
+                };
+
+                userData.minderId = minderId;
+                mailer.emailConfirmation(userData);
+
+                res.status(201).send(resData);
+
+            });
+
+
+            /*async.waterfall([
 
                 //save user:
                 function (cb) {
@@ -259,7 +278,7 @@ var UserHandler = function (db) {
                 mailer.emailConfirmation(userData);
 
                 res.status(201).send(resData);
-            });
+            });*/
         });
 
     };

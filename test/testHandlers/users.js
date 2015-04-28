@@ -170,66 +170,11 @@ describe('Users', function() {
                 });
         });
 
-        it('User can\'t signUp from mobile without deviceId', function (done) {
-            var ticks = new Date().valueOf();
-            var data = {
-                email: 'test_' + ticks + '@mail.com',
-                pass: '1',
-                firstName: 'testFirstName',
-                lastName: 'testLastName'
-            };
-
-            userAgent1
-                .post(url)
-                .set('user-agent', conf.mobileUserAgent)
-                .send(data)
-                .end(function (err, res) {
-
-                    if (err) {
-                        done(err);
-                    } else {
-                        expect(res.status).to.equal(400);
-
-                        expect(res.body).to.have.property('error');
-                        expect(res.body.error).contains('deviceId');
-                        expect(res.body.error).include('deviceId');
-
-                        done();
-                    }
-                });
-        });
-
         it('User can\'t signUp from with exists email', function (done) {
             var data = testData.users[0];
 
             userAgent1
                 .post(url)
-                .send(data)
-                .end(function (err, res) {
-
-                    if (err) {
-                        done(err);
-                    } else {
-                        expect(res.status).to.equal(400);
-                        done();
-                    }
-                });
-        });
-
-        it('User can signUp from mobile by exists deviceId', function (done) {
-            var ticks = new Date().valueOf();
-            var data = {
-                email: 'test_' + ticks + '@mail.com',
-                pass: '1',
-                firstName: 'testFirstName',
-                lastName: 'testLastName',
-                deviceId: 'dev_1',
-                deviceName: 'Test Phone'
-            };
-
-            userAgent1
-                .post(url)
-                .set('user-agent', conf.mobileUserAgent)
                 .send(data)
                 .end(function (err, res) {
 

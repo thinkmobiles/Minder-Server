@@ -97,23 +97,6 @@ describe('Devices', function() {
                 });
         });
 
-        /*it('User2 can signIn', function (done) {
-            var signInData = testData.users[3];
-            signInData.pass = '1';
-
-            userAgent2
-                .post('/signIn')
-                .send(signInData)
-                .end(function (err, res) {
-                    if (err) {
-                        done(err);
-                    } else {
-                        expect(res.status).to.equals(200);
-                        done();
-                    }
-                });
-        });*/
-
     });
 
     describe('PUT /location', function () {
