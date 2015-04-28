@@ -13,7 +13,16 @@
                     </div>
                 </td>
                 <% _.each(collection, function(item){%>
+                <% if (userPlan) { %>
+                    <% if (userPlan._id === item._id) { %>
+                        <td class="active">
+                    <% } else { %>
+                        <td>
+                    <% } %>
+                <% } else { %>
                 <td>
+                <% } %>
+
                     <div class="tariffPlan">
                         <%= item.name %>
                     </div>
@@ -35,8 +44,8 @@
             </p>
 
             <p>
-                <span># of subscribed devices in this month:</span> 3 <br>
-                <span># of current subscribed devices:</span> 3 <br>
+                <span># of subscribed devices in this month:</span><%= user.billings.monthSubscribedDevices %><br>
+                <span># of current subscribed devices:</span><%= user.billings.subscribedDevices %><br>
             </p>
 
             <div class="panel panel-default">

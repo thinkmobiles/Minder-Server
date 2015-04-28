@@ -1,5 +1,5 @@
 <div class="col-md-8">
-    <div class="row">
+    <div class="row" id="topMenu">
         <form class="form-inline" id="searchForm">
             <div class="checkbox">
                 <label>
@@ -19,36 +19,16 @@
         <table class="table">
             <tbody>
             <% for (i in devices) { %>
-
-                <% if (devices[i].selected) { %>
-                    <tr class="active">
-                <% } else { %>
-                    <% if (devices[i].device.status === "deleted") { %>
-                        <tr class="deleted">
-                    <% } %>
-                    <% if (devices[i].device.status === "subscribed") { %>
-                        <tr class="subscribed">
-                    <% } %>
-                    <% if (devices[i].device.status === "active") { %>
-                        <tr class="activate">
-                    <% } %>
-                <% } %>
-
+            <tr class="<% if (devices[i].selected) { %> active <% } %>">
                 <td>
                     <input type="checkbox" name="device" class="deviceCheckbox" value="<%= devices[i].device._id %>" <% if(devices[i].selected) { %>checked<% } %> >
                 </td>
                 <td><%= devices[i].device.name %></td>
                 <td>
-                    <% if (devices[i].device.status === "deleted") { %>
-                        <button class="btn btn-default setActive" value="<%= devices[i].device._id %>">activate</button>
-                    <% } else if (devices[i].device.status === "active") { %>
-                        <a class="btn btn-default" href="#device/<%= devices[i].device._id %>">edit</a>
-                    <button class="btn btn-default setDelete" value="<%= devices[i].device._id %>">delete</button>
-                    <% } else if (devices[i].device.status === "subscribed") { %>
                     <a class="btn btn-default" href="#device/<%= devices[i].device._id %>">edit</a>
-                    <button class="btn btn-default setActive" value="<%= devices[i].device._id %>">unsubscribe</button>
-                    <button class="btn btn-default setDelete" value="<%= devices[i].device._id %>">delete</button>
-                    <% } %>
+                </td>
+                <td>
+                    <button class="btn btn-default delete" value="<%= devices[i].device._id %>">delete</button>
                 </td>
             </tr>
             <% } %>

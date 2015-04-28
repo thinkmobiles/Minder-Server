@@ -9,6 +9,7 @@ define([
 
     var MainView = Backbone.View.extend({
         //el: '#wrapper',
+        className: "mainPage",
         events: {
             'click #globalDevicesChecker': 'globalCheckTrigger',
             'click #mapLocateButton': 'locate',
@@ -28,6 +29,9 @@ define([
 
             this.render();
 
+            this.devicesCoordinatesCollection = new DevisesCollection();
+
+
 
             this.devisesCollection = new DevisesCollection();
 
@@ -35,9 +39,14 @@ define([
             this.listenTo(this.devisesCollection, 'change', this.renderDevices);
             this.listenTo(this.stateModel, 'change:params', this.handleParams);
 
-            this.selectedDevicesCollection.on('sync', function () {
+            this.devicesCoordinatesCollection.on('reset', function () {
                 _this.setMarkers()
             });
+
+            this.devicesCoordinatesCollection.on('all', function (e) {
+                console.log('event',e);
+            });
+
 
 
             this.paginationView = new PaginationView({
@@ -45,10 +54,11 @@ define([
                 onPage: 10,
                 padding: 2,
                 page: 1,
+                ends: true,
+                steps: true,
                 url: 'main/page',
                 data: {
-                    isPayed: true,
-                    enabledTrackLocation: true
+                    status: 'subscribed'
                 }
             });
             this.$el.find('#pagination').append(this.paginationView.$el);
@@ -63,7 +73,6 @@ define([
 
         search: function (event) {
             event.preventDefault();
-            console.log('search', this.$el.find('#search').val());
             this.paginationView.setData({
                 isPayed: true,
                 enabledTrackLocation: true,
@@ -87,7 +96,6 @@ define([
                 //var isSelected = false;
 
                 var selectedDevice = _this.selectedDevicesCollection.find(function (model) {
-                    console.log('id', device.id);
                     if (model.id === device.id) return true;
                 });
 
@@ -120,27 +128,62 @@ define([
                     if (device.cid === model.get('deviceCid')) return true;
                 }));
             }
-            console.log('selectedDevicesCollection', this.selectedDevicesCollection);
         },
 
         locate: function () {
             this.clearMarkers();
-            var _this = this;
+            var self = this;
             var devicesIdis = [];
-
+            var data;
 
             this.selectedDevicesCollection.map(function (model) {
                 devicesIdis.push(model.id);
             });
 
+            console.log("locate", devicesIdis);
+
             if (devicesIdis.length === 0) {
-                this.selectedDevicesCollection.reset();
+                this.devicesCoordinatesCollection.reset();
                 App.map.setZoom(1);
             } else {
-                this.selectedDevicesCollection.fetch({
-                    reset: true,
-                    data: {
-                        devices: devicesIdis
+
+                //var Model = Backbone.Model.extend({
+                //    url:function(){
+                //        return'/devices/getLocations'
+                //    }
+                //});
+                //
+                //var model = new Model();
+                //
+                //model.save({
+                //    devices:devicesIdis
+                //},{
+                //    success:function(data){
+                //        console.log('success',data.toJSON());
+                //        var coordinates = data.toJSON();
+                //        //self.devicesCoordinatesCollection.reset(data.toJSON());
+                //    },
+                //    error:function(err){
+                //        App.error(err);
+                //    }
+                //});
+
+                data = JSON.stringify(devicesIdis);
+                $.ajax({
+                    url: '/devices/getLocations',
+                    type: "POST",
+                    //dataType: 'text',
+                    data:{
+                        devices:data
+                    },
+                    success: function (data) {
+                        //data = JSON.parse(data);
+                        //console.log('>>>>>', data);
+                        self.devicesCoordinatesCollection.reset(data);
+                    },
+                    error: function (err) {
+                        console.log(err);
+                        App.error(err);
                     }
                 });
             }
@@ -154,11 +197,32 @@ define([
             this.curnetMarkersOnMap = [];
         },
 
-        setMarkers: function () {
-            console.log(this);
+        //setMarkers: function () {
+        //    var _this = this;
+        //    this.selectedDevicesCollection.map(function (model) {
+        //        var view = new markerView({model: model});
+        //        _this.curnetMarkersOnMap.push(view);
+        //    });
+        //    if (this.curnetMarkersOnMap.length < 2) {
+        //        if (this.curnetMarkersOnMap.length === 1) {
+        //            App.map.setZoom(11);
+        //            App.map.setCenter(this.curnetMarkersOnMap[0].marker.position);
+        //        } else {
+        //            App.map.setZoom(1);
+        //        }
+        //    } else {
+        //        var bounds = new google.maps.LatLngBounds();
+        //        _.each(_this.curnetMarkersOnMap, function (view) {
+        //            bounds.extend(view.marker.position);
+        //        });
+        //        App.map.fitBounds(bounds);
+        //    }
+        //},
 
+        setMarkers: function () {
             var _this = this;
-            this.selectedDevicesCollection.map(function (model) {
+            this.devicesCoordinatesCollection.map(function (model) {
+                console.log('>>',model);
                 var view = new markerView({model: model});
                 _this.curnetMarkersOnMap.push(view);
             });
@@ -177,6 +241,8 @@ define([
                 App.map.fitBounds(bounds);
             }
         },
+
+
 
         render: function () {
             var self = this;

@@ -1,15 +1,99 @@
+@logoWidth: 300px;
+@logoHeight: 100px;
+@color1: #D3D3D3;
+@color2: #AFAEAE;
+@color3: #494949;
+@color4: #fe102c;
+
 body, html, #wrapper {
   height: 100%;
 }
 
-#topMenu {
 
+
+#logo{
+  display: inline-block;
+  width: @logoWidth;
+  height: @logoHeight;
+  position: absolute;
+  left: 0px;
+  bottom: 0px;
 }
 
-#map {
+#topMenu{
+  position: absolute;
+  top:0px;
+  left:0px;
+  width: 100%;
+}
+
+#wrapper{
+  padding: @logoHeight 0 0 0 ;
+  height: 100%;
+  width: 100%;
+}
+
+.topMenu {
+  height: @logoHeight;
+  position: relative;
+  .menu{
+    position: absolute;
+    left: @logoWidth;
+    bottom: 0px;
+    .menuItem{
+      display: inline-block;
+    }
+  }
+}
+
+.dropContent{
+  display: none;
+}
+
+.dropDown:hover .dropContent{
+  position: absolute;
+  top:15px;
+  left:0px;
+  display: table;
+  z-index: 200;
+}
+.dropDown{
+  display: block;
+  position: absolute;
+  right: 0px;
+  bottom: 0px;
+  width: 150px;
+}
+.mainPage{
+  height: 100%;
+  position: relative;
+}
+
+#mapLeftPanel{
+  height: 100%;
+  width: @logoWidth;
+  background: @color1;
+  display: block;
+  z-index: 20;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+}
+
+#mapConteiner {
   background: #99f;
-  height: 100% !important;
-  min-height: 400px;
+  height: 100%;
+  width: 100%;
+  top: 0px;
+  left: 0px;
+  position: absolute;
+  padding:  0 0 0 @logoWidth;
+  z-index: 10;
+}
+#map{
+  height: 100%;
+  width: 100%;
+  z-index: 15;
 }
 
 #mainPageContainer {
@@ -19,6 +103,8 @@ body, html, #wrapper {
     height: 100%;
   }
 }
+
+
 
 .textCenter {
   text-align: center;
@@ -32,3 +118,18 @@ body, html, #wrapper {
 .activeDevice {
   background: rgba(0, 0, 0, 0.1);
 }
+
+
+.activate{
+  //background: @color4;
+}
+
+.deleted{
+  color: @color2;
+}
+
+.subscribed{
+  background: @color4;
+}
+
+

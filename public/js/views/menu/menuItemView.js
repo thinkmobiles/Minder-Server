@@ -28,7 +28,6 @@ define([
                 type: "POST",
                 success: function (response) {
                     App.router.navigate("login", {trigger: true});
-                    console.log('logout success');
                     App.sessionData.set({
                         authorized: false,
                         admin: false,

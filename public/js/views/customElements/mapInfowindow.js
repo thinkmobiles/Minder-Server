@@ -23,7 +23,7 @@ define([
             var _this = this;
             this.stateModel.set({
                 //updatedAt: model.get('updatedAt')
-                updatDate: moment(model.get('updatedAt')).format('YYYY/MM/DD HH:mm:ss')
+                updatDate: moment(model.get('lastLocation').dateTime).format('YYYY/MM/DD HH:mm:ss')
             });
             if (model.get('address')) {
                 _this.stateModel.set({
@@ -70,7 +70,6 @@ define([
             })
         },
         updateData: function () {
-            console.log('updateData');
             this.infowindow.setContent(_.template(template, this.stateModel.toJSON()));
         }
     });

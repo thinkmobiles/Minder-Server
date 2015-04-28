@@ -8,9 +8,8 @@ define([
             this.$el = options.$domElement;
             this.render(options);
             self.initializeMap(options);
+            this.stateModel= new Backbone.Model();
         },
-
-        stateModel: new Backbone.Model(),
 
         initializeMap: function (options) {
             var self = this;
@@ -31,7 +30,6 @@ define([
                             map: self.map,
                             position: results[0].geometry.location
                         });
-                        console.log(results);
                     } else {
                         alert('Geocode was not successful for the following reason: ' + status);
                     }

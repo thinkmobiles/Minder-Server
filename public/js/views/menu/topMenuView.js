@@ -1,44 +1,46 @@
 define([
-    'config/config',
-    'collections/menu/MenuItems',
+    //'config/config',
+    //'collections/menu/MenuItems',
     'text!templates/menu/topMenuTemplate.html',
-    'views/menu/menuItemView',
-    'views/menu/dropDownMenuView'
-], function (config, MenuItemsCollection, topMenuTemplate, menuItemView, DropDownMenuView) {
+    //'views/menu/menuItemView',
+    //'views/menu/dropDownMenuView'
+], function (topMenuTemplate) {
 
     var MainView = Backbone.View.extend({
         el: '#topMenu',
+
+        events: {
+            'click #logOut': 'logout'
+        },
 
         topMenuLeftItemsRaw: [
             {
                 name: "Home",
                 url: "#main",
                 title: "Home page",
-                action: false,
-                authorized: true,
-                administrator: false
+                authorized: true
+                //administrator: false
             }, {
                 name: "Devices",
                 url: "#devices",
                 title: "User devices management",
-                action: false,
-                authorized: true,
-                administrator: false
+                authorized: true
+                //administrator: false
             }, {
                 name: "Billing info",
                 url: "#billingInfo",
                 title: "User billing info",
-                action: false,
-                authorized: true,
-                administrator: false
-            }, {
-                name: "User management",
-                url: "#userManagement",
-                title: "Admin user management",
-                action: false,
-                authorized: true,
-                administrator: true
+                authorized: true
+                //administrator: false
             }
+            //, {
+            //    name: "User management",
+            //    url: "#userManagement",
+            //    title: "Admin user management",
+            //    action: false,
+            //    authorized: true,
+            //    administrator: true
+            //}
             //{
             //    name: "Contact us",
             //    url: "#contactUs",
@@ -51,77 +53,126 @@ define([
                 name: "Profile",
                 url: "#profile",
                 title: "User profile",
-                action: false,
-                authorized: true,
-                administrator: false
-            }, {
-                name: "Logout",
-                url: "#logout",
-                title: "User logout",
-                action: 'logout',
-                authorized: true,
-                administrator: false
+                authorized: true
+                //administrator: false
             }
+            //, {
+            //    name: "Logout",
+            //    url: "#logout",
+            //    title: "User logout",
+            //    action: 'logout',
+            //    authorized: true
+            //    //administrator: false
+            //}
         ],
 
         initialize: function (options) {
 
-            this.topMenuLeftItemsCollection = new MenuItemsCollection();
+            //this.topMenuCollection = new MenuItemsCollection();
+            //
+            //
+            //this.dropDownCollection = new MenuItemsCollection();
 
 
-            this.topMenuRightDropdownItemsCollection = new MenuItemsCollection();
+            //this.topMenuCollection = new Backbone.Collection(this.topMenuLeftItemsRaw);
+            //this.dropDownCollection = new Backbone.Collection(this.topMenuRightDropdownItemsRaw);
 
 
-            this.topMenuLeftItemsCollection.add(this.topMenuLeftItemsRaw);
-            this.topMenuRightDropdownItemsCollection.add(this.topMenuRightDropdownItemsRaw);
+            //this.views = [];
 
-
-            this.views = [];
-            this.render();
-            this.listenTo(App.sessionData, 'change', this.renderMenuItems);
+            this.listenTo(App.sessionData, 'change', this.render);
+            App.sessionData.on('change', function(e){
+                console.log('--sessionData--',e);
+            });
+            //this.render();
 
         },
 
-        renderMenuItems: function () {
-            var _this = this;
-            _.each(this.views, function (view) {
-                view.remove();
-            });
-
-
-            this.topMenuLeftItemsCollection.map(function (model) {
-                console.log('>>>>>>', model.get('administrator') === App.sessionData.get('admin'));
-                if (model.get('administrator') === App.sessionData.get('admin') && App.sessionData.get('authorized')) {
-                    var view = new menuItemView({model: model});
-                    _this.views.push(view);
-                    _this.$('#topMenuLeft').append(view.render().el);
-                    return
+        logout: function () {
+            $.ajax({
+                url: "/signOut",
+                type: "POST",
+                success: function (response) {
+                    App.router.navigate("login", {trigger: true});
+                    console.log('logout success');
+                    App.sessionData.set({
+                        authorized: false,
+                        admin: false,
+                        user: null
+                    });
+                },
+                error: function (err) {
+                    console.log('logout error', err);
+                    App.error(err);
                 }
-                if (model.get('authorized') === App.sessionData.get('authorized') && !model.get('administrator')) {
-                    var view = new menuItemView({model: model});
-                    _this.views.push(view);
-                    _this.$('#topMenuLeft').append(view.render().el);
-                    return
-                }
-
             });
-
-            if (App.sessionData.get('authorized')) {
-                var view = new DropDownMenuView({
-                    dropDownName: 'User menu',
-                    collection: _this.topMenuRightDropdownItemsCollection
-                });
-                this.views.push(view);
-                this.$('#topMenuRight').append(view.el);
-            }
-
-            return this;
         },
+
+        //renderMenuItems: function () {
+        //    var _this = this;
+        //    _.each(this.views, function (view) {
+        //        view.remove();
+        //    });
+        //
+        //
+        //    this.topMenuCollection.map(function (model) {
+        //        console.log('>>>>>>', model.get('administrator') === App.sessionData.get('admin'));
+        //        if (model.get('administrator') === App.sessionData.get('admin') && App.sessionData.get('authorized')) {
+        //            var view = new menuItemView({model: model});
+        //            _this.views.push(view);
+        //            _this.$('#topMenuLeft').append(view.render().el);
+        //            return
+        //        }
+        //        if (model.get('authorized') === App.sessionData.get('authorized') && !model.get('administrator')) {
+        //            var view = new menuItemView({model: model});
+        //            _this.views.push(view);
+        //            _this.$('#topMenuLeft').append(view.render().el);
+        //            return
+        //        }
+        //
+        //    });
+        //
+        //    if (App.sessionData.get('authorized')) {
+        //        var view = new DropDownMenuView({
+        //            dropDownName: 'User menu',
+        //            collection: _this.dropDownCollection
+        //        });
+        //        this.views.push(view);
+        //        this.$('#topMenuRight').append(view.el);
+        //    }
+        //
+        //    return this;
+        //},
 
         render: function () {
             var _this = this;
-            this.$el.html(_.template(topMenuTemplate));
-            this.renderMenuItems();
+            var authorized = App.sessionData.get('authorized');
+            var data = {
+                top:[],
+                dropDown:[]
+            };
+            _.each(this.topMenuLeftItemsRaw, function(item){
+                if(item.authorized === authorized){
+                    data.top.push(item);
+                }
+            });
+            _.each(this.topMenuRightDropdownItemsRaw, function(item){
+                if(item.authorized === authorized){
+                    data.dropDown.push(item);
+                }
+            });
+
+            //var data = {
+            //    top: this.topMenuCollection.filter(function (model) {
+            //        if (model.get('authorized') === authorized) return true
+            //    }),
+            //    dropDown: this.dropDownCollection.filter(function (model) {
+            //        if (model.get('authorized') === authorized) return true
+            //    })
+            //};
+            console.log('=======render+++++', data, authorized);
+            this.$el.html(_.template(topMenuTemplate, data));
+            //this.renderMenuItems();
             return this;
         }
     });

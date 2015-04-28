@@ -37,7 +37,6 @@ define([
                 messages: false,
                 email: this.$el.find("#email").val().trim()
             };
-            console.log('-------', stateModelUpdate);
 
             event.preventDefault();
 
@@ -55,7 +54,6 @@ define([
                     stateModelUpdate.messages = messages;
                 }
                 this.stateModel.set(stateModelUpdate);
-                console.log(this.stateModel.toJSON());
                 return this;
             }
             $.ajax({

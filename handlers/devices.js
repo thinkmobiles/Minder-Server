@@ -1,5 +1,7 @@
 'use strict';
 var DEVICE_OS = require('../constants/deviceOs');
+var STATUSES = require('../constants/statuses');
+var RESPONSES = require('../constants/responses');
 var async = require('async');
 var mongoose = require('mongoose');
 var badRequests = require('../helpers/badRequests');
@@ -159,33 +161,30 @@ var DeviceHandler = function (db) {
             criteria.name = new RegExp(params.name.trim(), "i");
         }
 
-        if (params.isPayed === 'true') {
-            criteria.isPayed = true;
+        if (params.status === 'subscribed') {
+            criteria.status = 'subscribed';
+        } else if (params.status === 'active') {
+            criteria.status = 'active';
+        } else if (params.status === 'deleted') {
+            criteria.status = 'deleted';
         }
-        if (params.isPayed === 'false') {
-            criteria.isPayed = false;
-        }
-        if (params.enabledTrackLocation === 'true') {
-            criteria.enabledTrackLocation = true;
-        }
-        if (params.enabledTrackLocation === 'false') {
-            criteria.enabledTrackLocation = false;
-        }
-        if (params.devices) {
-            criteria._id = {
-                $in: params.devices
-            };
-        }
+
+
+        //if (params.devices) {
+        //    criteria._id = {
+        //        $in: params.devices
+        //    };
+        //}
 
         //console.log(criteria);
 
-        query = DeviceModel.find(criteria);
+        query = DeviceModel.find(criteria, 'name status _id');
 
-        if (!params.devices) {
-            query.sort('name');
-            query.limit(params.count);
-            query.skip(skip);
-        }
+        // if (!params.devices) {
+        query.sort('name');
+        query.limit(params.count);
+        query.skip(skip);
+        //}
 
         query.exec(function (err, devices) {
             if (err) {
@@ -215,12 +214,16 @@ var DeviceHandler = function (db) {
             criteria.name = new RegExp(params.name.trim(), "i");
         }
 
-        if (params.isPayed === 'true') criteria.isPayed = true;
-        if (params.isPayed === 'false') criteria.isPayed = false;
-        if (params.enabledTrackLocation === 'true') criteria.enabledTrackLocation = true;
-        if (params.enabledTrackLocation === 'false') criteria.enabledTrackLocation = false;
+        if (params.status === 'subscribed') {
+            criteria.status = 'subscribed';
+        } else if (params.status === 'active') {
+            criteria.status = 'active';
+        } else if (params.status === 'deleted') {
+            criteria.status = 'deleted';
+        }
 
-        console.log(params, skip);
+
+        //console.log(params, skip);
 
         DeviceModel.count(criteria)
             .exec(function (err, devices) {
@@ -228,6 +231,39 @@ var DeviceHandler = function (db) {
                     return next(err);
                 }
                 res.status(200).send({count: devices});
+            });
+    };
+
+    this.getDevicesLocation = function (req, res, next) {
+        var userId = req.session.userId;
+        var params = req.body;
+        var criteria = {};
+
+        console.log('params', params);
+
+        if(!params.devices){
+            return res.status(200).send([]);
+        }else{
+            criteria._id ={
+                $in: JSON.parse(params.devices)
+            }
+        }
+
+
+
+        if (!session.isAdmin(req)) {
+            criteria.user = userId;
+            criteria.status = 'subscribed';
+        }
+        console.log('criteria', criteria);
+        console.log('req.session', req.session);
+
+        DeviceModel.find(criteria, 'name _id lastLocation updatedAt')
+            .exec(function (err, devices) {
+                if (err) {
+                    return next(err);
+                }
+                res.status(200).send(devices);
             });
     };
 
@@ -323,6 +359,46 @@ var DeviceHandler = function (db) {
 
         //res.status(500).send('Not implemented');
     };
+
+    this.setDeleted = function(req, res, next){
+        var userId = req.session.userId;
+        var deviceId = req.params.id;
+        var status = req.body.status;
+
+        console.log(userId, deviceId, status);
+
+        if(status!==STATUSES.DELETED && status!==STATUSES.ACTIVE){
+        //if(status!==STATUSES.DELETED && status!==STATUSES.ACTIVE && status!==STATUSES.SUBSCRIBED){
+            return next(badRequests.NotEnParams());
+        }
+
+        DeviceModel.findOne({
+            _id:deviceId,
+            user:userId
+        }, function(err, device){
+            if(err){
+                return next(err);
+            }
+            if(!device){
+                return next(badRequests.NotFound());
+            }
+
+            device.status = status;
+
+            device.save(function(err, newDevice){
+                if(err){
+                    return next(err);
+                }
+                console.log(newDevice);
+                res
+                    .status('200')
+                    .send(newDevice);
+            });
+
+
+
+        });
+    }
 
 };
 

@@ -11,29 +11,17 @@ define([
             this.collection = new TariffPlansCollection();
 
             this.stateModel = new Backbone.Model({
-                renewal: false
+                renewal: false,
+                userPlan:null
                 //TODO
             });
 
 
-            var userPlan = this.collection.find(function (model) {
-                console.log(App.sessionData.get('user'));
-                console.log(model.get('name'));
-                if (model.get('name') === App.sessionData.get('user').currentPlan) {
-                    return true;
-                }
-            });
-
-            this.stateModel.set({
-                userPlan: userPlan
-            });
-
-            console.log('.....', userPlan);
             this.setUserPlans();
             this.render();
             this.listenTo(this.stateModel, 'change', this.render);
             this.listenTo(this.collection, 'change sort sync add', this.render);
-           // App.stateModel.on('change:tariffPlans', this.setUserPlans);
+            // App.stateModel.on('change:tariffPlans', this.setUserPlans);
             this.listenTo(App.sessionData, 'change:tariffPlans', this.setUserPlans);
 
 
@@ -43,10 +31,23 @@ define([
             "change #renewal": "renewal"
         },
 
-        setUserPlans:function(){
+        setUserPlans: function () {
             var plans = App.sessionData.get('tariffPlans');
-            if(plans){
-                this.collection.add(plans);
+            if (!plans) {
+                return
+            }
+
+            this.collection.add(plans);
+
+            var userPlan = this.collection.find(function (model) {
+                if (model.get('_id') === App.sessionData.get('user').currentPlan) {
+                    return true;
+                }
+            });
+            if (userPlan) {
+                this.stateModel.set({
+                    userPlan: userPlan.toJSON()
+                });
             }
         },
 
@@ -56,7 +57,9 @@ define([
             data = _.extend(data, {
                 collection: _this.collection.toJSON()
             });
-            console.log('render', data);
+            data = _.extend(data, {
+                user: App.sessionData.get('user')
+            });
             this.$el.html(_.template(template, data));
             return this;
         },

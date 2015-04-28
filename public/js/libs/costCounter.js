@@ -16,6 +16,16 @@
         var date = data.date;
         var daysInThisMonth = daysInMonth((date.getMonth() + 1), date.getFullYear());
         var daysLeft = (daysInThisMonth - date.getDate()+ 1);
+
+        if(plan){
+            for(var i = 0; i< plans.length; i++){
+                if(plans[i]._id === plan){
+                    plan = plans[i].name;
+                    break;
+                }
+            }
+        }
+
         var result = {
             plan: plan,
             costForThisMonth: 0,

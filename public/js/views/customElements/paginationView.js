@@ -13,8 +13,25 @@ define([
                 padding: options.padding || 3,
                 url: options.url || '',
                 pages: [],
-                ends: options.page || true,
-                data: options.data
+                ends: options.ends,
+                steps: options.steps,
+                data: options.data,
+                countSelector:options.countSelector
+                //countSelectorData:[
+                //    {
+                //        name:'10 items',
+                //        data:10
+                //    },{
+                //        name:'25 items',
+                //        data:25
+                //    },{
+                //        name:'50 items',
+                //        data:50
+                //    },{
+                //        name:'100 items',
+                //        data:100
+                //    }
+                //]
             });
             this.collection = options.collection;
             _this.count();
@@ -22,15 +39,9 @@ define([
             this.stateModel.on('change:page', function (func) {
                 _this.count();
             });
-            this.stateModel.on('change:data', function (func) {
-                console.log('pagination----', func);
-            });
+
         },
         tagName: 'nav',
-        events: {
-            //'click .deviseMainPageCheck': 'updateCheck',
-            //'click': 'updateCheck'
-        },
 
         count: function (cb) {
             var _this = this;
@@ -74,6 +85,7 @@ define([
             var start = 1;
             var end = 1;
             var ends = this.stateModel.get('ends');
+            var steps = this.stateModel.get('steps');
             var page = this.stateModel.get('page');
 
             if ((paddingBiffore + paddingafter + 1) > allPages) {
@@ -93,41 +105,74 @@ define([
                 end = allPages;
             }
 
-            if (ends) {
-                pages.push({
-                    html: '<<',
-                    data: '1'
+            if(end-start <2){
+                this.stateModel.set({
+                    pages: []
                 });
-            }
+            } else {
+                if (ends) {
+                    pages.push({
+                        html: '<<',
+                        data: 1
+                    });
+                }
+                if(steps){
+                    if(page < 2){
+                        pages.push({
+                            html: '<',
+                            data: 1
+                        });
+                    }else{
+                        pages.push({
+                            html: '<',
+                            data: page -1
+                        });
+                    }
 
-            for (; start <= end; start++) {
-                pages.push({
-                    html: start,
-                    data: start,
-                    active: start === page
-                });
-            }
+                }
 
-            if (ends) {
-                pages.push({
-                    html: '>>',
-                    data: allPages
+                for (; start <= end; start++) {
+                    pages.push({
+                        html: start,
+                        data: start,
+                        active: start === page
+                    });
+                }
+
+                if(steps){
+                    if(page  < allPages){
+                        pages.push({
+                            html: '>',
+                            data: page + 1
+                        });
+                    }else{
+                        pages.push({
+                            html: '>',
+                            data: allPages
+                        });
+                    }
+
+                }
+
+                if (ends) {
+                    pages.push({
+                        html: '>>',
+                        data: allPages
+                    });
+                }
+                this.stateModel.set({
+                    pages: pages
                 });
             }
-            this.stateModel.set({
-                pages: pages
-            });
             this.loadPage();
             this.render();
         },
 
         setData: function (data) {
-            console.log('setData', data);
             this.stateModel.set({
                 data: data,
                 page: 1
             });
-            console.log('setData==', this.stateModel.toJSON());
             this.count();
         },
 
