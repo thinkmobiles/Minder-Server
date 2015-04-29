@@ -3,8 +3,9 @@ define([
     'text!templates/signUp/signUpTemplate.html',
     'custom',
     'validation',
-    'config/config'
-], function (router, template, Custom, validation, config) {
+    'config/config',
+    'recaptcha'
+], function (router, template, Custom, validation, config, recaptcha) {
 
     var View = Backbone.View.extend({
         //el: '#wrapper',
@@ -19,8 +20,9 @@ define([
                 errors: false,
                 messages: false
             });
-            this.listenTo(this.stateModel, 'change', this.render);
+            this.listenTo(this.stateModel, 'change:errors change:messages', this.render);
             this.render();
+            //this.reCptchaId=null;
         },
 
 
@@ -32,8 +34,14 @@ define([
         render: function (options) {
             this.$el.html(_.template(template, this.stateModel.toJSON()));
             var elem = this.$el.find('#captcha').get()[0];
-            grecaptcha.render(elem, {
-                sitekey: config.recaptchaSyteKay
+            //this.reCptchaId = grecaptcha.render(elem, {
+            //    sitekey: config.recaptchaSyteKay,
+            //    type:'image',
+            //    theme:'dark'
+            //});
+            Recaptcha.create(config.recaptchaSyteKay, 'captcha', {
+                tabindex: 4,
+                theme: "clean"
             });
             return this;
         },
@@ -43,9 +51,17 @@ define([
         },
 
         sendMail: function (event) {
+
+            event.preventDefault();
+
             var self = this;
             var errors = [];
             var messages = [];
+            //var grecaptchaData = grecaptcha.getResponse(self.reCptchaId);
+            var grecaptchaData = {
+                challenge: Recaptcha.get_challenge(),
+                response: Recaptcha.get_response()
+            };
             var stateModelUpdate = {
                 errors: false,
                 messages: false,
@@ -57,7 +73,7 @@ define([
                 iAcceptConditions: this.$el.find("#iAcceptConditions").prop('checked')
             };
 
-            event.preventDefault();
+
 
             this.stateModel.set(stateModelUpdate);
 
@@ -78,6 +94,14 @@ define([
                 messages.push('terms and conditions is not checked');
             }
 
+            console.log('-------',grecaptchaData);
+            console.log(self.reCptchaId);
+
+            if(!grecaptchaData || grecaptchaData===''){
+                messages.push('please check reCAPTCHA');
+            }
+
+
             if (errors.length > 0 || messages.length > 0) {
                 if (errors.length > 0) {
                     stateModelUpdate.errors = errors;
@@ -95,7 +119,9 @@ define([
                     email: stateModelUpdate.email,
                     pass: stateModelUpdate.password,
                     firstName: stateModelUpdate.firstName,
-                    lastName: stateModelUpdate.lastName
+                    lastName: stateModelUpdate.lastName,
+                    captchaChallenge: grecaptchaData.challenge,
+                    captchaResponse: grecaptchaData.response
                 },
                 success: function (response) {
                     self.stateModel.set({

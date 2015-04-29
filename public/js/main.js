@@ -22,13 +22,15 @@ require.config({
         templates: '../templates',
         text: './libs/text',
         moment: './libs/moment',
-        common: 'common'
+        common: 'common',
+        "recaptcha": "//www.google.com/recaptcha/api/js/recaptcha_ajax"
     },
     shim: {
         'ajaxForm': ['jQuery'],
         'Bootstrap': ['jQuery'],
         'Backbone': ['Underscore', 'jQuery'],
-        'app': ['Backbone', 'less', 'ajaxForm', 'Bootstrap', 'moment', 'costCounter']
+        'app': ['Backbone', 'less', 'ajaxForm', 'Bootstrap', 'moment', 'costCounter'],
+        "recaptcha": { exports: 'Recaptcha' }
     },
     config: {
         moment: {
