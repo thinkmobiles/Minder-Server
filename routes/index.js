@@ -28,9 +28,13 @@ module.exports = function (app, db) {
     app.post('/signUp', userHandler.signUp);
     app.post('/signIn', userHandler.signIn);
     app.post('/signOut', session.kill);
-    app.get('/now', function (req, res, next) {
+    app.get('/now', session.authenticatedUser, function (req, res, next) {
         var now = new Date();
-        res.status(200).send({now: now});
+        res.status(200).send({
+            now: now/*,
+            expires: req.session.cookie.expires,
+            maxAge: req.session.cookie.maxAge*/
+        });
     });
     app.get('/currentUser', session.authenticatedUser, userHandler.getCurrentUser);
     app.get('/confirmEmail/:confirmToken', userHandler.confirmEmail);

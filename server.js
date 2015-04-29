@@ -2,8 +2,8 @@ var mongoose = require('mongoose');
 var app;
 var mainDb;
 //var mainAppConfig = require('./config/main').mainApp;
-var dbsObject = {};
-var dbsNames = {};
+ var dbsObject = {} ;//TODO remove
+var dbsNames = {};//TODO remove
 
 if (!process.env.NODE_ENV) {
     process.env.NODE_ENV = 'development';
@@ -34,33 +34,6 @@ mainDb.once('open', function callback () {
 
     var main = mainDb.model('sessions', sessionSchema);
     var port = process.env.PORT || 8877;
-
-    main.find().exec(function (err, result) {
-        var dbsForConnect;
-
-        if (err) {
-            console.error('Something went wrong in main server');
-            return process.exit(1);
-        }
-
-        /*dbsForConnect = sessionParser(result, dbsObject);
-
-        Saas.find({DBname: {$in: dbsForConnect}}, function (err, result) {
-            if (!err && result.length) {
-                result.forEach(function (_db) {
-                    var dbObject = mongoose.createConnection(_db.url, _db.DBname);
-
-                    dbObject.on('error', console.error.bind(console, 'connection error:'));
-                    dbObject.once('open', function callback () {
-                        console.log("Connection to " + _db.DBname + " is success");
-
-                        dbsObject[_db.DBname] = dbObject;
-                    });
-                });
-            }
-        });*/
-    });
-
 
     mainDb.mongoose = mongoose;
 

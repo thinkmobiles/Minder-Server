@@ -5,7 +5,6 @@ var crypto = require("crypto");
 var mongoose = require('mongoose');
 
 var REG_EXP = require('../constants/regExp');
-var USER_ROLES = require('../constants/userRoles');
 
 var badRequests = require('../helpers/badRequests');
 var tokenGenerator = require('../helpers/randomPass');
@@ -88,7 +87,7 @@ var UserHandler = function (db) {
                 cb();
             },
 
-            //is valid device data:
+            //is valid device data://TODO remove
             function (cb) {
                 if (deviceData) {
                     deviceHandler.validateDeviceData(deviceData, function (err) {
@@ -111,11 +110,11 @@ var UserHandler = function (db) {
 
                 } else {
 
-                    UserModel.find({email: userData.email}, function (err, docs) {
+                    UserModel.findOne({email: userData.email}, function (err, user) {
 
                         if (err) {
-                            cb(err)
-                        } else if (docs && docs.length) {
+                            cb(err);
+                        } else if (user) {
                             cb(badRequests.EmailInUse());
                         } else {
                             cb();
@@ -163,8 +162,6 @@ var UserHandler = function (db) {
     };
 
     function createUser(userData, callback) {
-        'use strict';
-
         var encryptedPass;
         var minderId;
         var confirmToken;
@@ -177,7 +174,6 @@ var UserHandler = function (db) {
         userData.minderId = minderId;
         userData.confirmToken = confirmToken;
         userData.pass = encryptedPass;
-        userData.role = USER_ROLES.USER;
 
         newUser = new UserModel(userData);
 
@@ -284,12 +280,10 @@ var UserHandler = function (db) {
     };
 
     function signUpWeb(req, res, next) {
-        'use strict';
-
         var options = req.body;
         var userData;
 
-        userData = prepareUserData(options);
+        userData = prepareUserData(options); ////TODO remove
         userData.pass = options.pass;
 
         validateSignUp(userData, null, function (err) {
@@ -361,6 +355,7 @@ var UserHandler = function (db) {
         var encryptedPass;
         var query;
         var fields;
+        var rememberMe;
 
         if (!options.email || !options.pass) {
             return next(badRequests.NotEnParams({reqParams: ['email', 'pass']}));
@@ -376,6 +371,7 @@ var UserHandler = function (db) {
         };
 
         UserModel.findOne(query, fields, function (err, user) {
+            var sessionParams;
 
             if (err) {
                 return next(err);
@@ -389,7 +385,11 @@ var UserHandler = function (db) {
                 return next(badRequests.UnconfirmedEmail());
             }
 
-            session.register(req, res, user);
+            sessionParams = {
+                rememberMe: options.rememberMe
+            };
+
+            session.register(req, res, user, sessionParams);
 
         });
 
@@ -445,7 +445,7 @@ var UserHandler = function (db) {
                                 return next(err);
                             }
 
-                            session.register(req, res, user);
+                            session.register(req, res, user, {rememberMe: true});
                         });
                     }
                 });

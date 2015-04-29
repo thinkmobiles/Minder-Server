@@ -1,8 +1,10 @@
 'use strict';
 
 var USER_ROLES = require('../constants/userRoles');
-var SESSION_ADMIN = 'admin';
-var SESSION_USER = 'user';
+var SESSION = require('../constants/sessions');
+var SESSION_ADMIN = SESSION.ADMIN;
+var SESSION_USER = SESSION.USER;
+var SESSION_MAX_AGE = SESSION.MAX_AGE;
 
 var Session = function (db) {
 
@@ -19,6 +21,12 @@ var Session = function (db) {
         req.session.loggedIn = true;
         req.session.userId = userModel._id;
         req.session.userRole = role;
+
+        if (options && options.rememberMe) {
+            req.session.rememberMe = true;
+        } else {
+            req.session.rememberMe = null;
+        }
 
         if (process.env.NODE_ENV === 'test') {
             res.status(status).send({
@@ -41,11 +49,20 @@ var Session = function (db) {
     };
 
     this.authenticatedUser = function (req, res, next) {
+        var err;
+
         if (req.session && req.session.userId && req.session.loggedIn) {
+            if (!req.session.rememberMe) {
+                req.session.cookie.expires = new Date(Date.now() + SESSION_MAX_AGE);
+            } /*else {
+                res.session.cookie.maxAge = null;
+            }*/
+
             next();
         } else {
-            var err = new Error('Unauthorized');
+            err = new Error('Unauthorized');
             err.status = 401;
+
             next(err);
         }
     };

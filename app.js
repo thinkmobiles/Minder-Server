@@ -15,8 +15,8 @@ module.exports = function (mainDb, dbsNames) {
     var app = express();
     var dbsObject = mainDb.dbsObject;
     var logWriter = require('./helpers/logWriter')();
+    var SESSION_MAX_AGE = require('./constants/sessions').MAX_AGE;
     var MemoryStore = require('connect-mongo')(session);
-
     var sessionConfig = {
         db: mainDb.name,
         host: mainDb.host,
@@ -36,8 +36,8 @@ module.exports = function (mainDb, dbsNames) {
     app.use(allowCrossDomain);
 
     app.enable('trust proxy');
-    app.set('dbsObject', dbsObject);
-    app.set('dbsNames', dbsNames);
+    app.set('dbsObject', dbsObject); //TODO remove
+    app.set('dbsNames', dbsNames);//TODO remove
 
     /*app.engine('html', consolidate.swig);
     app.set('view engine', 'html');
@@ -49,11 +49,9 @@ module.exports = function (mainDb, dbsNames) {
     app.set('view engine', 'html');
     app.use(logger('dev'));
 
-    //app.use(subDomainParser);
-
     app.use(bodyParser.json({strict: false, inflate: false, limit: 1024 * 1024 * 200}));
     app.use(bodyParser.urlencoded({extended: false, limit: 1024 * 1024 * 200}));
-    //app.use(cookieParser("CRMkey"));
+
     app.use(express.static(path.join(__dirname, 'public')));
 
     app.use(session({
@@ -61,10 +59,6 @@ module.exports = function (mainDb, dbsNames) {
         secret: '1q2w3e4r5tdhgkdfhgejflkejgkdlgh8j0jge4547hh',
         resave: false,
         saveUninitialized: false,
-        /*cookie: {
-            path: '/',
-            domain: ".live.easyerp.com"
-        },*/
         store: new MemoryStore(sessionConfig)
     }));
 
