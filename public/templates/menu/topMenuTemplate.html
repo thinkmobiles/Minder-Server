@@ -9,17 +9,19 @@
         </div>
         <% } %>
     </div>
-    <div class="dropDown">
-        User
-        <div class="dropContent">
-            <% for (i in dropDown) { %>
-            <div class="menuItem topMenuItem">
-                <a  href="<%= dropDown[i].url %>"><%= dropDown[i].name %></a>
-            </div>
-            <% } %>
-            <div class="menuItem dropDownMenuItem">
-                <a id="logOut">Log out</a>
+    <% for (i in dropDown) { %>
+        <div class="dropDown">
+            User
+            <div class="dropContent">
+                <% for (i in dropDown) { %>
+                <div class="menuItem topMenuItem">
+                    <a href="<%= dropDown[i].url %>"><%= dropDown[i].name %></a>
+                </div>
+                <% } %>
+                <div class="menuItem dropDownMenuItem">
+                    <a id="logOut">Log out</a>
+                </div>
             </div>
         </div>
-    </div>
+    <% } %>
 </nav>

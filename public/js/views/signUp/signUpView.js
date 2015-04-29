@@ -8,7 +8,6 @@ define([
 ], function (router, template, Custom, validation, config, recaptcha) {
 
     var View = Backbone.View.extend({
-        //el: '#wrapper',
         initialize: function (options) {
             this.stateModel = new Backbone.Model({
                 email: '',
@@ -22,7 +21,6 @@ define([
             });
             this.listenTo(this.stateModel, 'change:errors change:messages', this.render);
             this.render();
-            //this.reCptchaId=null;
         },
 
 
@@ -33,12 +31,6 @@ define([
 
         render: function (options) {
             this.$el.html(_.template(template, this.stateModel.toJSON()));
-            var elem = this.$el.find('#captcha').get()[0];
-            //this.reCptchaId = grecaptcha.render(elem, {
-            //    sitekey: config.recaptchaSyteKay,
-            //    type:'image',
-            //    theme:'dark'
-            //});
             Recaptcha.create(config.recaptchaSyteKay, 'captcha', {
                 tabindex: 4,
                 theme: "clean"
@@ -57,7 +49,6 @@ define([
             var self = this;
             var errors = [];
             var messages = [];
-            //var grecaptchaData = grecaptcha.getResponse(self.reCptchaId);
             var grecaptchaData = {
                 challenge: Recaptcha.get_challenge(),
                 response: Recaptcha.get_response()
@@ -94,13 +85,9 @@ define([
                 messages.push('terms and conditions is not checked');
             }
 
-            console.log('-------',grecaptchaData);
-            console.log(self.reCptchaId);
-
             if(!grecaptchaData || grecaptchaData===''){
                 messages.push('please check reCAPTCHA');
             }
-
 
             if (errors.length > 0 || messages.length > 0) {
                 if (errors.length > 0) {
