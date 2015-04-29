@@ -275,6 +275,28 @@ var BadRequestModule = function () {
         return new Errors(errOptions);
     }
 
+    function CaptchaError(options) {
+        var errOptions;
+
+        if (options) {
+            errOptions = options;
+        } else {
+            errOptions = {};
+        }
+
+        if (!errOptions.name) {
+            errOptions.name = 'CaptchaError';
+        }
+        if (!errOptions.status) {
+            errOptions.status = 400;
+        }
+        if (!errOptions.message) {
+            errOptions.message = 'The reCAPTCHA wasn\'t entered correctly. Go back and try it again.';
+        }
+
+        return new Errors(errOptions);
+    }
+
     return {
         NotEnParams: NotEnParams,
         InvalidEmail: InvalidEmail,
@@ -285,6 +307,7 @@ var BadRequestModule = function () {
         UnconfirmedEmail: UnconfirmedEmail,
         SignInError: SignInError,
         AccessError: AccessError,
+        CaptchaError:CaptchaError,
         BlockedAccount: BlockedAccount,
         UnknownDeviceOS: UnknownDeviceOS
     }

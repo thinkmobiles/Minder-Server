@@ -3,6 +3,8 @@
 var async = require('async');
 var crypto = require("crypto");
 var mongoose = require('mongoose');
+var http = require('http');
+var querystring = require('querystring');
 
 var REG_EXP = require('../constants/regExp');
 var USER_ROLES = require('../constants/userRoles');
@@ -234,54 +236,98 @@ var UserHandler = function (db) {
 
             /*async.waterfall([
 
-                //save user:
-                function (cb) {
-                    createUser(userData, function (err, userModel) {
-                        if (err) {
-                            cb(err);
-                        } else {
-                            cb(null, userModel);
-                        }
+             //save user:
+             function (cb) {
+             createUser(userData, function (err, userModel) {
+             if (err) {
+             cb(err);
+             } else {
+             cb(null, userModel);
+             }
 
-                    });
-                },
+             });
+             },
 
-                //save device:
-                function (userModel, cb) {
-                    deviceHandler.createDevice(deviceData, userModel, function (err, deviceModel) {
-                        if (err) {
-                            cb(err);
-                            //FIXME: remove user (rollback);
-                        } else {
-                            cb(null, userModel, deviceModel);
-                        }
-                    });
-                }
+             //save device:
+             function (userModel, cb) {
+             deviceHandler.createDevice(deviceData, userModel, function (err, deviceModel) {
+             if (err) {
+             cb(err);
+             //FIXME: remove user (rollback);
+             } else {
+             cb(null, userModel, deviceModel);
+             }
+             });
+             }
 
-            ], function (err, user, device) {
-                var resData;
-                var minderId;
+             ], function (err, user, device) {
+             var resData;
+             var minderId;
 
-                if (err) {
-                    return next(err);
-                }
+             if (err) {
+             return next(err);
+             }
 
-                minderId = user.minderId;
-                resData = {
-                    success: 'success signUp',
-                    message: 'Thank you for registering with Minder. Please check your email and verify account',
-                    minderId: minderId
-                };
+             minderId = user.minderId;
+             resData = {
+             success: 'success signUp',
+             message: 'Thank you for registering with Minder. Please check your email and verify account',
+             minderId: minderId
+             };
 
-                userData.minderId = minderId;
+             userData.minderId = minderId;
 
-                mailer.emailConfirmation(userData);
+             mailer.emailConfirmation(userData);
 
-                res.status(201).send(resData);
-            });*/
+             res.status(201).send(resData);
+             });*/
         });
 
     };
+
+    function checkCaptcha(params, callback){
+        if (!params.captchaChallenge || !params.captchaResponse) {
+            return callback(badRequests.CaptchaError());
+        }
+
+        var captchaVerifyData = querystring.stringify({
+            'privatekey': process.env.recaptchaPrivatekey,
+            'remoteip': req.ip,
+            'challenge': req.body.captchaChallenge,
+            'response': req.body.captchaResponse
+        });
+
+        var options = {
+            hostname: 'www.google.com',
+            path: '/recaptcha/api/verify',
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            port: 80
+        };
+
+        var httpRequest = http.request(options, function (httpResponse) {
+            httpResponse.setEncoding('utf8');
+            if (httpResponse.statusCode !== 200) {
+                return callback(badRequests.CaptchaError());
+            }
+            httpResponse.on('data', function (chunk) {
+                if (chunk.indexOf('true') === -1) {
+                    return callback(badRequests.CaptchaError());
+                }
+                callback(null, true);
+            });
+        });
+
+        httpRequest.on('error', function (httpError) {
+            callback(httpError);
+        });
+        httpRequest.write(captchaVerifyData);
+        httpRequest.end();
+
+    }
+
 
     function signUpWeb(req, res, next) {
         'use strict';
@@ -297,31 +343,106 @@ var UserHandler = function (db) {
                 return next(err);
             }
 
-            createUser(userData, function (err, user) {
-                var resData;
-                var minderId;
-
-                if (err) {
-                    return next(err);
+            checkCaptcha({
+                captchaChallenge: req.body.captchaChallenge,
+                captchaResponse: req.body.captchaResponse
+            },function(captchaError){
+                if(captchaError){
+                    return next(captchaError);
                 }
+                createUser(userData, function (err, user) {
+                    var resData;
+                    var minderId;
 
-                minderId = user.minderId;
-                resData = {
-                    success: 'success signUp',
-                    message: 'Thank you for registering with Minder. Please check your email and verify account',
-                    minderId: minderId
-                };
+                    if (err) {
+                        return next(err);
+                    }
 
-                userData.minderId = minderId;
+                    minderId = user.minderId;
+                    resData = {
+                        success: 'success signUp',
+                        message: 'Thank you for registering with Minder. Please check your email and verify account',
+                        minderId: minderId
+                    };
 
-                mailer.emailConfirmation(userData);
+                    userData.minderId = minderId;
 
-                res.status(201).send(resData);
+                    mailer.emailConfirmation(userData);
+
+                    res.status(201).send(resData);
+                });
             });
+
+
+            //if (!req.body.captchaChallenge || !req.body.captchaResponse) {
+            //    return next(badRequests.NotEnParams());
+            //}
+            //var captchaVerifyData = querystring.stringify({
+            //    'privatekey': '6Lfy2QUTAAAAABrXwHIJsv-r_n5bWkGXOQ31j0aI',
+            //    'remoteip': req.ip,
+            //    'challenge': req.body.captchaChallenge,
+            //    'response': req.body.captchaResponse
+            //    //'secret' : '6Lfy2QUTAAAAABrXwHIJsv-r_n5bWkGXOQ31j0aI',
+            //    //'response': req.body.captchaToken
+            //});
+            //var options = {
+            //    hostname: 'www.google.com',
+            //    path: '/recaptcha/api/verify',
+            //    method: 'POST',
+            //    headers: {
+            //        'Content-Type': 'application/x-www-form-urlencoded',
+            //        //'Content-Length': postData.length
+            //    },
+            //    port: 80
+            //};
+            //var httpRequest = http.request(options, function (httpResponse) {
+            //    httpResponse.setEncoding('utf8');
+            //    if (httpResponse.statusCode !== 200) {
+            //        return next(badRequests.AccessError());
+            //    }
+            //    httpResponse.on('data', function (chunk) {
+            //        //chunk = JSON.parse(chunk);
+            //        console.log('---------------');
+            //        console.log('BODY:', chunk);
+            //        console.log('---------------');
+            //        console.log(typeof chunk);
+            //        if (chunk.indexOf('true') === -1) {
+            //            return next(badRequests.AccessError());
+            //        }
+            //        createUser(userData, function (err, user) {
+            //            var resData;
+            //            var minderId;
+            //
+            //            if (err) {
+            //                return next(err);
+            //            }
+            //
+            //            minderId = user.minderId;
+            //            resData = {
+            //                success: 'success signUp',
+            //                message: 'Thank you for registering with Minder. Please check your email and verify account',
+            //                minderId: minderId
+            //            };
+            //
+            //            userData.minderId = minderId;
+            //
+            //            mailer.emailConfirmation(userData);
+            //
+            //            res.status(201).send(resData);
+            //        });
+            //    });
+            //});
+            //
+            //httpRequest.on('error', function (httpError) {
+            //    next(httpError);
+            //});
+            //
+            //httpRequest.write(captchaVerifyData);
+            //httpRequest.end();
         });
 
     };
-    
+
     function updateUserProfile(userId, options, callback) {
         var update = prepareUserData(options);
         var criteria = {
@@ -344,7 +465,7 @@ var UserHandler = function (db) {
             }
         });
     }
-    
+
     this.signUp = function (req, res, next) {
         'use strict';
 
@@ -486,15 +607,15 @@ var UserHandler = function (db) {
 
             //return res.status(500).send('NotImplementedYet');
             /*//FIXME: update the userModel:
-            userModel
-                .save({confirmToken: null}, function (err, user) {
-                    if (err) {
-                        return self.renderError(err, req, res);
-                    }
+             userModel
+             .save({confirmToken: null}, function (err, user) {
+             if (err) {
+             return self.renderError(err, req, res);
+             }
 
-                    res.redirect(process.env.HOST + '/successConfirm');
+             res.redirect(process.env.HOST + '/successConfirm');
 
-                });*/
+             });*/
 
         });
 
@@ -621,7 +742,7 @@ var UserHandler = function (db) {
     this.updateUser = function (req, res, next) {
         var userId = req.params.id;
         var options = req.body;
-        
+
         updateUserProfile(userId, options, function (err, user) {
             if (err) {
                 next(err);
