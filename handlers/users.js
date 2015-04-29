@@ -231,16 +231,16 @@ var UserHandler = function (db) {
         });
     };
 
-    function checkCaptcha(params, callback){
-        if (!params.captchaChallenge || !params.captchaResponse) {
+    function checkCaptcha(params, callback) {
+        if (!params.captchaChallenge || !params.captchaResponse || !params.ip) {
             return callback(badRequests.CaptchaError());
         }
 
         var captchaVerifyData = querystring.stringify({
-            privatekey: process.env.recaptchaPrivatekey,
-            remoteip: req.ip,
-            challenge: req.body.captchaChallenge,
-            response: req.body.captchaResponse
+            'privatekey': process.env.recaptchaPrivatekey,
+            'remoteip': params.ip,
+            'challenge': params.captchaChallenge,
+            'response': params.captchaResponse
         });
 
         var options = {
@@ -290,9 +290,10 @@ var UserHandler = function (db) {
 
             checkCaptcha({
                 captchaChallenge: req.body.captchaChallenge,
-                captchaResponse: req.body.captchaResponse
-            },function(captchaError){
-                if(captchaError){
+                captchaResponse: req.body.captchaResponse,
+                ip: req.ip
+            }, function (captchaError) {
+                if (captchaError) {
                     return next(captchaError);
                 }
                 createUser(userData, function (err, user) {

@@ -13,24 +13,27 @@ define([
         view: null,
 
         routes: {
-            "home": "any",
             "login": "login",
-            "main": "main",
-            "main/page/:page": "main",
+            "main(/page/:page)": "main",
             "forgotPassword": "forgotPassword",
             "signUp": "signUp",
             "resetPassword/:token": "resetPassword",
             "billingInfo": "billingInfo",
             "termsAndConditions": "termsAndConditions",
-            "userManagement": "userManagement",
-            "userManagement/:page": "userManagement",
-            //"contactUs": "contactUs",
             "devices": "devices",
-            "device/:id": "device",
-            "devices/page/:page": "devices",
+            "device(/:id)": "device",
+            "devices(/page/:page)": "devices",
             "profile": "profile",
             "*any": "any"
         },
+
+        needAuthorize: [
+            "main(/page/:page)",
+            "billingInfo",
+            "device(/:id)",
+            "devices(/page/:page)",
+            "profile",
+        ],
 
         initialize: function () {
             this.topMenuView = new TopMenuView();
@@ -38,6 +41,8 @@ define([
         },
 
         loadWrapperView: function (name, params) {
+
+
             var self = this;
             require(['views/' + name + '/' + name + 'View'], function (View) {
                 if (!self[name + 'View']) {
@@ -75,13 +80,13 @@ define([
             $(document).trigger("resize");
             this.view = view;
         },
-        checkLogin: function () {
-            if (!App.sessionData.get('authorized')) {
-                App.router.navigate("login", {trigger: true});
-                this.loadWrapperView('login');
-            }
-            return !App.sessionData.get('authorized');
-        },
+        //checkLogin: function () {
+        //    if (!App.sessionData.get('authorized')) {
+        //        App.router.navigate("login", {trigger: true});
+        //        this.loadWrapperView('login');
+        //    }
+        //    return !App.sessionData.get('authorized');
+        //},
         main: function (page) {
             if (page) page = parseInt(page);
             if (this.checkLogin()) return;
