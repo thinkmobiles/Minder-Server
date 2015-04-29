@@ -228,57 +228,7 @@ var UserHandler = function (db) {
                 res.status(201).send(resData);
 
             });
-
-
-            /*async.waterfall([
-
-             //save user:
-             function (cb) {
-             createUser(userData, function (err, userModel) {
-             if (err) {
-             cb(err);
-             } else {
-             cb(null, userModel);
-             }
-
-             });
-             },
-
-             //save device:
-             function (userModel, cb) {
-             deviceHandler.createDevice(deviceData, userModel, function (err, deviceModel) {
-             if (err) {
-             cb(err);
-             //FIXME: remove user (rollback);
-             } else {
-             cb(null, userModel, deviceModel);
-             }
-             });
-             }
-
-             ], function (err, user, device) {
-             var resData;
-             var minderId;
-
-             if (err) {
-             return next(err);
-             }
-
-             minderId = user.minderId;
-             resData = {
-             success: 'success signUp',
-             message: 'Thank you for registering with Minder. Please check your email and verify account',
-             minderId: minderId
-             };
-
-             userData.minderId = minderId;
-
-             mailer.emailConfirmation(userData);
-
-             res.status(201).send(resData);
-             });*/
         });
-
     };
 
     function checkCaptcha(params, callback){
@@ -287,10 +237,10 @@ var UserHandler = function (db) {
         }
 
         var captchaVerifyData = querystring.stringify({
-            'privatekey': process.env.recaptchaPrivatekey,
-            'remoteip': req.ip,
-            'challenge': req.body.captchaChallenge,
-            'response': req.body.captchaResponse
+            privatekey: process.env.recaptchaPrivatekey,
+            remoteip: req.ip,
+            challenge: req.body.captchaChallenge,
+            response: req.body.captchaResponse
         });
 
         var options = {
@@ -305,9 +255,11 @@ var UserHandler = function (db) {
 
         var httpRequest = http.request(options, function (httpResponse) {
             httpResponse.setEncoding('utf8');
+
             if (httpResponse.statusCode !== 200) {
                 return callback(badRequests.CaptchaError());
             }
+
             httpResponse.on('data', function (chunk) {
                 if (chunk.indexOf('true') === -1) {
                     return callback(badRequests.CaptchaError());
@@ -323,7 +275,6 @@ var UserHandler = function (db) {
         httpRequest.end();
 
     }
-
 
     function signUpWeb(req, res, next) {
         var options = req.body;
