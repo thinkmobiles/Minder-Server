@@ -1,26 +1,22 @@
-if (!process.env.NODE_ENV) {
-    process.env.NODE_ENV = 'development';
-}
+'use strict';
 
-require('../config/' + process.env.NODE_ENV);
+var server = require('../server');
+var db = server.db;
 
 var commander = require('commander');
-var stripe = require('stripe')(process.env.StripePrivateKey);
+var stripe = require('stripe')(process.env.STRIPE_PRIVATE_KEY);
 var tariffPlans = require('./tariffPlans');
 var util = require('util');
 var mongoose = require('mongoose');
-var _ = require('underscore');
-
-var mainDb;
-var dbsObject = {};
-
+//var _ = require('underscore');
+var _ = require('lodash');
 
 function log(data) {
     console.log(util.inspect(data, {
         colors: true,
         depth: 5
     }));
-}
+};
 
 commander
     .version('0.0.1')
@@ -35,99 +31,63 @@ commander
 
 if (commander.database) {
 
-
-    mongoose.connect(process.env.DB_HOST, process.env.DB_NAME);
-    mainDb = mongoose.connection;
-
-    mainDb.on('error', console.error.bind(console, 'connection error:'));
-
-    mainDb.once('open', function callback() {
-        mainDb.dbsObject = dbsObject;
-        console.log('Connection to ' + process.env.DB_HOST + '/' + process.env.DB_NAME + ' is success');
-
-        require('../models/index.js');
-
-        var sessionSchema = mongoose.Schema({
-            _id: String,
-            session: String,
-            expires: Date
-        }, {collection: 'sessions'});
-
-        var main = mainDb.model('sessions', sessionSchema);
-        var port = process.env.PORT || 8877;
-
-        main.find().exec(function (err, result) {
-            if (err) {
-                console.error('Something went wrong in main server');
-                return process.exit(1);
-            }
-        });
-
-
-        mainDb.mongoose = mongoose;
-
-        var tariffPlanSchema = mongoose.Schemas['TariffPlan'];
-        var TariffPlan = mainDb.model('TariffPlan', tariffPlanSchema);
-
-
-        if (commander.create) {
-            for (var i = 0; i < tariffPlans.length; i++) {
-                var newPlan = new TariffPlan(tariffPlans[i]);
-                newPlan.save(function (err) {
-                    if (err) {
-                        return log(err);
-                    }
-                    log(('created plan plan'));
-
-                });
-            }
-        }
-
-        if (commander.update) {
-            for (var i = 0; i < tariffPlans.length; i++) {
-                TariffPlan.findOne({id: tariffPlans[i].id}, function (err, plan) {
-                    if (err) {
-                        return log(err);
-                    }
-                    var tarif = _.find(tariffPlans, function (elem) {
-                        if (elem.id === plan.id) {
-                            return true
-                        }
-                    });
-                    if (!tarif) {
-                        log(new Error());
-                    }
-                    plan.name = tarif.name;
-                    plan.metadata = tarif.metadata;
-                    plan.statement_descriptor = tarif.statement_descriptor;
-                    plan.save(function (err) {
-                        if (err) {
-                            return log(err);
-                        }
-                        log('plan updated');
-                    });
-                })
-            }
-        }
-
-        if (commander.list) {
-            TariffPlan.find({}, function (err, plans) {
+    if (commander.create) {
+        for (var i = 0; i < tariffPlans.length; i++) {
+            var newPlan = new TariffPlan(tariffPlans[i]);
+            newPlan.save(function (err) {
                 if (err) {
                     return log(err);
                 }
-                log(plans);
-            })
-        }
+                log(('created plan plan'));
 
-        if (commander.delete) {
-            TariffPlan.remove({}, function (err) {
-                if (err) {
-                    return log(err);
-                }
-                log('remove all plans');
             });
         }
-    });
+    }
+
+    if (commander.update) {
+        for (var i = 0; i < tariffPlans.length; i++) {
+            TariffPlan.findOne({id: tariffPlans[i].id}, function (err, plan) {
+                if (err) {
+                    return log(err);
+                }
+                var tarif = _.find(tariffPlans, function (elem) {
+                    if (elem.id === plan.id) {
+                        return true
+                    }
+                });
+                if (!tarif) {
+                    log(new Error());
+                }
+                plan.name = tarif.name;
+                plan.metadata = tarif.metadata;
+                plan.statement_descriptor = tarif.statement_descriptor;
+                plan.save(function (err) {
+                    if (err) {
+                        return log(err);
+                    }
+                    log('plan updated');
+                });
+            })
+        }
+    }
+
+    if (commander.list) {
+        TariffPlan.find({}, function (err, plans) {
+            if (err) {
+                return log(err);
+            }
+            log(plans);
+        })
+    }
+
+    if (commander.delete) {
+        TariffPlan.remove({}, function (err) {
+            if (err) {
+                return log(err);
+            }
+            log('remove all plans');
+        });
+    }
 
 }
 

@@ -9,5 +9,4 @@ process.env.mailerService = 'Gmail';
 process.env.mailerUserName = 'istvan.nazarovits.dev@gmail.com';
 process.env.mailerPassword = 'thinkmobiles365';
 
-
-process.env.recaptchaPrivatekey = '6Lfy2QUTAAAAABrXwHIJsv-r_n5bWkGXOQ31j0aI';
+process.env.RECAPTCHA_PRIVATE_KEY = '6Lfy2QUTAAAAABrXwHIJsv-r_n5bWkGXOQ31j0aI';

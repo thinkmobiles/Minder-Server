@@ -1,11 +1,12 @@
 'use strict';
 
-var stripe = require('stripe')(process.env.StripePrivateKey);
+var stripe = require('stripe')(process.env.STRIPE_PRIVATE_KEY);
 var mongoose = require('mongoose');
 var async = require('async');
-var _ = require('underscore');
+//var _ = require('underscore');
+var _ = require('lodash');
 
-var STATUSES = require('../constants/statuses');
+var STATUSES = require('../constants/deviceStatuses');
 var badRequests = require('../helpers/badRequests');
 
 var TariffPlanHandler = function (db) {

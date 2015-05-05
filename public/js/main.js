@@ -46,28 +46,6 @@ require.config({
 });
 
 require(['app'], function (app) {
-    Backbone.Collection.prototype.getElement = function (id) {
-        return (id) ? this.get(id) : ((this.currentElement) ? this.currentElement : this.at(0));
-    };
-    Backbone.Collection.prototype.setElement = function (id, model) {
-        if (arguments.length === 0) {
-            this.currentElement = this.at(0);
-        } else if (arguments.length === 2) {
-            if (model) {
-                this.currentElement = model;
-            } else if (id) {
-                this.currentElement = this.get(id);
-            }
-        } else {
-            if ((typeof (id) == 'string') && id.length == 24) {
-                this.currentElement = this.get(id);
-            } else if (typeof (id) == 'object') {
-                this.currentElement = id;
-            }
-        }
-
-    };
-
     App.error = function (xhr) {
         if (xhr) {
             if (xhr.status === 401 || xhr.status === 403) {

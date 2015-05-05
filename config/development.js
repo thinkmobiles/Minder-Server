@@ -8,5 +8,6 @@ process.env.DB_NAME = 'minderDev';
 process.env.mailerService = 'Gmail';
 process.env.mailerUserName = 'istvan.nazarovits.dev@gmail.com';
 process.env.mailerPassword = 'thinkmobiles365';
-process.env.recaptchaPrivatekey = '6Lfy2QUTAAAAABrXwHIJsv-r_n5bWkGXOQ31j0aI';
-process.env.StripePrivateKey = 'sk_test_AZd2W2bGj2cM1r4x9kywC8oG';
+
+process.env.RECAPTCHA_PRIVATE_KEY = '6Lfy2QUTAAAAABrXwHIJsv-r_n5bWkGXOQ31j0aI';
+process.env.STRIPE_PRIVATE_KEY = 'sk_test_AZd2W2bGj2cM1r4x9kywC8oG';

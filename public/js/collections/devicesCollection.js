@@ -6,10 +6,6 @@ define([
 
         url: function () {
             return "/devices"
-        },
-
-        initialize: function () {
-
         }
     });
 

@@ -237,7 +237,7 @@ var UserHandler = function (db) {
         }
 
         var captchaVerifyData = querystring.stringify({
-            'privatekey': process.env.recaptchaPrivatekey,
+            'privatekey': process.env.RECAPTCHA_PRIVATE_KEY,
             'remoteip': params.ip,
             'challenge': params.captchaChallenge,
             'response': params.captchaResponse

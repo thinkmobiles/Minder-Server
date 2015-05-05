@@ -1,7 +1,6 @@
 'use strict';
 var DEVICE_OS = require('../constants/deviceOs');
 var DEVICE_STATUSES = require('../constants/deviceStatuses');
-var RESPONSES = require('../constants/responses');
 var async = require('async');
 var mongoose = require('mongoose');
 var badRequests = require('../helpers/badRequests');
@@ -356,7 +355,7 @@ var DeviceHandler = function (db) {
         //res.status(500).send('Not implemented');
     };
 
-    this.setDeleted = function (req, res, next) {
+    this.setStatusDeleted = function (req, res, next) {
         var userId = req.session.userId;
         var deviceId = req.params.id;
         var criteria;
@@ -375,11 +374,6 @@ var DeviceHandler = function (db) {
             };
         }
 
-        /*if(status!==STATUSES.DELETED && status!==STATUSES.ACTIVE){
-         //if(status!==STATUSES.DELETED && status!==STATUSES.ACTIVE && status!==STATUSES.SUBSCRIBED){
-         return next(badRequests.NotEnParams());
-         }*/
-
         DeviceModel.findOneAndUpdate(criteria, update, function (err, device) {
             if (err) {
                 return next(err);
@@ -389,17 +383,7 @@ var DeviceHandler = function (db) {
             }
 
             res.status(200).send(device);
-
-            /*device.save(function (err, newDevice) {
-                if (err) {
-                    return next(err);
-                }
-                console.log(newDevice);
-                res
-                    .status('200') //TODO: '200'
-                    .send(newDevice);
-            });*/
-
+            //TODO: decrement user, active devices count;
         });
     }
 

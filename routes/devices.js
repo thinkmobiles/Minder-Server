@@ -6,8 +6,6 @@ var SessionHandler = require('../handlers/sessions');
 var DeviceHandler = require('../handlers/devices');
 
 module.exports = function (db) {
-    'use strict';
-
     var session = new SessionHandler();
     var deviceHandler = new DeviceHandler(db);
 
@@ -17,7 +15,7 @@ module.exports = function (db) {
     router.get('/:id', deviceHandler.getDevice);
     router.put('/:id', deviceHandler.updateDevice);
     //router.delete('/:id', deviceHandler.removeDevice);
-    router.patch('/:id', deviceHandler.setDeleted);
+    router.patch('/:id', deviceHandler.setStatusDeleted);
     router.post('/getLocations', deviceHandler.getDevicesLocation);
 
     return router;
