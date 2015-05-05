@@ -287,32 +287,34 @@ describe('Devices', function() {
                 });
         });
 
-        /*it('User can delete the device by id', function(done) {
+        it('User can delete the device by id', function(done) {
             var devId = testData.devices[2]._id.toString();
             var url = '/devices/' + devId;
 
             userAgent1
-                .delete(url)
+                .patch(url)
                 .end(function (err, res) {
                     expect(res.status).to.equals(200);
                     expect(res.body).to.be.instanceOf(Object);
-                    expect(res.body).to.have.property('success');
+                    expect(res.body).to.have.property('_id');
+                    expect(res.body).to.have.property('status');
+                    expect(res.body.status).to.equals(DEVICE_STATUSES.DELETED);
                     done();
                 });
         });
 
-        it('User can delete the device by id', function(done) {
+        it('Another user can\'t delete the device by id', function(done) {
             var devId = testData.devices[3]._id.toString();
             var url = '/devices/' + devId;
 
             userAgent2
-                .delete(url)
+                .patch(url)
                 .end(function (err, res) {
                     expect(res.status).to.equals(400);
                     expect(res.body).to.have.property('error');
                     done();
                 });
-        });*/
+        });
 
     });
 });
