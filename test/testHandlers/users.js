@@ -187,29 +187,6 @@ describe('Users', function() {
                 });
         });
 
-        it('User can signUp from web by valid data', function (done) {
-            var ticks = new Date().valueOf();
-            var data = {
-                email: 'test_' + ticks + '@mail.com',
-                pass: '1',
-                firstName: 'testFirstName',
-                lastName: 'testLastName'
-            };
-
-            userAgent1
-                .post(url)
-                .send(data)
-                .end(function (err, res) {
-
-                    if (err) {
-                        done(err);
-                    } else {
-                        expect(res.status).to.equal(201);
-                        done();
-                    }
-                });
-        });
-
         it('User can signUp from mobile by valid data', function (done) {
             var ticks = new Date().valueOf();
             var data = {

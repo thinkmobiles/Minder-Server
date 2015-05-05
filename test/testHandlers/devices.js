@@ -3,6 +3,7 @@ var expect = require("chai").expect;
 var async = require('async');
 var Config = require('./../config');
 var testData = require('./../data/testData');
+var DEVICE_STATUSES = require('../../constants/deviceStatuses');
 
 describe('Devices', function() {
     var conf = new Config();
@@ -18,30 +19,28 @@ describe('Devices', function() {
         var createTestData;
         this.timeout(5000);
 
-        setTimeout(function () {
-            console.log('waiting for the server');
+        createTestData = new CreateTestData(db);
 
-            createTestData = new CreateTestData(db);
+        async.parallel([
+            createTestData.createUsers,
+            createTestData.createDevices
+        ], function (err) {
+            if (err) {
+                done(err);
+            } else {
+                done();
+            }
+        });
 
-            async.parallel([
-                createTestData.createUsers,
-                createTestData.createDevices
-            ], function (err) {
-                if (err) {
-                    done(err);
-                } else {
-                    done();
-                }
-            });
-
-        }, 500);
     });
 
     describe('Test Session', function () {
 
         it('admin can signIn', function (done) {
             var signInData = testData.admins[0];
+
             signInData.pass = '1q2w3e4r';
+            signInData.rememberMe = true;
 
             adminAgent
                 .post('/signIn')
@@ -70,7 +69,9 @@ describe('Devices', function() {
 
         it('User1 can signIn', function (done) {
             var signInData = testData.users[0];
+
             signInData.pass = '1';
+            signInData.rememberMe = true;
 
             userAgent1
                 .post('/signIn')
@@ -275,16 +276,18 @@ describe('Devices', function() {
             var url = '/devices/' + devId;
 
             adminAgent
-                .delete(url)
+                .patch(url)
                 .end(function (err, res) {
                     expect(res.status).to.equals(200);
                     expect(res.body).to.be.instanceOf(Object);
-                    expect(res.body).to.have.property('success');
+                    expect(res.body).to.have.property('_id');
+                    expect(res.body).to.have.property('status');
+                    expect(res.body.status).to.equals(DEVICE_STATUSES.DELETED);
                     done();
                 });
         });
 
-        it('User can delete the device by id', function(done) {
+        /*it('User can delete the device by id', function(done) {
             var devId = testData.devices[2]._id.toString();
             var url = '/devices/' + devId;
 
@@ -309,7 +312,7 @@ describe('Devices', function() {
                     expect(res.body).to.have.property('error');
                     done();
                 });
-        });
+        });*/
 
     });
 });
