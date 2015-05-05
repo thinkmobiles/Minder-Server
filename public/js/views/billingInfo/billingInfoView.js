@@ -4,11 +4,13 @@ define([
 ], function (template, TariffPlansCollection) {
 
     var View = Backbone.View.extend({
-        //el: '#wrapper',
         initialize: function (options) {
 
-
             this.collection = new TariffPlansCollection();
+
+            this.collection.on('all', function(e){
+                console.log('>>',e);
+            });
 
             this.stateModel = new Backbone.Model({
                 renewal: false,
@@ -16,15 +18,11 @@ define([
                 //TODO
             });
 
-
             this.setUserPlans();
             this.render();
             this.listenTo(this.stateModel, 'change', this.render);
-            this.listenTo(this.collection, 'change sort sync add', this.render);
-            // App.stateModel.on('change:tariffPlans', this.setUserPlans);
+            this.listenTo(this.collection, 'reset', this.render);
             this.listenTo(App.sessionData, 'change:tariffPlans', this.setUserPlans);
-
-
         },
 
         events: {
@@ -37,7 +35,7 @@ define([
                 return
             }
 
-            this.collection.add(plans);
+            this.collection.reset(plans);
 
             var userPlan = this.collection.find(function (model) {
                 if (model.get('_id') === App.sessionData.get('user').currentPlan) {
@@ -52,14 +50,34 @@ define([
         },
 
         render: function (options) {
-            var _this = this;
+            var self = this;
             var data = this.stateModel.toJSON();
+            var tearsMonth =  new TariffPlansCollection(self.collection.filter(function(tier){
+                if(tier.get('metadata').type === 'month'){
+                    return true
+                }
+            }));
+
+            var tearsYear =  new TariffPlansCollection(self.collection.filter(function(tier){
+                if(tier.get('metadata').type === 'year'){
+                    return true
+                }
+            }));
+
             data = _.extend(data, {
-                collection: _this.collection.toJSON()
-            });
-            data = _.extend(data, {
+                tearsMonth: tearsMonth.toJSON(),
+                tearsYear: tearsYear.toJSON(),
                 user: App.sessionData.get('user')
             });
+
+            data.tearsMonth = _.sortBy(data.tearsMonth, function(elem){
+                return elem.amount;
+            });
+            data.tearsYear = _.sortBy(data.tearsYear, function(elem){
+                return elem.amount;
+            });
+
+            console.log('>>>>>', data);
             this.$el.html(_.template(template, data));
             return this;
         },

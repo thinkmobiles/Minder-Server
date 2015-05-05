@@ -9,6 +9,7 @@ define([
         //el: '#wrapper',
         initialize: function (options) {
             this.stateModel = new Backbone.Model({
+                rememberMe:false,
                 email: '',
                 password: '',
                 errors: false,
@@ -31,7 +32,8 @@ define([
 
         login: function (event) {
             event.stopImmediatePropagation();
-            //consle.log('login');
+            event.preventDefault();
+
             var self = this;
             var errors = [];
             var messages = [];
@@ -39,10 +41,9 @@ define([
                 errors: false,
                 messages: false,
                 email: this.$el.find("#email").val().trim(),
-                password: this.$el.find("#password").val().trim()
+                password: this.$el.find("#password").val().trim(),
+                rememberMe: this.$el.find('#rememberMe').prop('checked')
             };
-
-            event.preventDefault();
 
             this.stateModel.set(stateModelUpdate);
 
@@ -68,7 +69,8 @@ define([
                 dataType: 'json',
                 data: {
                     email: stateModelUpdate.email,
-                    pass: stateModelUpdate.password
+                    pass: stateModelUpdate.password,
+                    rememberMe : stateModelUpdate.rememberMe
                 },
                 success: function (response) {
                     self.stateModel.set({

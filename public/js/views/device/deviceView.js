@@ -8,7 +8,6 @@ define([
             this.stateModel = new Backbone.Model();
             this.listenTo(this.stateModel, 'change', this.render);
             //this.listenTo(this.model, 'change', this.render);
-
             this.render();
         },
 
@@ -26,11 +25,11 @@ define([
 
         getDevice: function () {
             var device = null;
-            var _this = this;
+            var self = this;
 
             if (App.router.devicesView) {
                 device = App.router.devicesView.devisesCollection.find(function (model) {
-                    if (model.id === _this.stateModel.get('id')) {
+                    if (model.id === self.stateModel.get('id')) {
                         return true;
                     }
                 })
@@ -44,11 +43,11 @@ define([
             }
             this.model = device;
             this.listenTo(this.model, 'change', function () {
-                _this.render();
+                self.render();
             });
             this.listenTo(this.model, 'sync', function () {
                 if (this.model.changed.success) {
-                    _this.afterUpend();
+                    self.afterUpend();
                     if (window.history) {
                         if (window.history.back) {
                             window.history.back();

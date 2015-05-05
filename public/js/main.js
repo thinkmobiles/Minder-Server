@@ -23,14 +23,20 @@ require.config({
         text: './libs/text',
         moment: './libs/moment',
         common: 'common',
-        "recaptcha": "//www.google.com/recaptcha/api/js/recaptcha_ajax"
+        recaptcha: "//www.google.com/recaptcha/api/js/recaptcha_ajax",
+        stripeCheckout : '//checkout.stripe.com/checkout'
     },
     shim: {
         'ajaxForm': ['jQuery'],
         'Bootstrap': ['jQuery'],
         'Backbone': ['Underscore', 'jQuery'],
         'app': ['Backbone', 'less', 'ajaxForm', 'Bootstrap', 'moment', 'costCounter'],
-        "recaptcha": { exports: 'Recaptcha' }
+        "recaptcha": {
+            exports: 'Recaptcha'
+        },
+        "stripeCheckout": {
+            exports: 'StripeCheckout'
+        }
     },
     config: {
         moment: {
@@ -74,6 +80,7 @@ require(['app'], function (app) {
                 if (xhr.responseJSON) {
                     alert(xhr.responseJSON.error);
                 } else {
+                    console.log(xhr);
                     Backbone.history.navigate("home", {trigger: true});
                 }
             }

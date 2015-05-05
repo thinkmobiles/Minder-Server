@@ -47,7 +47,7 @@ define([
         },
 
         renderMenuItems: function () {
-            var _this = this;
+            var self = this;
             _.each(this.views, function (view) {
                 view.remove();
             });
@@ -56,14 +56,14 @@ define([
             this.collection.map(function (model) {
                 if (model.get('administrator') === App.sessionData.get('admin') && App.sessionData.get('authorized')) {
                     var view = new menuItemView({model: model});
-                    _this.views.push(view);
-                    _this.$('.dropdown-menu').append(view.render().el);
+                    self.views.push(view);
+                    self.$('.dropdown-menu').append(view.render().el);
                     return
                 }
                 if (model.get('authorized') === App.sessionData.get('authorized') && !model.get('administrator')) {
                     var view = new menuItemView({model: model});
-                    _this.views.push(view);
-                    _this.$('.dropdown-menu').append(view.render().el);
+                    self.views.push(view);
+                    self.$('.dropdown-menu').append(view.render().el);
                     return
                 }
 

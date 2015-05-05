@@ -11,7 +11,7 @@ define([
         },
         stateModel: new Backbone.Model(),
         initializeMap: function () {
-            var _this = this;
+            var self = this;
             var mapOptions = {
                 center: new google.maps.LatLng(0, 0),
                 zoom: 2,
@@ -21,9 +21,9 @@ define([
             App.map = this.map;
 
             google.maps.event.addDomListener(window, "resize", function () {
-                var center = _this.map.getCenter();
-                google.maps.event.trigger(_this.map, "resize");
-                _this.map.setCenter(center);
+                var center = self.map.getCenter();
+                google.maps.event.trigger(self.map, "resize");
+                self.map.setCenter(center);
             });
 
             this.mapInfowindowView = new MapInfowindow();

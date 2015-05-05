@@ -17,7 +17,7 @@ define([
         },
 
         initialize: function (options) {
-            var _this = this;
+            var self = this;
             this.stateModel = new Backbone.Model({
                 params: {}
             });
@@ -26,12 +26,9 @@ define([
             this.curnetMarkersOnMap = [];
             this.views = [];
 
-
             this.render();
 
             this.devicesCoordinatesCollection = new DevisesCollection();
-
-
 
             this.devisesCollection = new DevisesCollection();
 
@@ -40,14 +37,8 @@ define([
             this.listenTo(this.stateModel, 'change:params', this.handleParams);
 
             this.devicesCoordinatesCollection.on('reset', function () {
-                _this.setMarkers()
+                self.setMarkers()
             });
-
-            this.devicesCoordinatesCollection.on('all', function (e) {
-                console.log('event',e);
-            });
-
-
 
             this.paginationView = new PaginationView({
                 collection: this.devisesCollection,
@@ -83,11 +74,11 @@ define([
 
         renderDevices: function () {
             this.$el.find('#globalDevicesChecker').prop('checked', false);
-            var _this = this;
+            var self = this;
             var devicesList = this.$el.find('#devicesMainList');
             //devicesList.html('');
             _.each(this.views, function (view) {
-                _this.stopListening(view.stateModel);
+                self.stopListening(view.stateModel);
                 view.remove();
             });
 
@@ -95,7 +86,7 @@ define([
             this.devisesCollection.map(function (device) {
                 //var isSelected = false;
 
-                var selectedDevice = _this.selectedDevicesCollection.find(function (model) {
+                var selectedDevice = self.selectedDevicesCollection.find(function (model) {
                     if (model.id === device.id) return true;
                 });
 
@@ -105,8 +96,8 @@ define([
                     view.stateModel.set({checked: true});
                 }
 
-                _this.listenTo(view.stateModel, 'change', _this.itemChecked);
-                _this.views.push(view);
+                self.listenTo(view.stateModel, 'change', self.itemChecked);
+                self.views.push(view);
                 devicesList.append(view.$el);
             });
         },
@@ -220,11 +211,11 @@ define([
         //},
 
         setMarkers: function () {
-            var _this = this;
+            var self = this;
             this.devicesCoordinatesCollection.map(function (model) {
                 console.log('>>',model);
                 var view = new markerView({model: model});
-                _this.curnetMarkersOnMap.push(view);
+                self.curnetMarkersOnMap.push(view);
             });
             if (this.curnetMarkersOnMap.length < 2) {
                 if (this.curnetMarkersOnMap.length === 1) {
@@ -235,7 +226,7 @@ define([
                 }
             } else {
                 var bounds = new google.maps.LatLngBounds();
-                _.each(_this.curnetMarkersOnMap, function (view) {
+                _.each(self.curnetMarkersOnMap, function (view) {
                     bounds.extend(view.marker.position);
                 });
                 App.map.fitBounds(bounds);

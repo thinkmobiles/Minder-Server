@@ -108,7 +108,6 @@ define([
             });
         },
         render: function () {
-            var _this = this;
             var authorized = App.sessionData.get('authorized');
             var data = {
                 top: [],

@@ -10,10 +10,10 @@ define([
             authorized: false,
             admin: false,
             user: null,
-            date:null,
-            tariffPlans:null
+            date: null,
+            tariffPlans: null
         });
-        function getDateTime(){
+        function getDateTime() {
             $.ajax({
                 url: '/now',
                 type: "GET",
@@ -29,7 +29,10 @@ define([
             });
         }
 
-        function getPlans(){
+        function getPlans() {
+            if (App.sessionData.get('tariffPlans')) {
+                return
+            }
             $.ajax({
                 url: '/tariffPlans',
                 type: "GET",
@@ -45,9 +48,15 @@ define([
             });
         }
 
-        setInterval(getDateTime,1000*60*60);
+        setInterval(getDateTime, 1000 * 60 * 50);
         getDateTime();
         getPlans();
+
+        App.sessionData.on('change:authorized', function () {
+            if (App.sessionData.get('authorized')) {
+                getPlans();
+            }
+        });
 
         var appRouter = new Router();
         App.router = appRouter;

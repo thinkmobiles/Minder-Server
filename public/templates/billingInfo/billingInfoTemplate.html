@@ -1,6 +1,8 @@
 <div class="panel panel-default">
     <div class="panel-heading">Billing Info</div>
     <div class="panel-body">
+
+
         <table class="table">
             <tbody>
             <tr>
@@ -9,12 +11,12 @@
                         Tier
                     </div>
                     <div class="tariffPlanInfo">
-                        MINDER Unit Base Cost by Volume RRP
+                        MINDER Unit Base Cost by Volume RRP per month
                     </div>
                 </td>
-                <% _.each(collection, function(item){%>
+                <% _.each(tearsMonth, function(item){%>
                 <% if (userPlan) { %>
-                    <% if (userPlan._id === item._id) { %>
+                    <% if (userPlan.id === item.id) { %>
                         <td class="active">
                     <% } else { %>
                         <td>
@@ -27,13 +29,51 @@
                         <%= item.name %>
                     </div>
                     <div class="tariffPlanInfo">
-                        <%= item.description %>
+                        <%= item.statement_descriptor %><br>
+                        <%= item.metadata.minDevices %> - <%= item.metadata.maxDevices %> devicess
                     </div>
                 </td>
                 <% }) %>
             </tr>
             </tbody>
         </table>
+
+        <table class="table">
+            <tbody>
+            <tr>
+                <td>
+                    <div class="tariffPlan">
+                        Tier
+                    </div>
+                    <div class="tariffPlanInfo">
+                        MINDER Unit Base Cost by Volume RRP per year
+                    </div>
+                </td>
+                <% _.each(tearsYear, function(item){%>
+                <% if (userPlan) { %>
+                <% if (userPlan.id === item.id) { %>
+                <td class="active">
+                    <% } else { %>
+                <td>
+                    <% } %>
+                    <% } else { %>
+                <td>
+                    <% } %>
+
+                    <div class="tariffPlan">
+                        <%= item.name %>
+                    </div>
+                    <div class="tariffPlanInfo">
+                        <%= item.statement_descriptor %><br>
+                        <%= item.metadata.minDevices %> - <%= item.metadata.maxDevices %> devicess
+                    </div>
+                </td>
+                <% }) %>
+            </tr>
+            </tbody>
+        </table>
+
+
         <% if (userPlan) { %>
 
             <p>
