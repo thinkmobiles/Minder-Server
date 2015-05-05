@@ -361,10 +361,60 @@ var DeviceHandler = function (db) {
         res.status(500).send('Not implemented');
     };
 
-    this.setStatusDeleted = function (req, res, next) {
+    function setStatusActive() {};
+
+    function setStatusDeleted(deviceModel, callback) {
+        var oldStatus = deviceModel.status;
+
+        deviceModel.status = DEVICE_STATUSES.DELETED;
+
+        device.save(function (err, updatedDevice) {
+            var ownerId;
+
+            if (err) {
+                if (callback && (typeof callback === 'function')) {
+                    callback(err);
+                }
+                return
+            }
+            if (!updatedDevice) {
+                if (callback && (typeof callback === 'function')) {
+                    callback(badRequests.NotFound());
+                }
+                return;
+            }
+
+            if (oldStatus === DEVICE_STATUSES.SUBSCRIBED) {
+
+                ownerId = deviceModel.user.toString();
+                self.incrementSubscribedDevicesCount(ownerId, -1, function (err) {
+                    if (err) {
+                        if (process.env.NODE_ENV !== 'production') {
+                            console.error(err);
+                            logWriter.log('handlers.js setStatusDeleted() -> userHandler.incrementSubscribedDevicesCount', err.stack);
+                        }
+                    }
+                })
+            }
+
+            res.status(200).send(updatedDevice);
+        });
+    };
+
+    this.updateStatus = function (req, res, next) {
         var userId = req.session.userId;
         var deviceId = req.params.id;
+        var options = req.body;
+        var deviceStatus = options.status;
         var criteria;
+
+        if (!deviceStatus) {
+            return next(badRequests.NotEnParams({reqParams: 'status'}));
+        }
+
+        if ((deviceStatus !== DEVICE_STATUSES.ACTIVE) && (deviceStatus !== DEVICE_STATUSES.DELETED) ){
+            return next(badRequests.InvalidValue({param: 'status'}));
+        }
 
         if (session.isAdmin(req)) {
             criteria = {
@@ -388,22 +438,31 @@ var DeviceHandler = function (db) {
             }
 
             oldStatus = device.status;
-
-            device.status = DEVICE_STATUSES.DELETED;
+            
+            device.status = deviceStatus;
             device.save(function (err, updatedDevice) {
                 var ownerId;
+                var quantity;
 
                 if (err) {
-                    return next (err);
+                    return next(err);
                 }
                 if (!updatedDevice) {
                     return next(badRequests.NotFound());
                 }
 
-                if (oldStatus === DEVICE_STATUSES.SUBSCRIBED) {
-
+                if ((oldStatus === DEVICE_STATUSES.SUBSCRIBED) && (deviceStatus === DEVICE_STATUSES.DELETED)) {
                     ownerId = device.user.toString();
-                    self.incrementSubscribedDevicesCount(ownerId, -1, function (err) {
+
+                    if (deviceStatus === DEVICE_STATUSES.ACTIVE) {
+                        quantity = 1;
+                    }
+
+                    if (deviceStatus === DEVICE_STATUSES.DELETED) {
+                        quantity = -1;
+                    }
+
+                    self.incrementSubscribedDevicesCount(ownerId, quantity, function (err) {
                         if (err) {
                             if (process.env.NODE_ENV !== 'production') {
                                 console.error(err);
@@ -415,6 +474,7 @@ var DeviceHandler = function (db) {
 
                 res.status(200).send(updatedDevice);
             });
+
         });
     };
 

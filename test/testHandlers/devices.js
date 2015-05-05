@@ -270,13 +270,78 @@ describe('Devices', function() {
 
     });
 
-    describe('DELETE /device/:id', function() {
-        it('Admin can delete the device by id', function(done) {
+    describe('PATCH /device/:id', function() {
+
+        //ACTIVATE:
+        it('Admin can activate the device by id', function(done) {
             var devId = testData.devices[4]._id.toString();
             var url = '/devices/' + devId;
+            var data = {
+                status: DEVICE_STATUSES.ACTIVE
+            };
 
             adminAgent
                 .patch(url)
+                .send(data)
+                .end(function (err, res) {
+                    expect(res.status).to.equals(200);
+                    expect(res.body).to.be.instanceOf(Object);
+                    expect(res.body).to.have.property('_id');
+                    expect(res.body).to.have.property('status');
+                    expect(res.body.status).to.equals(DEVICE_STATUSES.ACTIVE);
+                    done();
+                });
+        });
+
+        it('User can activate the device by id', function(done) {
+            var devId = testData.devices[2]._id.toString();
+            var url = '/devices/' + devId;
+            var data = {
+                status: DEVICE_STATUSES.ACTIVE
+            };
+
+            userAgent1
+                .patch(url)
+                .send(data)
+                .end(function (err, res) {
+                    expect(res.status).to.equals(200);
+                    expect(res.body).to.be.instanceOf(Object);
+                    expect(res.body).to.have.property('_id');
+                    expect(res.body).to.have.property('status');
+                    expect(res.body.status).to.equals(DEVICE_STATUSES.ACTIVE);
+                    done();
+                });
+        });
+
+        it('Another user can\'t delete the device by id', function(done) {
+            var devId = testData.devices[3]._id.toString();
+            var url = '/devices/' + devId;
+            var data = {
+                status: DEVICE_STATUSES.ACTIVE
+            };
+
+            userAgent2
+                .patch(url)
+                .send(data)
+                .end(function (err, res) {
+                    expect(res.status).to.equals(400);
+                    expect(res.body).to.have.property('error');
+                    expect(res.body.error).to.include('Not Found');
+                    done();
+                });
+        });
+
+        //DELETE:
+        it('Admin can delete the device by id', function(done) {
+            var devId = testData.devices[4]._id.toString();
+            var url = '/devices/' + devId;
+            var data = {
+                status: DEVICE_STATUSES.DELETED
+            };
+
+            adminAgent
+                .patch(url)
+                .send(data)
                 .end(function (err, res) {
                     expect(res.status).to.equals(200);
                     expect(res.body).to.be.instanceOf(Object);
@@ -290,9 +355,13 @@ describe('Devices', function() {
         it('User can delete the device by id', function(done) {
             var devId = testData.devices[2]._id.toString();
             var url = '/devices/' + devId;
+            var data = {
+                status: DEVICE_STATUSES.DELETED
+            };
 
             userAgent1
                 .patch(url)
+                .send(data)
                 .end(function (err, res) {
                     expect(res.status).to.equals(200);
                     expect(res.body).to.be.instanceOf(Object);
@@ -306,12 +375,17 @@ describe('Devices', function() {
         it('Another user can\'t delete the device by id', function(done) {
             var devId = testData.devices[3]._id.toString();
             var url = '/devices/' + devId;
+            var data = {
+                status: DEVICE_STATUSES.ACTIVE
+            };
 
             userAgent2
                 .patch(url)
+                .send(data)
                 .end(function (err, res) {
                     expect(res.status).to.equals(400);
                     expect(res.body).to.have.property('error');
+                    expect(res.body.error).to.include('Not Found');
                     done();
                 });
         });

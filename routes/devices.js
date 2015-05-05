@@ -15,7 +15,7 @@ module.exports = function (db) {
     router.get('/:id', deviceHandler.getDevice);
     router.put('/:id', deviceHandler.updateDevice);
     //router.delete('/:id', deviceHandler.removeDevice);
-    router.patch('/:id', deviceHandler.setStatusDeleted);
+    router.patch('/:id', deviceHandler.updateStatus); //req.body.status = "active" | "deleted"
     router.post('/getLocations', deviceHandler.getDevicesLocation);
 
     return router;
