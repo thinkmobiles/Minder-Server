@@ -438,7 +438,7 @@ var DeviceHandler = function (db) {
             }
 
             oldStatus = device.status;
-            
+
             device.status = deviceStatus;
             device.save(function (err, updatedDevice) {
                 var ownerId;
@@ -451,18 +451,10 @@ var DeviceHandler = function (db) {
                     return next(badRequests.NotFound());
                 }
 
-                if ((oldStatus === DEVICE_STATUSES.SUBSCRIBED) && (deviceStatus === DEVICE_STATUSES.DELETED)) {
+                if (oldStatus === DEVICE_STATUSES.SUBSCRIBED) {
                     ownerId = device.user.toString();
 
-                    if (deviceStatus === DEVICE_STATUSES.ACTIVE) {
-                        quantity = 1;
-                    }
-
-                    if (deviceStatus === DEVICE_STATUSES.DELETED) {
-                        quantity = -1;
-                    }
-
-                    self.incrementSubscribedDevicesCount(ownerId, quantity, function (err) {
+                    self.incrementSubscribedDevicesCount(ownerId, -1, function (err) {
                         if (err) {
                             if (process.env.NODE_ENV !== 'production') {
                                 console.error(err);
