@@ -715,8 +715,31 @@ var UserHandler = function (db) {
                 res.status(200).send({success: 'udpated', model: user});
             }
         });
-        //res.status(500).send('Not implemented');
     };
+
+    /*this.incrementSubscribedDevicesCount = function(userId, quantity, callback) {
+        var criteria = {
+            _id: userId
+        };
+        var update = {
+            $inc: {
+                quantity: quantity,
+                'billings.subscribedDevices': 1
+            }
+        };
+
+        UserModel.findAndModify(criteria, update, function (err, numAffected) {
+            if (err) {
+                if (callback && (typeof callback === 'function')) {
+                    callback(err);
+                }
+            } else {
+                if (callback && (typeof callback === 'function')) {
+                    callback(null, numAffected);
+                }
+            }
+        });
+    };*/
 
 
 };

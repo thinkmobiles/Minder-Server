@@ -2,6 +2,7 @@
 
 var DEVICE_OS = require('../../constants/deviceOs');
 var USER_ROLES = require('../../constants/userRoles');
+var DEVICE_STATUSES = require('../../constants/deviceStatuses');
 
 var TestDataModule = function () {
     var self = this;
@@ -68,6 +69,12 @@ var TestDataModule = function () {
         deviceName: 'Another device. But it will not removed via another user',
         deviceType: DEVICE_OS.WINDOWS_PHONE,
         user: self.users[0]._id
+    }, {
+        deviceId: 'dev_5',
+        deviceName: 'Subscribed device',
+        deviceType: DEVICE_OS.WINDOWS_PHONE,
+        user: self.users[0]._id,
+        status: DEVICE_STATUSES.SUBSCRIBED
     }];
 
 };

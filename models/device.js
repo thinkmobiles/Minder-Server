@@ -1,4 +1,5 @@
 'use strict';
+var DEVICE_STATUSES = require('../constants/deviceStatuses');
 
 module.exports = (function () {
     var mongoose = require('mongoose');
@@ -9,7 +10,7 @@ module.exports = (function () {
         deviceId: {type: String, required: true, unique: true},
         deviceType: {type: String, required: true},
         name: {type: String, default: ''},
-        status: {type: String, required: true, default: 'active'}, // active | deleted | subscribed
+        status: {type: String, required: true, default: DEVICE_STATUSES.ACTIVE}, // active | deleted | subscribed
         lastLocation: {
             long: {type: Number, default: null},
             lat: {type: Number, default: null},

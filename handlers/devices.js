@@ -5,13 +5,14 @@ var async = require('async');
 var mongoose = require('mongoose');
 var badRequests = require('../helpers/badRequests');
 var logWriter = require('../helpers/logWriter')();
-
 var SessionHandler = require('../handlers/sessions');
 
 var DeviceHandler = function (db) {
     var session = new SessionHandler(db);
     var deviceSchema = mongoose.Schemas['Device'];
     var DeviceModel = db.model('Device', deviceSchema);
+    var userSchema = mongoose.Schemas['User'];
+    var UserModel = db.model('User', userSchema);
     var self = this;
 
     function prepareDeviceData(data) {
@@ -233,27 +234,32 @@ var DeviceHandler = function (db) {
 
     this.getDevicesLocation = function (req, res, next) {
         var userId = req.session.userId;
-        var params = req.body;
-        var criteria = {};
+        var options = req.body;
+        var criteria = {
+            status: DEVICE_STATUSES.SUBSCRIBED
+        };
+        var deviceIds;
+        var fields = {
+            name: 1,
+            _id: 1,
+            lastLocation: 1,
+            updatedAt: 1
+        };
 
-        console.log('params', params);
-
-        if (!params.devices) {
-            return res.status(200).send([]);
-        } else {
-            criteria._id = {
-                $in: JSON.parse(params.devices)
-            }
+        if (!options.devices) {
+            return next(badRequests.NotEnParams({reqParams: ['devices']}));
         }
+
+        deviceIds = JSON.parse(options.devices);
+        criteria._id = {
+            $in: deviceIds
+        };
 
         if (!session.isAdmin(req)) {
             criteria.user = userId;
-            criteria.status = 'subscribed';
         }
-        console.log('criteria', criteria);
-        console.log('req.session', req.session);
 
-        DeviceModel.find(criteria, 'name _id lastLocation updatedAt')
+        DeviceModel.find(criteria, fields)
             .exec(function (err, devices) {
                 if (err) {
                     return next(err);
@@ -331,7 +337,7 @@ var DeviceHandler = function (db) {
     };
 
     this.removeDevice = function (req, res, next) {
-        var id = req.params.id;
+        /*var id = req.params.id;
         var userId = req.session.userId;
 
         var criteria = {
@@ -350,18 +356,15 @@ var DeviceHandler = function (db) {
             } else {
                 res.status(200).send({success: 'removed'});
             }
-        });
+        });*/
 
-        //res.status(500).send('Not implemented');
+        res.status(500).send('Not implemented');
     };
 
     this.setStatusDeleted = function (req, res, next) {
         var userId = req.session.userId;
         var deviceId = req.params.id;
         var criteria;
-        var update = {
-            status: DEVICE_STATUSES.DELETED
-        };
 
         if (session.isAdmin(req)) {
             criteria = {
@@ -374,7 +377,9 @@ var DeviceHandler = function (db) {
             };
         }
 
-        DeviceModel.findOneAndUpdate(criteria, update, function (err, device) {
+        DeviceModel.findOne(criteria, function (err, device) {
+            var oldStatus;
+
             if (err) {
                 return next(err);
             }
@@ -382,10 +387,60 @@ var DeviceHandler = function (db) {
                 return next(badRequests.NotFound());
             }
 
-            res.status(200).send(device);
-            //TODO: decrement user, active devices count;
+            oldStatus = device.status;
+
+            device.status = DEVICE_STATUSES.DELETED;
+            device.save(function (err, updatedDevice) {
+                var ownerId;
+
+                if (err) {
+                    return next (err);
+                }
+                if (!updatedDevice) {
+                    return next(badRequests.NotFound());
+                }
+
+                if (oldStatus === DEVICE_STATUSES.SUBSCRIBED) {
+
+                    ownerId = device.user.toString();
+                    self.incrementSubscribedDevicesCount(ownerId, -1, function (err) {
+                        if (err) {
+                            if (process.env.NODE_ENV !== 'production') {
+                                console.error(err);
+                                logWriter.log('handlers.js setStatusDeleted() -> userHandler.incrementSubscribedDevicesCount', err.stack);
+                            }
+                        }
+                    })
+                }
+
+                res.status(200).send(updatedDevice);
+            });
         });
-    }
+    };
+
+    this.incrementSubscribedDevicesCount = function(userId, quantity, callback) {
+        var criteria = {
+            _id: userId
+        };
+        var update = {
+            $inc: {
+                'billings.subscribedDevices': quantity
+            }
+        };
+
+        UserModel.findOneAndUpdate(criteria, update, function (err, userModel) {
+            if (err) {
+                if (callback && (typeof callback === 'function')) {
+                    callback(err);
+                }
+            } else {
+                if (callback && (typeof callback === 'function')) {
+                    callback(null, userModel);
+                }
+            }
+        });
+
+    };
 
 };
 

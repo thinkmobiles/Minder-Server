@@ -21,7 +21,7 @@ module.exports = (function () {
             expirationDate: {type: Date, default: null},
             renewEnabled: {type: Boolean, default: false},
             subscribedDevices: {type: Number, required: true, default: 0},
-            monthSubscribedDevices: {type: Number, required: true, default: 0},
+            //monthSubscribedDevices: {type: Number, required: true, default: 0}, //TODO remove
             active: {type: Boolean, required: true, default: false}, //is need this field
             stripeId: {type: String, default: ''}
         },

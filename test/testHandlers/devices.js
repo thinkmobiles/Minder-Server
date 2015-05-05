@@ -272,7 +272,7 @@ describe('Devices', function() {
 
     describe('DELETE /device/:id', function() {
         it('Admin can delete the device by id', function(done) {
-            var devId = testData.devices[1]._id.toString();
+            var devId = testData.devices[4]._id.toString();
             var url = '/devices/' + devId;
 
             adminAgent
