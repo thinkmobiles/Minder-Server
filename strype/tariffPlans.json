@@ -1,0 +1,123 @@
+[
+  {
+    "id": "1",
+    "name": "T1",
+    "amount": 0,
+    "currency": "USD",
+    "interval": "month",
+    "metadata": {
+      "type": "month",
+      "minDevices": 0,
+      "maxDevices": 1
+    },
+    "statement_descriptor": "Minder T1 Tear"
+  },
+  {
+    "id": "2",
+    "name": "T2",
+    "amount": 500,
+    "currency": "USD",
+    "interval": "month",
+    "metadata": {
+      "type": "month",
+      "minDevices": 1,
+      "maxDevices": 5
+    },
+    "statement_descriptor": "Minder T2 Tear"
+  },
+  {
+    "id": "3",
+    "name": "T3",
+    "amount": 900,
+    "currency": "USD",
+    "interval": "month",
+    "metadata": {
+      "type": "month",
+      "minDevices": 6,
+      "maxDevices": 10
+    },
+    "statement_descriptor": "Minder T3 Tear"
+  },
+  {
+    "id": "4",
+    "name": "T4",
+    "amount": 2000,
+    "currency": "USD",
+    "interval": "month",
+    "metadata": {
+      "type": "month",
+      "minDevices": 11,
+      "maxDevices": 25
+    },
+    "statement_descriptor": "Minder T4 Tear"
+  },
+  {
+    "id": "5",
+    "name": "T5",
+    "amount": 3500,
+    "currency": "USD",
+    "interval": "month",
+    "metadata": {
+      "type": "month",
+      "minDevices": 26,
+      "maxDevices": 50
+    },
+    "statement_descriptor": "Minder T5 Tear"
+  },
+  {
+    "id": "6",
+    "name": "T6",
+    "amount": 5000,
+    "currency": "USD",
+    "interval": "month",
+    "metadata": {
+      "type": "month",
+      "minDevices": 51,
+      "maxDevices": 100
+    },
+    "statement_descriptor": "Minder T6 Tear"
+  },
+
+
+
+
+  {
+    "id": "7",
+    "name": "T7",
+    "amount": 12000,
+    "currency": "USD",
+    "interval": "year",
+    "metadata": {
+      "type": "year",
+      "minDevices": 0,
+      "maxDevices": 25
+    },
+    "statement_descriptor": "Minder T7 Tear"
+  },
+  {
+    "id": "8",
+    "name": "T8",
+    "amount": 15000,
+    "currency": "USD",
+    "interval": "year",
+    "metadata": {
+      "type": "year",
+      "minDevices": 26,
+      "maxDevices": 50
+    },
+    "statement_descriptor": "Minder T8 Tear"
+  },
+  {
+    "id": "9",
+    "name": "T9",
+    "amount": 20000,
+    "currency": "USD",
+    "interval": "year",
+    "metadata": {
+      "type": "year",
+      "minDevices": 51,
+      "maxDevices": 100
+    },
+    "statement_descriptor": "Minder T9 Tear"
+  }
+]

@@ -28,11 +28,11 @@ define([
         },
 
         needAuthorize: [
-            "main(/page/:page)",
+            "main",
             "billingInfo",
-            "device(/:id)",
-            "devices(/page/:page)",
-            "profile",
+            "device",
+            "devices",
+            "profile"
         ],
 
         initialize: function () {
@@ -42,6 +42,16 @@ define([
 
         loadWrapperView: function (name, params) {
 
+            if (!App.sessionData.get('authorized')) {
+                var WrongRout = _.find(this.needAuthorize, function(rout){
+                    if(name === rout){
+                        return true
+                    }
+                });
+                if(WrongRout){
+                    App.router.navigate("login", {trigger: true});
+                }
+            }
 
             var self = this;
             require(['views/' + name + '/' + name + 'View'], function (View) {
@@ -73,28 +83,12 @@ define([
             }
         },
 
-        changeView: function (view) {
-            if (this.view) {
-                this.view.undelegateEvents();
-            }
-            $(document).trigger("resize");
-            this.view = view;
-        },
-        //checkLogin: function () {
-        //    if (!App.sessionData.get('authorized')) {
-        //        App.router.navigate("login", {trigger: true});
-        //        this.loadWrapperView('login');
-        //    }
-        //    return !App.sessionData.get('authorized');
-        //},
         main: function (page) {
             if (page) page = parseInt(page);
-            if (this.checkLogin()) return;
             this.loadWrapperView('main', {page: page});
         },
 
         any: function () {
-            if (this.checkLogin()) return;
             this.loadWrapperView('main');
         },
 
@@ -116,27 +110,22 @@ define([
             this.loadWrapperView('contactUs');
         },
         profile: function () {
-            if (this.checkLogin()) return;
             this.loadWrapperView('profile');
         },
         billingInfo: function () {
-            if (this.checkLogin()) return;
             this.loadWrapperView('billingInfo');
         },
         devices: function (page) {
             if (page) page = parseInt(page);
-            if (this.checkLogin()) return;
             this.loadWrapperView('devices', {page: page});
         },
         device: function (id) {
-            if (this.checkLogin()) return;
             this.loadWrapperView('device', {id: id});
         },
         resetPassword: function (token) {
             this.loadWrapperView('resetPassword', {token: token});
         },
         userManagement: function (page) {
-            if (this.checkLogin()) return;
             if (!App.sessionData.get('admin')) {
                 return
             }

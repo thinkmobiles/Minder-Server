@@ -15,7 +15,7 @@ define([
         },
 
         initialize: function (options) {
-            var _this = this;
+            var self = this;
             this.stateModel = new Backbone.Model({
                 params: {},
                 devices: [],
@@ -34,17 +34,17 @@ define([
             this.listenTo(this.stateModel, 'change:params', this.handleParams);
             this.listenTo(this.devisesCollection, 'sync remove', this.render);
             this.listenTo(this.selectedDevicesCollection, 'add remove', function () {
-                _this.calculatePlan();
-                _this.render();
+                self.calculatePlan();
+                self.render();
             });
             App.sessionData.on('change:date change:tariffPlans sync', function () {
                 if (App.sessionData.get('date')) {
-                    _this.generateDropdown();
+                    self.generateDropdown();
                 }
-                _this.calculatePlan();
+                self.calculatePlan();
             });
-            _this.generateDropdown();
-            _this.calculatePlan();
+            self.generateDropdown();
+            self.calculatePlan();
 
             this.paginationView = new PaginationView({
                 collection: this.devisesCollection,
@@ -57,14 +57,14 @@ define([
 
         },
         deviceCheck: function (event) {
-            var _this = this;
+            var self = this;
             this.devisesCollection.map(function (model) {
                 if (model.id === event.target.value) {
                     //console.log(event.toElement.checked);
                     if (event.toElement.checked) {
-                        _this.selectedDevicesCollection.add(model);
+                        self.selectedDevicesCollection.add(model);
                     } else {
-                        _this.selectedDevicesCollection.remove(model);
+                        self.selectedDevicesCollection.remove(model);
                     }
                 }
             });
@@ -77,12 +77,11 @@ define([
             });
         },
         updateDevicesData: function () {
-            var _this = this;
-            var selectedDevices = this.$el.find();
+            var self = this;
             var devices = [];
             var deviceSelected = null;
             this.devisesCollection.map(function (device) {
-                deviceSelected = _this.selectedDevicesCollection.find(function (devSelected) {
+                deviceSelected = self.selectedDevicesCollection.find(function (devSelected) {
                     if (devSelected.id === device.id) return true;
                 });
                 if (deviceSelected) {
@@ -166,7 +165,7 @@ define([
             }
         },
         render: function () {
-            var self = this;
+
             this.updateDevicesData();
             this.$el.html(_.template(MainTemplate, this.stateModel.toJSON()));
             this.$el.find('#pagination').append(this.paginationView.$el);

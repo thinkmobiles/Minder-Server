@@ -5,7 +5,7 @@ define([
 
     var View = Backbone.View.extend({
         initialize: function (options) {
-            var _this = this;
+            var self = this;
             this.stateModel = new Backbone.Model({
                 address: '',
                 updatedAt: ''
@@ -16,17 +16,17 @@ define([
                 position: new google.maps.LatLng(-25.363882, 131.044922)
             });
             google.maps.event.addListener(App.map, 'click', function (e) {
-                _this.infowindow.close();
+                self.infowindow.close();
             });
         },
         setDeviceInfowindow: function (model, marker) {
-            var _this = this;
+            var self = this;
             this.stateModel.set({
                 //updatedAt: model.get('updatedAt')
                 updatDate: moment(model.get('lastLocation').dateTime).format('YYYY/MM/DD HH:mm:ss')
             });
             if (model.get('address')) {
-                _this.stateModel.set({
+                self.stateModel.set({
                     address: model.get('address')
                 });
                 this.stateModel.set(_.extend(this.stateModel.toJSON(), model.toJSON()));
@@ -39,7 +39,7 @@ define([
             //var data = model.toJSON();
             //data = _.extend(data, this.stateModel.toJSON());
             this.stateModel.set(_.extend(this.stateModel.toJSON(), model.toJSON()));
-            _this.stateModel.set({
+            self.stateModel.set({
                 address: ''
             });
             this.updateData();
@@ -50,7 +50,7 @@ define([
                 success: function (result) {
                     ///console.log(result);
                     if (result.status === 'OK') {
-                        _this.stateModel.set({
+                        self.stateModel.set({
                             address: result.results[0].formatted_address,
                             modelId: model.id,
                         });
@@ -58,7 +58,7 @@ define([
                             address: result.results[0].formatted_address
                         })
                     } else {
-                        _this.stateModel.set({
+                        self.stateModel.set({
                             address: ''
                         })
                     }

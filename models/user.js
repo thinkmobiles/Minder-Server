@@ -16,12 +16,14 @@ module.exports = (function () {
         status: {type: Number, default: 0}, // 0 - inactive ??? CMS buttons Activate | Edit | Delete ???
         role: {type: Number, required: true, default: USER_ROLES.USER},
         currentPlan: {type: ObjectId, ref: 'TariffPlans', default: null},
+        //currentPlan: {type: String, default: ''},
         billings: {
             expirationDate: {type: Date, default: null},
             renewEnabled: {type: Boolean, default: false},
             subscribedDevices: {type: Number, required: true, default: 0},
             monthSubscribedDevices: {type: Number, required: true, default: 0},
-            active: {type: Boolean, required: true, default: false} //is need this field
+            active: {type: Boolean, required: true, default: false}, //is need this field
+            stripeId: {type: String, default: ''}
         },
         createdAt: {type: Date, default: Date.now},
         updatedAt: {type: Date, default: Date.now}

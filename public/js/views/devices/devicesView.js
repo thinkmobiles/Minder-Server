@@ -2,8 +2,10 @@ define([
     'text!templates/devices/devicesTemplate.html',
     'collections/devicesCollection',
     'views/device/deviceMainListView',
-    'views/customElements/paginationView'
-], function (MainTemplate, DevisesCollection, deviceMainListView, PaginationView) {
+    'views/customElements/paginationView',
+    'stripeCheckout',
+    'config/config'
+], function (MainTemplate, DevisesCollection, deviceMainListView, PaginationView, StripeCheckout, config) {
 
     var MainView = Backbone.View.extend({
         events: {
@@ -16,7 +18,7 @@ define([
         },
 
         initialize: function (options) {
-            var _this = this;
+            var self = this;
             this.stateModel = new Backbone.Model({
                 params: {},
                 devices: [],
@@ -29,26 +31,39 @@ define([
                 costForThisMonth: 0
             });
 
-
             this.selectedDevicesCollection = new DevisesCollection();
+
+            this.Stripe = StripeCheckout.configure({
+                key: config.strypePublicKay,
+                image: '/images/logoForPaiments.jpg',
+                token: function(token){
+                    self.stripeTokenHandler(token);
+                },
+                //currency:'USD',
+                email:App.sessionData.get('user').email,
+                panelLabel:'Subscribe'
+            });
+
+
+
             this.devisesCollection = new DevisesCollection();
             this.listenTo(this.stateModel, 'change:params', this.handleParams);
             this.listenTo(this.devisesCollection, 'sync remove', this.render);
             this.listenTo(this.selectedDevicesCollection, 'add remove', function () {
-                _this.calculatePlan();
-                _this.render();
+                self.calculatePlan();
+                self.render();
             });
-            //this.selectedDevicesCollection.on('all', function (e) {
-            //    console.log('>>', e, _this.selectedDevicesCollection.length);
-            //});
+            this.selectedDevicesCollection.on('all', function (e) {
+                console.log('>>', e, self.selectedDevicesCollection.length);
+            });
             App.sessionData.on('change:date change:tariffPlans sync', function () {
                 if (App.sessionData.get('date')) {
-                    _this.generateDropdown();
+                    self.generateDropdown();
                 }
-                _this.calculatePlan();
+                self.calculatePlan();
             });
-            _this.generateDropdown();
-            _this.calculatePlan();
+            self.generateDropdown();
+            self.calculatePlan();
 
             this.paginationView = new PaginationView({
                 collection: this.devisesCollection,
@@ -62,15 +77,53 @@ define([
             this.render();
 
         },
+        stripeTokenHandler:function(token){
+            var self = this;
+            var Model;
+            var model;
+            var devices = self.selectedDevicesCollection.toJSON();
+            console.log(self);
+            console.log(token);
+            devices = _.pluck(devices, '_id');
+
+
+            Model = Backbone.Model.extend({
+                url:function(){
+                    return '/tariffPlans/subscribe'
+                }
+            });
+            model = new Model();
+            console.log({
+                devices: devices,
+                tokenObject: token
+            });
+            model.save({
+                devices: devices,
+                tokenObject: token
+            }, {
+                error:function(err){
+                    App.error(err);
+                },
+                patch: true
+            });
+        },
+        showStripe:function(e){
+            //e.preventDefault();
+            this.Stripe.open({
+                name: 'Demo Site',
+                description: '2 widgets'
+                //amount: 2500
+            });
+        },
         deviceCheck: function (event) {
-            var _this = this;
+            var self = this;
             this.devisesCollection.map(function (model) {
                 if (model.id === event.target.value) {
                     //console.log(event.toElement.checked);
                     if (event.toElement.checked) {
-                        _this.selectedDevicesCollection.add(model);
+                        self.selectedDevicesCollection.add(model);
                     } else {
-                        _this.selectedDevicesCollection.remove(model);
+                        self.selectedDevicesCollection.remove(model);
                     }
                 }
             });
@@ -99,12 +152,11 @@ define([
             });
         },
         updateDevicesData: function () {
-            var _this = this;
-            var selectedDevices = this.$el.find();
+            var self = this;
             var devices = [];
             var deviceSelected = null;
             this.devisesCollection.map(function (device) {
-                deviceSelected = _this.selectedDevicesCollection.find(function (devSelected) {
+                deviceSelected = self.selectedDevicesCollection.find(function (devSelected) {
                     if (devSelected.id === device.id) return true;
                 });
                 if (deviceSelected) {
@@ -195,6 +247,11 @@ define([
             this.updateDevicesData();
             this.$el.html(_.template(MainTemplate, this.stateModel.toJSON()));
             this.$el.find('#pagination').append(this.paginationView.$el);
+
+            $('#myModal').on('hidden.bs.modal', function () {
+                self.showStripe()
+            });
+
             return this;
         },
         setParams: function (params) {

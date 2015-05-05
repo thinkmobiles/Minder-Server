@@ -21,7 +21,7 @@ define([
             }
         },
         render: function () {
-            var _this = this;
+            var self = this;
             if (!this.psition) {
                 var location = this.model.get('lastLocation');
                 this.psition = new google.maps.LatLng(location.lat, location.long);
@@ -54,8 +54,8 @@ define([
             }
             this.marker.setPosition(this.psition);
 
-            google.maps.event.addListener(_this.marker, 'click', function () {
-                App.mapInfowindowView.setDeviceInfowindow(_this.model, _this.marker);
+            google.maps.event.addListener(self.marker, 'click', function () {
+                App.mapInfowindowView.setDeviceInfowindow(self.model, self.marker);
             });
             return this;
         }

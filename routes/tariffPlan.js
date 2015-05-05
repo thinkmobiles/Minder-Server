@@ -12,6 +12,9 @@ module.exports = function (db) {
     var session = new SessionHandler(db);
 
     router.get('/', session.authenticatedUser, tariffPlan.getTariffPans);
+    router.post('/subscribe', session.authenticatedUser, tariffPlan.subscribe);
+    //router.get('/getStripeTariffs', session.authenticatedUser, tariffPlan.getStripeTariffs);
+    //router.get('/getStripeCustomers', session.authenticatedUser, tariffPlan.getStripeCustomers);
 
     return router;
 };

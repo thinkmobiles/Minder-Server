@@ -4,7 +4,7 @@ define([
 
     var View = Backbone.View.extend({
         initialize: function (options) {
-            var _this = this;
+            var self = this;
             if (options.page < 1) options.page = 1;
             this.stateModel = new Backbone.Model({
                 count: 0,
@@ -34,26 +34,26 @@ define([
                 //]
             });
             this.collection = options.collection;
-            _this.count();
+            self.count();
 
             this.stateModel.on('change:page', function (func) {
-                _this.count();
+                self.count();
             });
 
         },
         tagName: 'nav',
 
         count: function (cb) {
-            var _this = this;
+            var self = this;
             $.ajax({
                 url: "/devices/count",
                 type: "GET",
                 data: this.getFilters(),
                 success: function (response) {
-                    _this.stateModel.set({
+                    self.stateModel.set({
                         count: response.count
                     });
-                    _this.calculate();
+                    self.calculate();
                 },
                 error: function (err) {
                     App.error(err);
