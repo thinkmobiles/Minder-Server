@@ -6,9 +6,6 @@ define([
     var View = Backbone.View.extend({
         initialize: function (options) {
             this.marker = null;
-            //var self = this;
-            //console.log(self);
-            //self.initializeMap();
             this.render();
             this.stateModel = new Backbone.Model();
         },
@@ -31,9 +28,6 @@ define([
                     map: App.map,
                     icon: {
                         url: '/images/markers/default.png',
-                        //size: new google.maps.Size(32, 32),
-                        //origin: new google.maps.Point(0, 0),
-                        //anchor: new google.maps.Point(32, 16)
                     },
                     title: this.model.get('name')
                 });

@@ -1,9 +1,5 @@
 define([
-    //'config/config',
-    //'collections/menu/MenuItems',
-    'text!templates/menu/topMenuTemplate.html',
-    //'views/menu/menuItemView',
-    //'views/menu/dropDownMenuView'
+    'text!templates/menu/topMenuTemplate.html'
 ], function (topMenuTemplate) {
 
     var MainView = Backbone.View.extend({
@@ -19,73 +15,29 @@ define([
                 url: "#main",
                 title: "Home page",
                 authorized: true
-                //administrator: false
             }, {
                 name: "Devices",
                 url: "#devices",
                 title: "User devices management",
                 authorized: true
-                //administrator: false
             }, {
                 name: "Billing info",
                 url: "#billingInfo",
                 title: "User billing info",
                 authorized: true
-                //administrator: false
             }
-            //, {
-            //    name: "User management",
-            //    url: "#userManagement",
-            //    title: "Admin user management",
-            //    action: false,
-            //    authorized: true,
-            //    administrator: true
-            //}
-            //{
-            //    name: "Contact us",
-            //    url: "#contactUs",
-            //    title: "press here if you wont contact with us"
-            //}
         ],
-
         topMenuRightDropdownItemsRaw: [
             {
                 name: "Profile",
                 url: "#profile",
                 title: "User profile",
                 authorized: true
-                //administrator: false
             }
-            //, {
-            //    name: "Logout",
-            //    url: "#logout",
-            //    title: "User logout",
-            //    action: 'logout',
-            //    authorized: true
-            //    //administrator: false
-            //}
         ],
 
         initialize: function (options) {
-
-            //this.topMenuCollection = new MenuItemsCollection();
-            //
-            //
-            //this.dropDownCollection = new MenuItemsCollection();
-
-
-            //this.topMenuCollection = new Backbone.Collection(this.topMenuLeftItemsRaw);
-            //this.dropDownCollection = new Backbone.Collection(this.topMenuRightDropdownItemsRaw);
-
-
-            //this.views = [];
-
             this.listenTo(App.sessionData, 'change', this.render);
-            App.sessionData.on('change', function (e) {
-                console.log('--sessionData--', e);
-            });
-            //this.render();
-
         },
 
         logout: function () {
@@ -94,7 +46,6 @@ define([
                 type: "POST",
                 success: function (response) {
                     App.router.navigate("login", {trigger: true});
-                    console.log('logout success');
                     App.sessionData.set({
                         authorized: false,
                         admin: false,
@@ -102,7 +53,6 @@ define([
                     });
                 },
                 error: function (err) {
-                    console.log('logout error', err);
                     App.error(err);
                 }
             });

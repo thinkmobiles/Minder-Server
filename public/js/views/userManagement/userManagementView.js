@@ -14,7 +14,7 @@ define([
             'click .delete': 'deviceDelete'
         },
 
-        initialize: function (options) {
+        initialize: function () {
             var self = this;
             this.stateModel = new Backbone.Model({
                 params: {},
@@ -60,7 +60,6 @@ define([
             var self = this;
             this.devisesCollection.map(function (model) {
                 if (model.id === event.target.value) {
-                    //console.log(event.toElement.checked);
                     if (event.toElement.checked) {
                         self.selectedDevicesCollection.add(model);
                     } else {

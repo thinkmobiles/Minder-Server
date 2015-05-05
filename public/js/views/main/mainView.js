@@ -8,7 +8,6 @@ define([
 ], function (MainTemplate, MapView, markerView, DevisesCollection, deviceMainListView, PaginationView) {
 
     var MainView = Backbone.View.extend({
-        //el: '#wrapper',
         className: "mainPage",
         events: {
             'click #globalDevicesChecker': 'globalCheckTrigger',
@@ -16,7 +15,7 @@ define([
             'submit #searchForm': 'search'
         },
 
-        initialize: function (options) {
+        initialize: function () {
             var self = this;
             this.stateModel = new Backbone.Model({
                 params: {}
@@ -131,33 +130,10 @@ define([
                 devicesIdis.push(model.id);
             });
 
-            console.log("locate", devicesIdis);
-
             if (devicesIdis.length === 0) {
                 this.devicesCoordinatesCollection.reset();
                 App.map.setZoom(1);
             } else {
-
-                //var Model = Backbone.Model.extend({
-                //    url:function(){
-                //        return'/devices/getLocations'
-                //    }
-                //});
-                //
-                //var model = new Model();
-                //
-                //model.save({
-                //    devices:devicesIdis
-                //},{
-                //    success:function(data){
-                //        console.log('success',data.toJSON());
-                //        var coordinates = data.toJSON();
-                //        //self.devicesCoordinatesCollection.reset(data.toJSON());
-                //    },
-                //    error:function(err){
-                //        App.error(err);
-                //    }
-                //});
 
                 data = JSON.stringify(devicesIdis);
                 $.ajax({
@@ -168,12 +144,9 @@ define([
                         devices:data
                     },
                     success: function (data) {
-                        //data = JSON.parse(data);
-                        //console.log('>>>>>', data);
                         self.devicesCoordinatesCollection.reset(data);
                     },
                     error: function (err) {
-                        console.log(err);
                         App.error(err);
                     }
                 });
@@ -188,32 +161,9 @@ define([
             this.curnetMarkersOnMap = [];
         },
 
-        //setMarkers: function () {
-        //    var _this = this;
-        //    this.selectedDevicesCollection.map(function (model) {
-        //        var view = new markerView({model: model});
-        //        _this.curnetMarkersOnMap.push(view);
-        //    });
-        //    if (this.curnetMarkersOnMap.length < 2) {
-        //        if (this.curnetMarkersOnMap.length === 1) {
-        //            App.map.setZoom(11);
-        //            App.map.setCenter(this.curnetMarkersOnMap[0].marker.position);
-        //        } else {
-        //            App.map.setZoom(1);
-        //        }
-        //    } else {
-        //        var bounds = new google.maps.LatLngBounds();
-        //        _.each(_this.curnetMarkersOnMap, function (view) {
-        //            bounds.extend(view.marker.position);
-        //        });
-        //        App.map.fitBounds(bounds);
-        //    }
-        //},
-
         setMarkers: function () {
             var self = this;
             this.devicesCoordinatesCollection.map(function (model) {
-                console.log('>>',model);
                 var view = new markerView({model: model});
                 self.curnetMarkersOnMap.push(view);
             });
@@ -236,7 +186,6 @@ define([
 
 
         render: function () {
-            var self = this;
             this.$el.html(_.template(MainTemplate));
             return this;
         },
@@ -244,10 +193,8 @@ define([
             this.stateModel.set({params: params});
         },
         handleParams: function () {
-            //console.log('handleParams1', params);
             var params = this.stateModel.get('params');
             if (params) {
-                //console.log('handleParams2', params);
                 if (params.page) {
                     this.paginationView.stateModel.set({
                         page: this.stateModel.get('params').page

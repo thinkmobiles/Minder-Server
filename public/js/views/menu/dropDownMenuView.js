@@ -8,34 +8,10 @@ define([
         className: 'dropdown',
         dropDownName: 'Dropdown',
         initialize: function (options) {
-            var self = this;
-            var collection = this.collection;
             if (options.dropDownName) this.dropDownName = options.dropDownName;
             this.views = [];
             this.render();
             this.renderMenuItems();
-
-            //collection.map(function (model) {
-            //    var view = new menuItemView({model: model});
-            //    self.$el.find('.dropdown-menu').append(view.render().el);
-            //});
-
-            //this.topMenuLeftItemsCollection.map(function (model) {
-            //    console.log('>>>>>>', model.get('administrator') === App.sessionData.get('admin'));
-            //    if (model.get('administrator') === App.sessionData.get('admin') && App.sessionData.get('authorized')) {
-            //        var view = new menuItemView({model: model});
-            //        _this.views.push(view);
-            //        _this.$('#topMenuLeft').append(view.render().el);
-            //        return
-            //    }
-            //    if (model.get('authorized') === App.sessionData.get('authorized') && !model.get('administrator')) {
-            //        var view = new menuItemView({model: model});
-            //        _this.views.push(view);
-            //        _this.$('#topMenuLeft').append(view.render().el);
-            //        return
-            //    }
-            //
-            //});
         },
         template: _.template(template),
 
@@ -54,14 +30,15 @@ define([
 
 
             this.collection.map(function (model) {
+                var view;
                 if (model.get('administrator') === App.sessionData.get('admin') && App.sessionData.get('authorized')) {
-                    var view = new menuItemView({model: model});
+                    view = new menuItemView({model: model});
                     self.views.push(view);
                     self.$('.dropdown-menu').append(view.render().el);
                     return
                 }
                 if (model.get('authorized') === App.sessionData.get('authorized') && !model.get('administrator')) {
-                    var view = new menuItemView({model: model});
+                    view = new menuItemView({model: model});
                     self.views.push(view);
                     self.$('.dropdown-menu').append(view.render().el);
                     return
@@ -69,14 +46,7 @@ define([
 
             });
             return this;
-        },
-
-        //render: function () {
-        //    var _this = this;
-        //    this.$el.html(_.template(topMenuTemplate));
-        //    this.renderMenuItems();
-        //    return this;
-        //}
+        }
     });
     return dropDownMenuItemView;
 });

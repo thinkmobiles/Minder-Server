@@ -35,7 +35,6 @@ define([
                     });
                 },
                 error: function (err) {
-                    console.log('logout error', err);
                     App.error(err);
                 }
             });

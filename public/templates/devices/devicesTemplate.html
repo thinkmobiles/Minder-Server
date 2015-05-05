@@ -1,5 +1,6 @@
 <div class="col-md-8">
     <div class="row">
+        <% if(!params.modal) { %>
         <form class="form-inline" id="searchForm">
             <div class="checkbox">
                 <label>
@@ -14,6 +15,7 @@
 
             <button type="submit" class="btn btn-default" id="searchButton">search</button>
         </form>
+        <% } %>
     </div>
     <div class="row" id="devicesList">
         <table class="table">
@@ -35,9 +37,14 @@
                 <% } %>
 
                 <td>
-                    <input type="checkbox" name="device" class="deviceCheckbox" value="<%= devices[i].device._id %>" <% if(devices[i].selected) { %>checked<% } %> >
+                    <% if (devices[i].device.status === "deleted") { %>
+                        <!--<input disabled type="checkbox" name="device" class="deviceCheckbox" value="<%= devices[i].device._id %>" <% if(devices[i].selected) { %>checked<% } %> >-->
+                    <% } else { %>
+                        <input type="checkbox" name="device" class="deviceCheckbox" value="<%= devices[i].device._id %>" <% if(devices[i].selected) { %>checked<% } %> >
+                    <% } %>
                 </td>
                 <td><%= devices[i].device.name %></td>
+                <% if(!params.modal) { %>
                 <td>
                     <% if (devices[i].device.status === "deleted") { %>
                         <button class="btn btn-default setActive" value="<%= devices[i].device._id %>">activate</button>
@@ -46,10 +53,10 @@
                     <button class="btn btn-default setDelete" value="<%= devices[i].device._id %>">delete</button>
                     <% } else if (devices[i].device.status === "subscribed") { %>
                     <a class="btn btn-default" href="#device/<%= devices[i].device._id %>">edit</a>
-                    <button class="btn btn-default setActive" value="<%= devices[i].device._id %>">unsubscribe</button>
                     <button class="btn btn-default setDelete" value="<%= devices[i].device._id %>">delete</button>
                     <% } %>
                 </td>
+                <% } %>
             </tr>
             <% } %>
             </tbody>
@@ -62,11 +69,13 @@
 
         </div>
         <div class="buttons">
-
+            <button class="btn btn-danger unsubscribe">unsubscribe</button>
         </div>
     </div>
 
 </div>
+
+<% if(!params.modal) { %>
 <div class="col-md-4">
     <div class="panel panel-default">
         <div class="panel-body proceedSubscription">
@@ -99,9 +108,9 @@
         </div>
     </div>
 </div>
+<% } %>
 
-
-<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+<div class="modal fade" id="warningModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">

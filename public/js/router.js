@@ -18,7 +18,7 @@ define([
             "forgotPassword": "forgotPassword",
             "signUp": "signUp",
             "resetPassword/:token": "resetPassword",
-            "billingInfo": "billingInfo",
+            "billingInfo(/:subscribe)": "billingInfo",
             "termsAndConditions": "termsAndConditions",
             "devices": "devices",
             "device(/:id)": "device",
@@ -43,12 +43,12 @@ define([
         loadWrapperView: function (name, params) {
 
             if (!App.sessionData.get('authorized')) {
-                var WrongRout = _.find(this.needAuthorize, function(rout){
-                    if(name === rout){
+                var WrongRout = _.find(this.needAuthorize, function (rout) {
+                    if (name === rout) {
                         return true
                     }
                 });
-                if(WrongRout){
+                if (WrongRout) {
                     App.router.navigate("login", {trigger: true});
                 }
             }
@@ -85,7 +85,10 @@ define([
 
         main: function (page) {
             if (page) page = parseInt(page);
-            this.loadWrapperView('main', {page: page});
+            this.loadWrapperView('main', {
+                page: page,
+                modal: false
+            });
         },
 
         any: function () {
@@ -112,8 +115,10 @@ define([
         profile: function () {
             this.loadWrapperView('profile');
         },
-        billingInfo: function () {
-            this.loadWrapperView('billingInfo');
+        billingInfo: function (subscribe) {
+            this.loadWrapperView('billingInfo', {
+                subscribe: subscribe
+            });
         },
         devices: function (page) {
             if (page) page = parseInt(page);

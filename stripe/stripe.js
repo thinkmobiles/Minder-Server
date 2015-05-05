@@ -1,14 +1,12 @@
 'use strict';
 
-var server = require('../server');
-var db = server.db;
+
 
 var commander = require('commander');
 var stripe = require('stripe')(process.env.STRIPE_PRIVATE_KEY);
 var tariffPlans = require('./tariffPlans');
 var util = require('util');
-var mongoose = require('mongoose');
-//var _ = require('underscore');
+
 var _ = require('lodash');
 
 function log(data) {
@@ -17,6 +15,7 @@ function log(data) {
         depth: 5
     }));
 };
+
 
 commander
     .version('0.0.1')
@@ -30,64 +29,98 @@ commander
 
 
 if (commander.database) {
+    var mongoose = require('mongoose');
+    //var server = require('../server');
+    //var db = server.db;
 
-    if (commander.create) {
-        for (var i = 0; i < tariffPlans.length; i++) {
-            var newPlan = new TariffPlan(tariffPlans[i]);
-            newPlan.save(function (err) {
-                if (err) {
-                    return log(err);
-                }
-                log(('created plan plan'));
-
-            });
-        }
+    if (!process.env.NODE_ENV) {
+        process.env.NODE_ENV = 'development';
     }
 
-    if (commander.update) {
-        for (var i = 0; i < tariffPlans.length; i++) {
-            TariffPlan.findOne({id: tariffPlans[i].id}, function (err, plan) {
-                if (err) {
-                    return log(err);
-                }
-                var tarif = _.find(tariffPlans, function (elem) {
-                    if (elem.id === plan.id) {
-                        return true
-                    }
-                });
-                if (!tarif) {
-                    log(new Error());
-                }
-                plan.name = tarif.name;
-                plan.metadata = tarif.metadata;
-                plan.statement_descriptor = tarif.statement_descriptor;
-                plan.save(function (err) {
+    require('../config/' + process.env.NODE_ENV);
+
+    mongoose.connect(process.env.DB_HOST, process.env.DB_NAME);
+    var db = mongoose.connection;
+
+
+    db.once('open', function callback() {
+        console.log('Connection to ' + process.env.DB_HOST + '/' + process.env.DB_NAME + ' is success');
+
+        require('../models/index.js');
+        var tariffPlanSchema = mongoose.Schemas['TariffPlan'];
+        var TariffPlan = db.model('TariffPlan', tariffPlanSchema);
+
+
+        if (commander.create) {
+            for (var i = 0; i < tariffPlans.length; i++) {
+                var newPlan = new TariffPlan(tariffPlans[i]);
+                newPlan.save(function (err) {
                     if (err) {
                         return log(err);
                     }
-                    log('plan updated');
+                    log(('created plan plan'));
+
                 });
+            }
+        }
+
+        if (commander.update) {
+            for (var i = 0; i < tariffPlans.length; i++) {
+                TariffPlan.findOne({id: tariffPlans[i].id}, function (err, plan) {
+                    if (err) {
+                        return log(err);
+                    }
+                    var tarif = _.find(tariffPlans, function (elem) {
+                        if (elem.id === plan.id) {
+                            return true
+                        }
+                    });
+                    if (!tarif) {
+                        log(new Error());
+                    }
+                    plan.name = tarif.name;
+                    plan.metadata = tarif.metadata;
+                    plan.statement_descriptor = tarif.statement_descriptor;
+                    plan.save(function (err) {
+                        if (err) {
+                            return log(err);
+                        }
+                        log('plan updated');
+                    });
+                })
+            }
+        }
+
+        if (commander.list) {
+            TariffPlan.find({}, function (err, plans) {
+                if (err) {
+                    return log(err);
+                }
+                log(plans);
             })
         }
-    }
 
-    if (commander.list) {
-        TariffPlan.find({}, function (err, plans) {
-            if (err) {
-                return log(err);
-            }
-            log(plans);
-        })
-    }
+        if (commander.delete) {
+            TariffPlan.remove({}, function (err) {
+                if (err) {
+                    return log(err);
+                }
+                log('remove all plans');
+            });
+        }
 
-    if (commander.delete) {
-        TariffPlan.remove({}, function (err) {
-            if (err) {
-                return log(err);
-            }
-            log('remove all plans');
-        });
-    }
+
+    });
+
+
+
+
+
+
+
+
+
+
 
 }
 

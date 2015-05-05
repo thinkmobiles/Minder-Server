@@ -8,8 +8,8 @@ var CreateTestData = function (db) {
     var userSchema = mongoose.Schemas['User'];
     var UserModel = db.model('User', userSchema);
     var deviceSchema = mongoose.Schemas['Device'];
-    var tariffPlanSchema = mongoose.Schemas['TariffPlan'];
     var DeviceModel = db.model('Device', deviceSchema);
+    var tariffPlanSchema = mongoose.Schemas['TariffPlan'];
     var TariffPlan = db.model('TariffPlan', tariffPlanSchema);
 
     var data = require('./testData');

@@ -22,7 +22,6 @@ define([
         setDeviceInfowindow: function (model, marker) {
             var self = this;
             this.stateModel.set({
-                //updatedAt: model.get('updatedAt')
                 updatDate: moment(model.get('lastLocation').dateTime).format('YYYY/MM/DD HH:mm:ss')
             });
             if (model.get('address')) {
@@ -34,10 +33,6 @@ define([
                 this.infowindow.open(marker.get('map'), marker);
                 return;
             }
-
-
-            //var data = model.toJSON();
-            //data = _.extend(data, this.stateModel.toJSON());
             this.stateModel.set(_.extend(this.stateModel.toJSON(), model.toJSON()));
             self.stateModel.set({
                 address: ''
@@ -48,7 +43,6 @@ define([
                 url: 'http://maps.googleapis.com/maps/api/geocode/json?latlng=' + model.get('lastLocation').lat + ',' + model.get('lastLocation').long + '&sensor=false',
                 dataType: "json",
                 success: function (result) {
-                    ///console.log(result);
                     if (result.status === 'OK') {
                         self.stateModel.set({
                             address: result.results[0].formatted_address,
@@ -62,7 +56,6 @@ define([
                             address: ''
                         })
                     }
-
                 },
                 error: function (err) {
                     App.error(err);

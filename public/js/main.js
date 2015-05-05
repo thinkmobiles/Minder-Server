@@ -14,7 +14,6 @@ require.config({
     paths: {
         jQuery: './libs/jquery-2.1.0.min.map',
         costCounter:'./libs/costCounter',
-        ajaxForm: './libs/jquery.form',
         Underscore: './libs/underscore-min.map.1.6.0',
         Bootstrap: './libs/bootstrap.min',
         Backbone: './libs/backbone-min.map.1.1.2',
@@ -30,7 +29,7 @@ require.config({
         'ajaxForm': ['jQuery'],
         'Bootstrap': ['jQuery'],
         'Backbone': ['Underscore', 'jQuery'],
-        'app': ['Backbone', 'less', 'ajaxForm', 'Bootstrap', 'moment', 'costCounter'],
+        'app': ['Backbone', 'less', 'Bootstrap', 'moment', 'costCounter'],
         "recaptcha": {
             exports: 'Recaptcha'
         },
