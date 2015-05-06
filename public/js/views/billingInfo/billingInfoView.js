@@ -63,6 +63,7 @@ define([
         },
 
         confirmSubscription:function(){
+            this.$el.find('#devicesModal').modal('hide');
             this.stateModel.set({
                 token: null,
                 proceedSubscription: true
@@ -167,7 +168,7 @@ define([
             var self = this;
             var devices = App.router.devicesView.selectedDevicesCollection.pluck('_id');
             var data = {
-                devicesIds:JSON.stringify(devices),
+                devicesIds:devices,
                 token:self.stateModel.get('token')
             };
             console.log(data);
@@ -176,7 +177,7 @@ define([
                 method:'POST',
                 //type:'json',
                 contentType:'application/json',
-                data:data,
+                data:JSON.stringify(data),
                 success:function(data){
                     console.log(data);
                     App.router.devicesView.selectedDevicesCollection.reset();
