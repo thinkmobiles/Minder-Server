@@ -4,7 +4,7 @@
     }
 
     function costCounter(data) {
-        var monthSubscribedDevices = data.user.billings.monthSubscribedDevices;
+        //var monthSubscribedDevices = data.user.billings.monthSubscribedDevices;
         var subscribedDevices = data.user.billings.subscribedDevices;
         var active = data.user.billings.active;
         var selectedDevicesCount = data.selectedDevicesCount;
@@ -29,7 +29,7 @@
             plan: plan,
             costForThisMonth: 0,
             devicesToPay: 0,
-            monthSubscribedDevices: monthSubscribedDevices,
+            //monthSubscribedDevices: monthSubscribedDevices,
             subscribedDevices: subscribedDevices,
             maxDevices: 0,
             selectedDevicesCount: selectedDevicesCount,
@@ -56,7 +56,8 @@
         }
 
         if (active) {
-            devicesToPay = (monthSubscribedDevices - subscribedDevices) + selectedDevicesCount;
+            devicesToPay = subscribedDevices + selectedDevicesCount;
+            //devicesToPay = (monthSubscribedDevices - subscribedDevices) + selectedDevicesCount;
         } else {
             devicesToPay = selectedDevicesCount;
         }

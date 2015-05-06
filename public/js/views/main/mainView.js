@@ -63,6 +63,7 @@ define([
 
         search: function (event) {
             event.preventDefault();
+            event.stopImmediatePropagation();
             this.paginationView.setData({
                 isPayed: true,
                 enabledTrackLocation: true,

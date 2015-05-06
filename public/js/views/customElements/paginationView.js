@@ -12,26 +12,12 @@ define([
                 page: options.page || 1,
                 padding: options.padding || 3,
                 url: options.url || '',
+                urlPagination: options.urlPagination || false,
                 pages: [],
                 ends: options.ends,
                 steps: options.steps,
                 data: options.data,
                 countSelector:options.countSelector
-                //countSelectorData:[
-                //    {
-                //        name:'10 items',
-                //        data:10
-                //    },{
-                //        name:'25 items',
-                //        data:25
-                //    },{
-                //        name:'50 items',
-                //        data:50
-                //    },{
-                //        name:'100 items',
-                //        data:100
-                //    }
-                //]
             });
             this.collection = options.collection;
             self.count();
@@ -42,6 +28,17 @@ define([
 
         },
         tagName: 'nav',
+
+        events: {
+            'click .goToPage': 'goToPage'
+        },
+
+
+        goToPage:function(event){
+            event.preventDefault();
+            console.log(event.currentTarget.href);
+            console.log('__');
+        },
 
         count: function (cb) {
             var self = this;
@@ -81,18 +78,11 @@ define([
             var paddingafter = this.stateModel.get('padding');
             var allPages = Math.ceil(count / onPage);
             var pages = [];
-            var range = 0;
             var start = 1;
             var end = 1;
             var ends = this.stateModel.get('ends');
             var steps = this.stateModel.get('steps');
             var page = this.stateModel.get('page');
-
-            if ((paddingBiffore + paddingafter + 1) > allPages) {
-                range = allPages;
-            } else {
-                range = (paddingBiffore + paddingafter + 1);
-            }
 
             if ((page - paddingBiffore) < 1) {
                 start = 1;
@@ -178,8 +168,7 @@ define([
 
         render: function () {
             var data = this.stateModel.toJSON();
-            //data = _.extend(data, this.model.toJSON());
-            this.$el.html(_.template(template, data));
+            this.setElement(_.template(template, data));
             return this;
         }
     });
