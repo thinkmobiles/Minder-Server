@@ -17,6 +17,7 @@ module.exports = function (db) {
     //router.delete('/:id', deviceHandler.removeDevice);
     router.patch('/:id', deviceHandler.updateStatus); //req.body.status = "active" | "deleted"
     router.post('/getLocations', deviceHandler.getDevicesLocation);
+    router.post('/subscribe', deviceHandler.subscribeDevices);
     router.post('/unsubscribe', deviceHandler.unsubscribeDevices);
 
     return router;

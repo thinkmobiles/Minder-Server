@@ -1,19 +1,24 @@
 'use strict';
 var DEVICE_OS = require('../constants/deviceOs');
 var DEVICE_STATUSES = require('../constants/deviceStatuses');
+var _ = require('lodash');
 var async = require('async');
 var mongoose = require('mongoose');
 var badRequests = require('../helpers/badRequests');
 var logWriter = require('../helpers/logWriter')();
 var SessionHandler = require('../handlers/sessions');
+var stripeModule = require('../helpers/stripe');
+var calculateTariff = require('../public/js/libs/costCounter');
 
 var DeviceHandler = function (db) {
     var session = new SessionHandler(db);
     var deviceSchema = mongoose.Schemas['Device'];
-    var DeviceModel = db.model('Device', deviceSchema);
-    var DeviceCollection = db.collection('Devices', deviceSchema);
     var userSchema = mongoose.Schemas['User'];
     var UserModel = db.model('User', userSchema);
+    var DeviceModel = db.model('Device', deviceSchema);
+    var tariffPlanSchema = mongoose.Schemas['TariffPlan'];
+    var TariffPlan = db.model('TariffPlan', tariffPlanSchema);
+
     var self = this;
 
     function prepareDeviceData(data) {
@@ -47,6 +52,122 @@ var DeviceHandler = function (db) {
         if (callback && (typeof callback === 'function')) {
             callback();
         }
+    };
+
+    function subscribe(userModel, deviceIds, plan, callback) {
+        var userId = userModel._id.toString();
+
+        async.waterfall([
+
+            //check is exists customer in stripe and create if need:
+            function (cb) {
+                var stripeId = userModel.billings.stripeId;
+                var customerData;
+
+                if (!stripeId) {
+
+                    customerData = {
+                        email: userModel.email,
+                        metadata: {
+                            userId: userModel._id.toString()
+                        }
+                    };
+                    stripeModule.createCustomer(customerData, function (err, customer) {
+                        if (err) {
+                            return cb(err);
+                        }
+
+                        cb(null, customer.id, userModel);
+                    });
+
+                    /*
+                     customerData = {
+                     plan: plan.id,
+                     quantity: deviceIds.length,
+                     source: tokenObject.id,
+                     email: userModel.email
+                     };
+
+                     stripe.customers.create(customerData, function (err, customer) {
+                     if (err) {
+                     return next(err);
+                     }
+
+                     res.status(200).send(customer);
+                     });
+                     */
+
+                } else {
+                    cb(null, stripeId, userModel);
+                }
+            },
+
+            //update user.stripeId if need:
+            function (stripeId, user, cb) {
+                if (!user.billings.stripeId) {
+
+                    user.billings.stripeId = stripeId;
+                    user.save(function (err, updatedUser) {
+                        if (err) {
+                            return cb(err);
+                        }
+                        cb(null, updatedUser);
+                    });
+
+                } else {
+                    cb(null, user);
+                }
+            },
+
+            //make subscription:
+            function (user, cb) {
+                cb(null, user); //TODO: ...
+            },
+
+            //update devices status = "subscribed":
+            function (user, cb) {
+                var criteria = {
+                    user: userId,
+                    status: DEVICE_STATUSES.ACTIVE,
+                    _id: {
+                        $in: deviceIds
+                    }
+                };
+                var update = {
+                    status: DEVICE_STATUSES.SUBSCRIBED
+                };
+
+                DeviceModel.update(criteria, update, {multi: true}, function (err, quantity) {
+                    if (err) {
+                        return cb(err);
+                    }
+                    cb(null, user, quantity);
+                });
+
+            },
+
+            //update user.billings.subscribedDevices:
+            function (user, quantity ,cb) {
+                self.incrementSubscribedDevicesCount(userId, quantity, function (err, updatedUser) {
+                    if (err) {
+                        return cb(err);
+                    }
+                    cb(null, updatedUser);
+                });
+
+            }
+
+        ], function (err, result) {
+            if (err) {
+                if (callback && (typeof callback === 'function')) {
+                    callback(err);
+                }
+                return;
+            }
+            if (callback && (typeof callback === 'function')) {
+                callback(null, result);
+            }
+        });
     };
 
     this.validateDeviceData = validateDeviceData;
@@ -144,18 +265,16 @@ var DeviceHandler = function (db) {
         var userId = req.session.userId;
         var params = req.query;
         var criteria = {};
+        var page = parseInt(params.page) || 1;
+        var count = parseInt(params.count) || 10;
         var skip = 0;
-        var query;
 
         if (!session.isAdmin(req)) {
             criteria.user = userId;
         }
 
-        params.page = parseInt(params.page) || 1;
-        params.count = parseInt(params.count) || 10;
-
-        if (params.page > 1) {
-            skip = (params.page - 1 ) * params.count;
+        if (page > 1) {
+            skip = (page - 1 ) * count;
         }
 
         if (params.name) {
@@ -170,7 +289,7 @@ var DeviceHandler = function (db) {
 
         DeviceModel.find(criteria, 'name status _id')
             .sort('name')
-            .limit(params.count)
+            .limit(count)
             .skip(skip)
             .exec(function (err, devices) {
                 if (err) {
@@ -437,15 +556,233 @@ var DeviceHandler = function (db) {
                 }
             }
         });
+    };
 
+    this.subscribeDevices = function (req, res, next) {
+        var tokenObject = req.body.token || req.body.tokenObject; //TODO: token
+        var deviceIds = req.body.deviceIds || req.body.devices;//TODO: deviceIds
+        var userId = req.session.userId;
+
+        if (!tokenObject) {
+            return next(badRequests.NotEnParams({reqParams: ['token', 'deviceIds']}));
+        }
+
+        if (!deviceIds || deviceIds.length === 0) {
+            return next(badRequests.NotEnParams({reqParams: ['token', 'deviceIds']}));
+        }
+
+        async.parallel({
+
+            user: function (cb) {
+                UserModel.findById(userId, function (err, user) {
+                    if (err) {
+                        return cb(err);
+                    }
+                    cb(null, user);
+                });
+            },
+
+            plans: function (cb) {
+                var criteria = {};
+
+                TariffPlan.find(criteria, function (err, plans) {
+                    if (err) {
+                        return cb(err);
+                    }
+                    cb(null, plans)
+                });
+            },
+
+            checkSubscribedDevices: function (cb) {
+                var criteria = {
+                    user: userId,
+                    status: DEVICE_STATUSES.SUBSCRIBED,
+                    _id: {
+                        $in: deviceIds
+                    }
+                };
+                var fields = '_id';
+
+                DeviceModel.find(criteria, fields, function (err, devices) {
+                    if (err) {
+                        cb(err);
+                    } else if (devices && devices.length) {
+                        cb(badRequests.DeviceIdInUse());
+                    } else {
+                        cb();
+                    }
+                });
+            },
+
+            checkActiveDevices: function(cb) {
+                var criteria = {
+                    user: userId,
+                    status: DEVICE_STATUSES.ACTIVE,
+                    _id: {
+                        $in: deviceIds
+                    }
+                };
+                var fields = '_id';
+
+                DeviceModel.find(criteria, fields, function (err, devices) {
+                    var activeIds;
+
+                    if (err) {
+                        cb(err);
+                    } else if (!devices || !devices.length) {
+                        cb(badRequests.NoActiveDevices());
+                    } else {
+                        activeIds = _.pluck(devices, '_id');
+                        cb(null, activeIds);
+                    }
+                });
+            }
+
+        }, function (err, results) {
+            var userModel = results.user;
+            var plans = results.plans;
+            var activeDeviceIds = results.checkActiveDevices;
+            var tariffParams;
+            var plan;
+
+            if (err) {
+                return next(err);
+            }
+
+            tariffParams = {
+                date: new Date(),
+                plans: plans,
+                user: userModel,
+                selectedDevicesCount: deviceIds.length //TODO: devicesCount
+            };
+
+            plan = calculateTariff(tariffParams);
+
+            subscribe(userModel, activeDeviceIds, plan, function (err, result) {
+                if (err) {
+                    return next(err);
+                }
+                res.status(200).send({success: 'subscribed'});
+            });
+
+            /*async.waterfall([
+
+                //check is exists customer in stripe and create if need:
+                function (cb) {
+                    var stripeId = userModel.billings.stripeId;
+                    var customerData;
+
+                    if (!stripeId) {
+
+                        customerData = {
+                            email: userModel.email,
+                            metadata: {
+                                userId: userModel._id.toString()
+                            }
+                        };
+                        stripeModule.createCustomer(customerData, function (err, customer) {
+                            if (err) {
+                                return cb(err);
+                            }
+
+                            cb(null, customer.id, userModel);
+                        });
+
+                        /!*
+                        customerData = {
+                            plan: plan.id,
+                            quantity: deviceIds.length,
+                            source: tokenObject.id,
+                            email: userModel.email
+                        };
+
+                        stripe.customers.create(customerData, function (err, customer) {
+                            if (err) {
+                                return next(err);
+                            }
+
+                            res.status(200).send(customer);
+                        });
+                        *!/
+
+                    } else {
+                        cb(null, stripeId, userModel);
+                    }
+                },
+
+                //update user.stripeId if need:
+                function (stripeId, user, cb) {
+                    if (!user.billings.stripeId) {
+
+                        user.billings.stripeId = stripeId;
+                        user.save(function (err, updatedUser) {
+                            if (err) {
+                                return cb(err);
+                            }
+                            cb(null, updatedUser);
+                        });
+
+                    } else {
+                        cb(null, user);
+                    }
+                },
+
+                //make subscription:
+                function (user, cb) {
+                    cb(null, user); //TODO: ...
+                },
+
+                //update devices status = "subscribed":
+                function (user, cb) {
+                    var criteria = {
+                        user: userId,
+                        status: DEVICE_STATUSES.ACTIVE,
+                        _id: {
+                            $in: deviceIds
+                        }
+                    };
+                    var update = {
+                        status: DEVICE_STATUSES.SUBSCRIBED
+                    };
+
+                    DeviceModel.update(criteria, update, {multi: true}, function (err, quantity) {
+                        if (err) {
+                            return cb(err);
+                        }
+                        cb(null, user, quantity);
+                    });
+
+                },
+
+                //update user.billings.subscribedDevices:
+                function (user, quantity ,cb) {
+                    self.incrementSubscribedDevicesCount(userId, quantity, function (err, updatedUser) {
+                        if (err) {
+                            return cb(err);
+                        }
+                        cb(null, updatedUser);
+                    });
+
+                }
+
+            ], function (err, result) {
+                if (err) {
+                    return next(err);
+                }
+                res.status(200).send({success: 'subscribed'});
+            });*/
+
+        });
     };
 
     this.unsubscribeDevices = function (req, res, next) {
         var options = req.body;
         var userId = req.session.userId;
         var deviceIds = options.deviceIds || options.devices; //TODO: deviceIds;
-        var criteria;
-        var update;
+
+        if (!deviceIds) {
+            return next(badRequests.NotEnParams({reqParams: 'deviceIds'}));
+        }
 
         try {
             deviceIds = JSON.parse(deviceIds);
@@ -453,29 +790,49 @@ var DeviceHandler = function (db) {
             return next(badRequests.InvalidValue({param: 'deviceIds'}));
         }
 
-        criteria = {
-            user: userId,
-            status: DEVICE_STATUSES.SUBSCRIBED,
-            _id: {
-                $in: deviceIds
+        async.waterfall([
+
+            //update devices:
+            function (cb) {
+                var criteria = {
+                    user: userId,
+                    status: DEVICE_STATUSES.SUBSCRIBED,
+                    _id: {
+                        $in: deviceIds
+                    }
+                };
+                var update = {
+                    status: DEVICE_STATUSES.ACTIVE
+                };
+
+                DeviceModel.update(criteria, update, {multi: true}, function (err, count) {
+                    if (err) {
+                        return cb(err);
+                    }
+
+                    cb(null, count);
+                });
+            },
+
+            //update Users.billings.subscribedDevices:
+            function (updatedDevicesCount, cb) {
+                var quantity = ( -1 )* updatedDevicesCount;
+
+                self.incrementSubscribedDevicesCount(userId, quantity, function (err, userModel) {
+                    if (err) {
+                        return cb(err);
+                    }
+
+                    cb(null, userModel);
+                });
             }
-        };
 
-        update = {
-            status: DEVICE_STATUSES.ACTIVE
-        };
-
-        if (!deviceIds) {
-            return next(badRequests.NotEnParams({reqParams: 'deviceIds'}));
-        }
-
-        DeviceModel.update(criteria, update, {multi: true}, function (err, raw) {
+        ], function (err, userModel, updatedDevicesCount) {
             if (err) {
                 return next(err);
             }
 
-            res.status(200).send({success: 'unsubscribed', count: raw});
-
+            res.status(200).send({success: 'unsubscribed', count: updatedDevicesCount, user: userModel});
         });
 
     };

@@ -297,6 +297,28 @@ var BadRequestModule = function () {
         return new Errors(errOptions);
     }
 
+    function NoActiveDevices(options) {
+        var errOptions;
+
+        if (options) {
+            errOptions = options;
+        } else {
+            errOptions = {};
+        }
+
+        if (!errOptions.name) {
+            errOptions.name = 'NoActiveDevices';
+        }
+        if (!errOptions.status) {
+            errOptions.status = 400;
+        }
+        if (!errOptions.message) {
+            errOptions.message = 'The are no active devices';
+        }
+
+        return new Errors(errOptions);
+    }
+
     return {
         NotEnParams: NotEnParams,
         InvalidEmail: InvalidEmail,
@@ -309,7 +331,8 @@ var BadRequestModule = function () {
         AccessError: AccessError,
         CaptchaError:CaptchaError,
         BlockedAccount: BlockedAccount,
-        UnknownDeviceOS: UnknownDeviceOS
+        UnknownDeviceOS: UnknownDeviceOS,
+        NoActiveDevices: NoActiveDevices
     }
 };
 

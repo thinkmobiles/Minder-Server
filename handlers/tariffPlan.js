@@ -63,7 +63,9 @@ var TariffPlanHandler = function (db) {
     };
 
     this.subscribe = function (req, res, next) {
-        var tokenObject = req.body.tokenObject; //TODO: token
+        res.status(500).send({error: 'Not Implemented'});
+
+        /*var tokenObject = req.body.tokenObject; //TODO: token
         var devices = req.body.devices;//TODO deviceIds
         var userId = req.session.userId;
         var plan = null;
@@ -152,8 +154,7 @@ var TariffPlanHandler = function (db) {
                 //TODO: ...
             }
 
-
-        });
+        });*/
     };
 
 
