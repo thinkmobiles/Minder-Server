@@ -71,7 +71,7 @@ var DeviceHandler = function (db) {
                         metadata: {
                             userId: userModel._id.toString()
                         },
-                        token: token
+                        source: token.id
                     };
                     stripeModule.createCustomer(customerData, function (err, customer) {
                         if (err) {
@@ -303,7 +303,7 @@ var DeviceHandler = function (db) {
             updatedAt: 1
         };
 
-        if (!deviceIds || deviceIds.length) {
+        if (!deviceIds || !deviceIds.length) {
             return next(badRequests.NotEnParams({reqParams: ['deviceIds']}));
         }
 
