@@ -47,7 +47,7 @@ define([
 
         events: {
             'click #saveRenewal': "renewal",
-            'click #confirmSubscription': "confirmSubscription",
+            'click #confirmSubscription': "confirmSubscription"
         },
 
         stripeTokenHandler: function (token) {
@@ -55,28 +55,19 @@ define([
                 token: token
             });
             if (this.stateModel.get('proceedRenewal')) {
-                this.proceedRenewal();
-
+                return this.proceedRenewal();
+            }
+            if (this.stateModel.get('proceedSubscription')) {
+                return this.proceedSubscription();
             }
         },
 
         confirmSubscription:function(){
-            var devices = App.router.devicesView.selectedDevicesCollection.pluck('_id');
-            $.ajax({
-                url:'/devices/subscribe',
-                method:'POST',
-                data:{
-                    devices:JSON.stringify(devices)
-                },
-                success:function(data){
-                    console.log(data)
-                    App.router.devicesView.selectedDevicesCollection.set(data);
-                    App.router.devicesView.selectedDevicesCollection.reset();
-                },
-                error:function(err){
-                    App.error(err);
-                }
+            this.stateModel.set({
+                token: null,
+                proceedSubscription: true
             });
+            this.showStripe();
         },
 
         setUserPlans: function () {
@@ -150,8 +141,8 @@ define([
             } else {
                 this.proceedRenewal();
             }
-
         },
+
         proceedRenewal: function () {
             var data = {};
             data.token = this.stateModel.get('token');
@@ -168,6 +159,32 @@ define([
                 },
                 error: function (err) {
                     App.error(err)
+                }
+            });
+        },
+
+        proceedSubscription:function(){
+            var self = this;
+            var devices = App.router.devicesView.selectedDevicesCollection.pluck('_id');
+            var data = {
+                devicesIds:JSON.stringify(devices),
+                token:self.stateModel.get('token')
+            };
+            console.log(data);
+            $.ajax({
+                url:'/devices/subscribe',
+                method:'POST',
+                data:data,
+                success:function(data){
+                    console.log(data)
+                    App.router.devicesView.selectedDevicesCollection.reset();
+                    this.stateModel.set({
+                        token: null,
+                        proceedSubscription: false
+                    });
+                },
+                error:function(err){
+                    App.error(err);
                 }
             });
         },
@@ -199,7 +216,7 @@ define([
 
             this.$el.find('#modalContent').append(this.devicesView.el);
             this.$el.find('#devicesModal').modal({show: true});
-        },
+        }
     });
 
     return View;

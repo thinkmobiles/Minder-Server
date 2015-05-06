@@ -310,9 +310,7 @@ define([
                     url: '/devices/unsubscribe',
                     success: function () {
                         self.selectedDevicesCollection.reset();
-                        self.setParams({
-                            page: 1
-                        })
+                        self.paginationView.loadPage();
                     },
                     error: function (err) {
                         App.error(err);
