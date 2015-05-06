@@ -3,9 +3,20 @@ define([
 ], function (template) {
 
     var View = Backbone.View.extend({
+
         initialize: function (options) {
             var self = this;
-            if (options.page < 1) options.page = 1;
+
+
+
+            if(options.el){
+                this.el = options.el;
+            }
+
+            if (options.page < 1){
+                options.page = 1;
+            }
+
             this.stateModel = new Backbone.Model({
                 count: 0,
                 onPage: options.onPage || 10,
@@ -19,14 +30,16 @@ define([
                 data: options.data,
                 countSelector:options.countSelector
             });
+
             this.collection = options.collection;
+
             self.count();
 
             this.stateModel.on('change:page', function (func) {
                 self.count();
             });
-
         },
+
         tagName: 'nav',
 
         events: {
@@ -36,8 +49,12 @@ define([
 
         goToPage:function(event){
             event.preventDefault();
-            console.log(event.currentTarget.href);
-            console.log('__');
+           var page =  event.currentTarget.getAttribute('value');
+            page = parseInt(page);
+            console.log('>>',page, typeof page);
+            this.stateModel.set({
+                page:page
+            });
         },
 
         count: function (cb) {
@@ -168,7 +185,11 @@ define([
 
         render: function () {
             var data = this.stateModel.toJSON();
-            this.setElement(_.template(template, data));
+
+            this.undelegateEvents();
+            this.$el.html(_.template(template, data));
+            this.delegateEvents();
+
             return this;
         }
     });

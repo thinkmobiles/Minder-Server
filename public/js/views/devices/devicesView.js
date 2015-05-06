@@ -1,11 +1,12 @@
 define([
     'text!templates/devices/devicesTemplate.html',
+    'text!templates/devices/devicesModalTemplate.html',
     'collections/devicesCollection',
     'views/device/deviceMainListView',
     'views/customElements/paginationView',
     'stripeCheckout',
     'config/config'
-], function (MainTemplate, DevisesCollection, deviceMainListView, PaginationView, StripeCheckout, config) {
+], function (Template, ModalTemplate, DevisesCollection, deviceMainListView, PaginationView, StripeCheckout, config) {
 
     var MainView = Backbone.View.extend({
             events: {
@@ -15,11 +16,19 @@ define([
                 'click .deviceCheckbox': 'deviceCheck',
                 'click .setDelete': 'deviceDelete',
                 'click .setActive': 'deviceActivate',
-                'click .unsubscribe': 'unsubscribe'
+                'click .unsubscribe': 'unsubscribe',
+                'hidden.bs.modal #warningModal': 'modalAccept'
             },
 
             initialize: function (options) {
                 var self = this;
+                var modal = false;
+                var paginationOptions;
+
+                if(options){
+                    modal = options.modal || false;
+                }
+
                 this.stateModel = new Backbone.Model({
                     params: {},
                     devices: [],
@@ -29,10 +38,29 @@ define([
                     selectedDevicesCount: 0,
                     currentPlan: null,
                     newPlan: null,
-                    costForThisMonth: 0
+                    costForThisMonth: 0,
+                    modal: modal
                 });
 
+                this.devisesCollection = new DevisesCollection();
+
                 this.selectedDevicesCollection = new DevisesCollection();
+
+                paginationOptions = {
+                    collection: this.devisesCollection,
+                    onPage: 10,
+                    padding: 2,
+                    page: 1,
+                    ends: true,
+                    steps: true,
+                    url: 'devices/page',
+                    urlPagination: true
+                };
+
+                if(modal){
+                    paginationOptions.urlPagination = false;
+                }
+
 
                 //this.Stripe = StripeCheckout.configure({
                 //    key: config.strypePublicKay,
@@ -44,37 +72,28 @@ define([
                 //    email: App.sessionData.get('user').email,
                 //    panelLabel: 'Subscribe'
                 //});
-
-
-                this.devisesCollection = new DevisesCollection();
                 this.listenTo(this.stateModel, 'change:params', this.handleParams);
                 this.listenTo(this.devisesCollection, 'sync remove', this.render);
+
                 this.listenTo(this.selectedDevicesCollection, 'add remove', function () {
                     self.calculatePlan();
                     self.render();
                 });
-                this.selectedDevicesCollection.on('all', function (e) {
-                    console.log('>>', e, self.selectedDevicesCollection.length);
-                });
+
+                //this.selectedDevicesCollection.on('all', function (e) {
+                //    console.log('>>', e, self.selectedDevicesCollection.length);
+                //});
+
                 App.sessionData.on('change:date change:tariffPlans sync', function () {
-                    if (App.sessionData.get('date')) {
-                        self.generateDropdown();
-                    }
                     self.calculatePlan();
                 });
-                self.generateDropdown();
+
                 self.calculatePlan();
 
-                this.paginationView = new PaginationView({
-                    collection: this.devisesCollection,
-                    onPage: 10,
-                    padding: 2,
-                    page: 1,
-                    ends: true,
-                    steps: true,
-                    url: 'devices/page'
-                });
-                this.render();
+                //this.render();
+
+
+                this.paginationView = new PaginationView(paginationOptions);
 
             },
             //stripeTokenHandler: function (token) {
@@ -198,29 +217,31 @@ define([
                     calculations: result
                 });
             },
-            generateDropdown: function () {
-                var date = App.sessionData.get('date');
-                if (!date) return;
-                var monthArray = [];
-                var yearArray = [];
-                var year = date.getFullYear();
-                for (var i = 0; i < 12; i++) {
-                    monthArray.push({
-                        name: i,
-                        value: i
-                    });
-                }
-                for (var i = year; i < year + 6; i++) {
-                    yearArray.push({
-                        name: i,
-                        value: i
-                    });
-                }
-                this.stateModel.set({
-                    yearArray: yearArray,
-                    monthArray: monthArray
-                })
-            },
+
+            //generateDropdown: function () {
+            //    var date = App.sessionData.get('date');
+            //    if (!date) return;
+            //    var monthArray = [];
+            //    var yearArray = [];
+            //    var year = date.getFullYear();
+            //    for (var i = 0; i < 12; i++) {
+            //        monthArray.push({
+            //            name: i,
+            //            value: i
+            //        });
+            //    }
+            //    for (var i = year; i < year + 6; i++) {
+            //        yearArray.push({
+            //            name: i,
+            //            value: i
+            //        });
+            //    }
+            //    this.stateModel.set({
+            //        yearArray: yearArray,
+            //        monthArray: monthArray
+            //    })
+            //},
+
             proceedSubscription: function () {
                 this.$el.find('#warningModal').modal({show: true});
             },
@@ -242,25 +263,34 @@ define([
                     this.selectedDevicesCollection.remove(this.devisesCollection.models);
                 }
             },
-            render: function () {
-                var self = this;
-                this.updateDevicesData();
-                this.$el.html(_.template(MainTemplate, this.stateModel.toJSON()));
-                this.$el.find('#pagination').append(this.paginationView.$el);
 
-                $('#warningModal').on('hidden.bs.modal', function () {
-                    Backbone.history.navigate('#billingInfo/subscribe',{
-                        trigger:true
-                    });
-                });
+            render: function () {
+                this.updateDevicesData();
+                var data = this.stateModel.toJSON();
+
+                if(data.modal){
+                    this.$el.html(_.template(ModalTemplate, data));
+                }else{
+                    this.$el.html(_.template(Template, data));
+                }
+
+                this.$el.find('#pagination').append(this.paginationView.render().$el);
 
                 return this;
             },
+
+            modalAccept: function () {
+                Backbone.history.navigate('#billingInfo/subscribe', {
+                    trigger: true
+                });
+            },
+
             setParams: function (params) {
                 this.stateModel.set({params: params});
             },
             handleParams: function () {
                 var params = this.stateModel.get('params');
+
                 if (params) {
                     if (params.page) {
                         this.paginationView.stateModel.set({
@@ -281,7 +311,7 @@ define([
                     success: function () {
                         self.selectedDevicesCollection.reset();
                         self.setParams({
-                            page:1
+                            page: 1
                         })
                     },
                     error: function (err) {

@@ -1,0 +1,34 @@
+<table class="table">
+    <tbody>
+    <% for (i in devices) { %>
+
+    <% if (devices[i].selected) { %>
+    <tr class="active">
+        <% } else { %>
+        <% if (devices[i].device.status === "deleted") { %>
+    <tr class="deleted">
+        <% } %>
+        <% if (devices[i].device.status === "subscribed") { %>
+    <tr class="subscribed">
+        <% } %>
+        <% if (devices[i].device.status === "active") { %>
+    <tr class="activate">
+        <% } %>
+        <% } %>
+
+        <td>
+            <% if (devices[i].device.status === "deleted") { %>
+            <!--<input disabled type="checkbox" name="device" class="deviceCheckbox" value="<%= devices[i].device._id %>" <% if(devices[i].selected) { %>checked<% } %> >-->
+            <% } else { %>
+            <input type="checkbox" name="device" class="deviceCheckbox" value="<%= devices[i].device._id %>" <%
+            if(devices[i].selected) { %>checked<% } %> >
+            <% } %>
+        </td>
+        <td><%= devices[i].device.name %></td>
+
+    </tr>
+    <% } %>
+    </tbody>
+</table>
+
+<div id="pagination"></div>

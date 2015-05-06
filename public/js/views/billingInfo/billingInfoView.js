@@ -47,7 +47,7 @@ define([
 
         events: {
             'click #saveRenewal': "renewal",
-            'click #confirmSubscription': "confirmSubscription"
+            'click #confirmSubscription': "confirmSubscription",
         },
 
         stripeTokenHandler: function (token) {
@@ -60,6 +60,24 @@ define([
             }
         },
 
+        confirmSubscription:function(){
+            var devices = App.router.devicesView.selectedDevicesCollection.pluck('_id');
+            $.ajax({
+                url:'/devices/subscribe',
+                method:'POST',
+                data:{
+                    devices:JSON.stringify(devices)
+                },
+                success:function(data){
+                    console.log(data)
+                    App.router.devicesView.selectedDevicesCollection.set(data);
+                    App.router.devicesView.selectedDevicesCollection.reset();
+                },
+                error:function(err){
+                    App.error(err);
+                }
+            });
+        },
 
         setUserPlans: function () {
             var userPlan;
@@ -168,15 +186,20 @@ define([
             }
         },
         showModal:function(){
-            var view = new DevicesView();
+            if(!App.router.devicesView){
+                return;
+            }
+            if(this.devicesView){
+                this.devicesView.undelegateEvents();
+                this.devicesView.remove();
+            }
 
+            this.devicesView = new DevicesView({modal:true});
+            this.devicesView.selectedDevicesCollection = App.router.devicesView.selectedDevicesCollection;
 
-            this.$el.find('#modalContent').append(view.el);
+            this.$el.find('#modalContent').append(this.devicesView.el);
             this.$el.find('#devicesModal').modal({show: true});
         },
-        confirmSubscription:function(){
-
-        }
     });
 
     return View;

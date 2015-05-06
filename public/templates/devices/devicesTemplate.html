@@ -44,7 +44,6 @@
                     <% } %>
                 </td>
                 <td><%= devices[i].device.name %></td>
-                <% if(!params.modal) { %>
                 <td>
                     <% if (devices[i].device.status === "deleted") { %>
                         <button class="btn btn-default setActive" value="<%= devices[i].device._id %>">activate</button>
@@ -56,7 +55,6 @@
                     <button class="btn btn-default setDelete" value="<%= devices[i].device._id %>">delete</button>
                     <% } %>
                 </td>
-                <% } %>
             </tr>
             <% } %>
             </tbody>
@@ -65,9 +63,7 @@
 
     </div>
     <div class="row" id="bottomMenu">
-        <div id="pagination">
-
-        </div>
+        <div id="pagination"></div>
         <div class="buttons">
             <button class="btn btn-danger unsubscribe">unsubscribe</button>
         </div>
