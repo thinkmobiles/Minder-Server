@@ -68,7 +68,6 @@
             result.costForThisMonth = Math.round(result.costForThisMonth * 100) / 100;
             result.subscribedDevices = subscribedDevices;
         }
-        console.log(result);
         return result;
     }
 

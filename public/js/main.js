@@ -13,7 +13,7 @@ var App = App ||
 require.config({
     paths: {
         jQuery: './libs/jquery-2.1.0.min.map',
-        costCounter:'./libs/costCounter',
+        costCounter: './libs/costCounter',
         Underscore: './libs/underscore-min.map.1.6.0',
         Bootstrap: './libs/bootstrap.min',
         Backbone: './libs/backbone-min.map.1.1.2',
@@ -23,7 +23,7 @@ require.config({
         moment: './libs/moment',
         common: 'common',
         recaptcha: "//www.google.com/recaptcha/api/js/recaptcha_ajax",
-        stripeCheckout : '//checkout.stripe.com/checkout'
+        stripeCheckout: '//checkout.stripe.com/checkout'
     },
     shim: {
         'ajaxForm': ['jQuery'],
