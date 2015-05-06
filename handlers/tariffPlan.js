@@ -63,83 +63,93 @@ var TariffPlanHandler = function (db) {
     };
 
     this.subscribe = function (req, res, next) {
-        var tokenObject = req.body.tokenObject;
-        var devices = req.body.devices;
+        var tokenObject = req.body.tokenObject; //TODO: token
+        var devices = req.body.devices;//TODO deviceIds
         var userId = req.session.userId;
         var plan = null;
+        var deviceIds = devices;
 
         if (!tokenObject) {
-            return next(badRequests.NotEnParams());
+            return next(badRequests.NotEnParams({reqParams: ['token', 'deviceIds']}));
         }
 
-        if (!devices || devices.length === 0) {
-            return next(badRequests.NotEnParams());
+        if (!deviceIds || deviceIds.length === 0) {
+            return next(badRequests.NotEnParams({reqParams: ['token', 'deviceIds']}));
         }
 
         async.parallel({
+
             user: function (cb) {
                 UserModel.findById(userId, function (err, user) {
                     if (err) {
-                        if (cb && (typeof cb === 'function')) {
-                            cb(err);
-                        }
-                        return;
+                        return cb(err);
                     }
-                    cb(null, user)
+                    cb(null, user);
                 });
             },
+
             plans: function (cb) {
-                TariffPlan.find({}, function (err, plans) {
+                var criteria = {};
+
+                TariffPlan.find(criteria, function (err, plans) {
                     if (err) {
-                        if (cb && (typeof cb === 'function')) {
-                            cb(err);
-                        }
-                        return;
+                        return cb(err);
                     }
                     cb(null, plans)
                 });
             },
-            checkDevices: function (cb) {
-                var intersection;
-                DeviceModel.find({
+
+            checkSubscribedDevices: function (cb) {
+                var criteria = {
                     user: userId,
-                    status: STATUSES.SUBSCRIBED
-                }, function (err, userDevices) {
-                    intersection = _.intersection(userDevices, devices);
-                    if (!intersection || intersection.length === 0) {
-                        return cb(badRequests.DeviceIdInUse())
+                    status: STATUSES.SUBSCRIBED,
+                    _id: {
+                        $in: deviceIds
                     }
-                    cb(null)
+                };
+                var fields = '_id';
+
+                DeviceModel.find(criteria, fields, function (err, devices) {
+                    if (err) {
+                        cb(err);
+                    } else if (devices && devices.length) {
+                        cb(badRequests.DeviceIdInUse());
+                    } else {
+                        cb();
+                    }
                 });
             }
+
         }, function (err, results) {
-            var user = results.user;
+            var userModel = results.user;
+            var plans = results.plans;
+            var customerData;
+
             plan = calculateTariff({
                 date: new Date(),
-                plans: results.plans,
-                user: results.user,
-                selectedDevicesCount: devices.length
+                plans: plans,
+                user: userModel,
+                selectedDevicesCount: deviceIds.length
             });
 
-            console.log('>>plan', plan);
-            console.log('>>tokenObject', tokenObject);
-
-            if (!user.stripeId) {
-                stripe.customers.create({
+            if (!userModel.stripeId) {
+                customerData = {
                     plan: plan.id,
-                    quantity: devices.length,
+                    quantity: deviceIds.length,
                     source: tokenObject.id,
-                    email: user.email
-                }, function (err, customer) {
+                    email: userModel.email
+                };
+
+                stripe.customers.create(customerData, function (err, customer) {
                     if (err) {
                         return next(err);
                     }
-                    console.log('>>customer', customer);
-                        res
-                        .status(200)
-                        .send(customer);
 
+                    res.status(200).send(customer);
                 });
+
+            } else {
+                //TODO: ...
             }
 
 

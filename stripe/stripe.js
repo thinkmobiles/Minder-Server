@@ -189,7 +189,7 @@ if (commander.delete) return;
 if (commander.database) return;
 
 
-console.log('Please choose on option, see --help')
+console.log('Please choose on option, see --help');
 
 
 

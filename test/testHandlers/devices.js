@@ -5,7 +5,7 @@ var Config = require('./../config');
 var testData = require('./../data/testData');
 var DEVICE_STATUSES = require('../../constants/deviceStatuses');
 
-describe('Devices', function() {
+describe('Devices', function () {
     var conf = new Config();
     var db = conf.db;
     var baseUrl = conf.baseUrl;
@@ -199,9 +199,9 @@ describe('Devices', function() {
 
     });
 
-    describe('GET /users/:id', function() {
+    describe('GET /users/:id', function () {
 
-        it ('Admin can get devices by id', function (done) {
+        it('Admin can get devices by id', function (done) {
             var devId = testData.devices[0]._id.toString();
             var url = '/devices/' + devId;
 
@@ -216,7 +216,7 @@ describe('Devices', function() {
                 });
         });
 
-        it ('User can get the device by id', function (done) {
+        it('User can get the device by id', function (done) {
             var devId = testData.devices[0]._id.toString();
             var url = '/devices/' + devId;
 
@@ -231,7 +231,7 @@ describe('Devices', function() {
                 });
         });
 
-        it ('User can\'t get other users device', function (done) {
+        it('User can\'t get other users device', function (done) {
             var devId = testData.devices[0]._id.toString();
             var url = '/devices/' + devId;
 
@@ -246,9 +246,9 @@ describe('Devices', function() {
 
     });
 
-    describe('PUT /users/:id', function() {
+    describe('PUT /users/:id', function () {
 
-        it ('Admin can update the device', function (done) {
+        it('Admin can update the device', function (done) {
             var devId = testData.devices[0]._id.toString();
             var url = '/devices/' + devId;
 
@@ -270,10 +270,10 @@ describe('Devices', function() {
 
     });
 
-    describe('PATCH /device/:id', function() {
+    describe('PATCH /device/:id', function () {
 
         //ACTIVATE:
-        it('Admin can activate the device by id', function(done) {
+        it('Admin can activate the device by id', function (done) {
             var devId = testData.devices[4]._id.toString();
             var url = '/devices/' + devId;
             var data = {
@@ -293,7 +293,7 @@ describe('Devices', function() {
                 });
         });
 
-        it('User can activate the device by id', function(done) {
+        it('User can activate the device by id', function (done) {
             var devId = testData.devices[2]._id.toString();
             var url = '/devices/' + devId;
             var data = {
@@ -313,7 +313,7 @@ describe('Devices', function() {
                 });
         });
 
-        it('Another user can\'t delete the device by id', function(done) {
+        it('Another user can\'t delete the device by id', function (done) {
             var devId = testData.devices[3]._id.toString();
             var url = '/devices/' + devId;
             var data = {
@@ -332,7 +332,7 @@ describe('Devices', function() {
         });
 
         //DELETE:
-        it('Admin can delete the device by id', function(done) {
+        it('Admin can delete the device by id', function (done) {
             var devId = testData.devices[4]._id.toString();
             var url = '/devices/' + devId;
             var data = {
@@ -352,7 +352,7 @@ describe('Devices', function() {
                 });
         });
 
-        it('User can delete the device by id', function(done) {
+        it('User can delete the device by id', function (done) {
             var devId = testData.devices[2]._id.toString();
             var url = '/devices/' + devId;
             var data = {
@@ -372,7 +372,7 @@ describe('Devices', function() {
                 });
         });
 
-        it('Another user can\'t delete the device by id', function(done) {
+        it('Another user can\'t delete the device by id', function (done) {
             var devId = testData.devices[3]._id.toString();
             var url = '/devices/' + devId;
             var data = {
@@ -390,5 +390,51 @@ describe('Devices', function() {
                 });
         });
 
+    });
+
+    describe('POST /devices/unsubscribe', function () {
+        var url = '/devices/unsubscribe';
+
+        it('User can\'t unsubscribe devices with invalid param', function (done) {
+            var data = {
+                deviceIds: "foo"
+            };
+
+            userAgent1
+                .post(url)
+                .send(data)
+                .end(function (err, res) {
+                    if (err) {
+                        done(err);
+                    } else {
+                        expect(res.status).to.equals(400);
+                        done();
+                    }
+                });
+        });
+
+        it('User can unsubscribe devices', function (done) {
+            var deviceIds = [
+                testData.devices[3]._id.toString(),
+                testData.devices[4]._id.toString(),
+                testData.devices[5]._id.toString(),
+                testData.devices[6]._id.toString()
+            ];
+            var data = {
+                deviceIds: JSON.stringify(deviceIds)
+            };
+
+            userAgent1
+                .post(url)
+                .send(data)
+                .end(function (err, res) {
+                    if (err) {
+                        done(err);
+                    } else {
+                        expect(res.status).to.equals(200);
+                        done();
+                    }
+                });
+        });
     });
 });

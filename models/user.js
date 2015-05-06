@@ -23,7 +23,7 @@ module.exports = (function () {
             subscribedDevices: {type: Number, required: true, default: 0},
             //monthSubscribedDevices: {type: Number, required: true, default: 0}, //TODO remove
             active: {type: Boolean, required: true, default: false}, //is need this field
-            stripeId: {type: String, default: ''}
+            stripeId: {type: String, default: null}
         },
         createdAt: {type: Date, default: Date.now},
         updatedAt: {type: Date, default: Date.now}

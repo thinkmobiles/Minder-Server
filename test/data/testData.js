@@ -71,9 +71,27 @@ var TestDataModule = function () {
         user: self.users[0]._id
     }, {
         deviceId: 'dev_5',
-        deviceName: 'Subscribed device',
+        deviceName: 'Subscribed device 1',
         deviceType: DEVICE_OS.WINDOWS_PHONE,
         user: self.users[0]._id,
+        status: DEVICE_STATUSES.SUBSCRIBED
+    }, {
+        deviceId: 'dev_6',
+        deviceName: 'Subscribed device 2',
+        deviceType: DEVICE_OS.WINDOWS_PHONE,
+        user: self.users[0]._id,
+        status: DEVICE_STATUSES.SUBSCRIBED
+    }, {
+        deviceId: 'dev_7',
+        deviceName: 'Subscribed device 3',
+        deviceType: DEVICE_OS.WINDOWS_PHONE,
+        user: self.users[0]._id,
+        status: DEVICE_STATUSES.SUBSCRIBED
+    }, {
+        deviceId: 'dev_8',
+        deviceName: 'Subscribed device 4',
+        deviceType: DEVICE_OS.WINDOWS_PHONE,
+        user: self.users[1]._id,
         status: DEVICE_STATUSES.SUBSCRIBED
     }];
 
