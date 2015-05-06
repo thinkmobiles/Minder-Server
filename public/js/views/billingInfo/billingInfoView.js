@@ -174,9 +174,11 @@ define([
             $.ajax({
                 url:'/devices/subscribe',
                 method:'POST',
+                //type:'json',
+                contentType:'application/json',
                 data:data,
                 success:function(data){
-                    console.log(data)
+                    console.log(data);
                     App.router.devicesView.selectedDevicesCollection.reset();
                     this.stateModel.set({
                         token: null,
@@ -212,7 +214,7 @@ define([
             }
 
             this.devicesView = new DevicesView({modal:true});
-            this.devicesView.selectedDevicesCollection = App.router.devicesView.selectedDevicesCollection;
+            this.devicesView.selectedDevicesCollection.reset(App.router.devicesView.selectedDevicesCollection.models);
 
             this.$el.find('#modalContent').append(this.devicesView.el);
             this.$el.find('#devicesModal').modal({show: true});
