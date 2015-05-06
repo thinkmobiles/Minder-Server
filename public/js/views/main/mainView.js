@@ -136,14 +136,14 @@ define([
                 App.map.setZoom(1);
             } else {
 
-                data = JSON.stringify(devicesIdis);
+                data = JSON.stringify({
+                    devices: devicesIdis
+                });
                 $.ajax({
                     url: '/devices/getLocations',
                     type: "POST",
-                    //dataType: 'text',
-                    data:{
-                        devices:data
-                    },
+                    contentType: 'application/json',
+                    data: data,
                     success: function (data) {
                         self.devicesCoordinatesCollection.reset(data);
                     },
@@ -183,7 +183,6 @@ define([
                 App.map.fitBounds(bounds);
             }
         },
-
 
 
         render: function () {

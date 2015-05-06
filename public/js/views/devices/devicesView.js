@@ -25,7 +25,7 @@ define([
                 var modal = false;
                 var paginationOptions;
 
-                if(options){
+                if (options) {
                     modal = options.modal || false;
                 }
 
@@ -57,7 +57,7 @@ define([
                     urlPagination: true
                 };
 
-                if(modal){
+                if (modal) {
                     paginationOptions.urlPagination = false;
                 }
 
@@ -256,9 +256,15 @@ define([
             },
             globalCheckTrigger: function () {
                 var checked = this.$el.find('#globalDevicesChecker').prop('checked');
+                var checkedDevices=[];
                 this.stateModel.set({checked: checked});
                 if (checked) {
-                    this.selectedDevicesCollection.add(this.devisesCollection.models);
+                    checkedDevices= this.devisesCollection.filter(function(model){
+                        if(model.get('status') !== 'deleted'){
+                            return true
+                        }
+                    });
+                    this.selectedDevicesCollection.add(checkedDevices);
                 } else {
                     this.selectedDevicesCollection.remove(this.devisesCollection.models);
                 }
@@ -268,9 +274,9 @@ define([
                 this.updateDevicesData();
                 var data = this.stateModel.toJSON();
 
-                if(data.modal){
+                if (data.modal) {
                     this.$el.html(_.template(ModalTemplate, data));
-                }else{
+                } else {
                     this.$el.html(_.template(Template, data));
                 }
 
@@ -303,10 +309,11 @@ define([
                 var self = this;
                 var selectedDevicesCollection = this.selectedDevicesCollection.pluck('_id');
                 $.ajax({
-                    data: {
-                        devices: JSON.stringify(selectedDevicesCollection)
-                    },
+                    data: JSON.stringify({
+                        devices: selectedDevicesCollection
+                    }),
                     method: 'POST',
+                    contentType: 'application/json',
                     url: '/devices/unsubscribe',
                     success: function () {
                         self.selectedDevicesCollection.reset();

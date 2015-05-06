@@ -47,7 +47,8 @@ define([
 
         events: {
             'click #saveRenewal': "renewal",
-            'click #confirmSubscription': "confirmSubscription"
+            //'click #confirmSubscription': "confirmSubscription",
+            'hidden.bs.modal #devicesModal': 'confirmSubscription'
         },
 
         stripeTokenHandler: function (token) {
@@ -62,7 +63,7 @@ define([
             }
         },
 
-        confirmSubscription:function(){
+        confirmSubscription: function () {
             this.$el.find('#devicesModal').modal('hide');
             this.stateModel.set({
                 token: null,
@@ -150,7 +151,8 @@ define([
             data.renewal = this.stateModel.get('renewal');
             $.ajax({
                 url: '/renewal',
-                data: data,
+                contentType: 'application/json',
+                data: JSON.stringify(data),
                 method: 'POST',
                 success: function () {
                     this.stateModel.set({
@@ -164,21 +166,21 @@ define([
             });
         },
 
-        proceedSubscription:function(){
+        proceedSubscription: function () {
             var self = this;
             var devices = App.router.devicesView.selectedDevicesCollection.pluck('_id');
             var data = {
-                devicesIds:devices,
-                token:self.stateModel.get('token')
+                deviceIds: devices,
+                token: self.stateModel.get('token')
             };
             console.log(data);
             $.ajax({
-                url:'/devices/subscribe',
-                method:'POST',
+                url: '/devices/subscribe',
+                method: 'POST',
                 //type:'json',
-                contentType:'application/json',
-                data:JSON.stringify(data),
-                success:function(data){
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                success: function (data) {
                     console.log(data);
                     App.router.devicesView.selectedDevicesCollection.reset();
                     this.stateModel.set({
@@ -186,12 +188,12 @@ define([
                         proceedSubscription: false
                     });
                 },
-                error:function(err){
+                error: function (err) {
                     App.error(err);
                 }
             });
         },
-        afterUpend:function(){
+        afterUpend: function () {
             this.stateModel.set({subscribe: false});
         },
         showStripe: function (e) {
@@ -201,20 +203,20 @@ define([
         },
         setParams: function (params) {
             console.log('setParams', params);
-            if(params.subscribe === 'subscribe'){
+            if (params.subscribe === 'subscribe') {
                 this.showModal();
             }
         },
-        showModal:function(){
-            if(!App.router.devicesView){
+        showModal: function () {
+            if (!App.router.devicesView) {
                 return;
             }
-            if(this.devicesView){
+            if (this.devicesView) {
                 this.devicesView.undelegateEvents();
                 this.devicesView.remove();
             }
 
-            this.devicesView = new DevicesView({modal:true});
+            this.devicesView = new DevicesView({modal: true});
             this.devicesView.selectedDevicesCollection.reset(App.router.devicesView.selectedDevicesCollection.models);
 
             this.$el.find('#modalContent').append(this.devicesView.el);
