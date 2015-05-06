@@ -124,20 +124,20 @@ define([
         locate: function () {
             this.clearMarkers();
             var self = this;
-            var devicesIdis = [];
+            var deviceIds = [];
             var data;
 
             this.selectedDevicesCollection.map(function (model) {
-                devicesIdis.push(model.id);
+                deviceIds.push(model.id);
             });
 
-            if (devicesIdis.length === 0) {
+            if (deviceIds.length === 0) {
                 this.devicesCoordinatesCollection.reset();
                 App.map.setZoom(1);
             } else {
 
                 data = JSON.stringify({
-                    devices: devicesIdis
+                    deviceIds: deviceIds
                 });
                 $.ajax({
                     url: '/devices/getLocations',

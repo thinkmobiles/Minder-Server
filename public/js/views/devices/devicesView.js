@@ -310,7 +310,7 @@ define([
                 var selectedDevicesCollection = this.selectedDevicesCollection.pluck('_id');
                 $.ajax({
                     data: JSON.stringify({
-                        devices: selectedDevicesCollection
+                        deviceIds: selectedDevicesCollection
                     }),
                     method: 'POST',
                     contentType: 'application/json',
