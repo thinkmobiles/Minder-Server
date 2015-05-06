@@ -54,7 +54,7 @@ var DeviceHandler = function (db) {
         }
     };
 
-    function subscribe(userModel, deviceIds, plan, callback) {
+    function subscribe(userModel, plan, token, callback) {
         var userId = userModel._id.toString();
 
         async.waterfall([
@@ -70,7 +70,8 @@ var DeviceHandler = function (db) {
                         email: userModel.email,
                         metadata: {
                             userId: userModel._id.toString()
-                        }
+                        },
+                        token: token
                     };
                     stripeModule.createCustomer(customerData, function (err, customer) {
                         if (err) {
@@ -122,10 +123,37 @@ var DeviceHandler = function (db) {
             //make subscription:
             function (user, cb) {
                 cb(null, user); //TODO: ...
+                /*var subscriptionParams = {
+                    customerId: user.billings.stripeId,
+                    planId: 'sub_2',
+                    quantity: 2
+                };
+                stripeModule.createSubscription(subscriptionParams, function (err, result) {
+                    if (err) {
+                        return cb(err);
+                    }
+                    cb(null, user, result);
+                });*/
             },
 
+        ], function (err, result) {
+            if (err) {
+                if (callback && (typeof callback === 'function')) {
+                    callback(err);
+                }
+                return;
+            }
+            if (callback && (typeof callback === 'function')) {
+                callback(null, result);
+            }
+        });
+    };
+
+    function updateStatusToSubscribed(userId, deviceIds, callback) {
+        async.waterfall([
+
             //update devices status = "subscribed":
-            function (user, cb) {
+            function (cb) {
                 var criteria = {
                     user: userId,
                     status: DEVICE_STATUSES.ACTIVE,
@@ -141,31 +169,31 @@ var DeviceHandler = function (db) {
                     if (err) {
                         return cb(err);
                     }
-                    cb(null, user, quantity);
+                    cb(null, quantity);
                 });
 
             },
 
             //update user.billings.subscribedDevices:
-            function (user, quantity ,cb) {
+            function (quantity ,cb) {
                 self.incrementSubscribedDevicesCount(userId, quantity, function (err, updatedUser) {
                     if (err) {
                         return cb(err);
                     }
                     cb(null, updatedUser);
                 });
-
             }
 
-        ], function (err, result) {
+        ], function (err, updatedUser) {
             if (err) {
                 if (callback && (typeof callback === 'function')) {
                     callback(err);
                 }
                 return;
             }
+
             if (callback && (typeof callback === 'function')) {
-                callback(null, result);
+                callback(null, updatedUser);
             }
         });
     };
@@ -261,6 +289,41 @@ var DeviceHandler = function (db) {
 
     };
 
+    this.getLocation = function (req, res, next) {
+        var userId = req.session.userId;
+        var options = req.body;
+        var criteria = {
+            status: DEVICE_STATUSES.SUBSCRIBED
+        };
+        var deviceIds = options.deviceIds;
+        var fields = {
+            name: 1,
+            _id: 1,
+            lastLocation: 1,
+            updatedAt: 1
+        };
+
+        if (!deviceIds || deviceIds.length) {
+            return next(badRequests.NotEnParams({reqParams: ['deviceIds']}));
+        }
+
+        criteria._id = {
+            $in: deviceIds
+        };
+
+        if (!session.isAdmin(req)) {
+            criteria.user = userId;
+        }
+
+        DeviceModel.find(criteria, fields)
+            .exec(function (err, devices) {
+                if (err) {
+                    return next(err);
+                }
+                res.status(200).send(devices);
+            });
+    };
+
     this.getDevices = function (req, res, next) {
         var userId = req.session.userId;
         var params = req.query;
@@ -335,42 +398,6 @@ var DeviceHandler = function (db) {
                     return next(err);
                 }
                 res.status(200).send({count: devices});
-            });
-    };
-
-    this.getDevicesLocation = function (req, res, next) {
-        var userId = req.session.userId;
-        var options = req.body;
-        var criteria = {
-            status: DEVICE_STATUSES.SUBSCRIBED
-        };
-        var deviceIds;
-        var fields = {
-            name: 1,
-            _id: 1,
-            lastLocation: 1,
-            updatedAt: 1
-        };
-
-        if (!options.devices) {
-            return next(badRequests.NotEnParams({reqParams: ['devices']}));
-        }
-
-        deviceIds = JSON.parse(options.devices);
-        criteria._id = {
-            $in: deviceIds
-        };
-
-        if (!session.isAdmin(req)) {
-            criteria.user = userId;
-        }
-
-        DeviceModel.find(criteria, fields)
-            .exec(function (err, devices) {
-                if (err) {
-                    return next(err);
-                }
-                res.status(200).send(devices);
             });
     };
 
@@ -559,11 +586,11 @@ var DeviceHandler = function (db) {
     };
 
     this.subscribeDevices = function (req, res, next) {
-        var tokenObject = req.body.token || req.body.tokenObject; //TODO: token
-        var deviceIds = req.body.deviceIds || req.body.devices;//TODO: deviceIds
+        var token = req.body.token;
+        var deviceIds = req.body.deviceIds;
         var userId = req.session.userId;
 
-        if (!tokenObject) {
+        if (!token) {
             return next(badRequests.NotEnParams({reqParams: ['token', 'deviceIds']}));
         }
 
@@ -658,111 +685,26 @@ var DeviceHandler = function (db) {
 
             plan = calculateTariff(tariffParams);
 
-            subscribe(userModel, activeDeviceIds, plan, function (err, result) {
-                if (err) {
-                    return next(err);
-                }
-                res.status(200).send({success: 'subscribed'});
-            });
+            async.waterfall([
 
-            /*async.waterfall([
-
-                //check is exists customer in stripe and create if need:
+                //subscription:
                 function (cb) {
-                    var stripeId = userModel.billings.stripeId;
-                    var customerData;
-
-                    if (!stripeId) {
-
-                        customerData = {
-                            email: userModel.email,
-                            metadata: {
-                                userId: userModel._id.toString()
-                            }
-                        };
-                        stripeModule.createCustomer(customerData, function (err, customer) {
-                            if (err) {
-                                return cb(err);
-                            }
-
-                            cb(null, customer.id, userModel);
-                        });
-
-                        /!*
-                        customerData = {
-                            plan: plan.id,
-                            quantity: deviceIds.length,
-                            source: tokenObject.id,
-                            email: userModel.email
-                        };
-
-                        stripe.customers.create(customerData, function (err, customer) {
-                            if (err) {
-                                return next(err);
-                            }
-
-                            res.status(200).send(customer);
-                        });
-                        *!/
-
-                    } else {
-                        cb(null, stripeId, userModel);
-                    }
+                    subscribe(userModel, plan, token, function (err, subscriptionResult) {
+                        if (err) {
+                            return cb(err);
+                        }
+                        cb(null, subscriptionResult);
+                    });
                 },
 
-                //update user.stripeId if need:
-                function (stripeId, user, cb) {
-                    if (!user.billings.stripeId) {
-
-                        user.billings.stripeId = stripeId;
-                        user.save(function (err, updatedUser) {
-                            if (err) {
-                                return cb(err);
-                            }
-                            cb(null, updatedUser);
-                        });
-
-                    } else {
+                //update Devices.status to "subscribed" and User.billings.subscribedDevices
+                function (subscriptionResult, cb) {
+                    updateStatusToSubscribed(userId, activeDeviceIds, function (err, user) {
+                        if (err) {
+                            return cb(err);
+                        }
                         cb(null, user);
-                    }
-                },
-
-                //make subscription:
-                function (user, cb) {
-                    cb(null, user); //TODO: ...
-                },
-
-                //update devices status = "subscribed":
-                function (user, cb) {
-                    var criteria = {
-                        user: userId,
-                        status: DEVICE_STATUSES.ACTIVE,
-                        _id: {
-                            $in: deviceIds
-                        }
-                    };
-                    var update = {
-                        status: DEVICE_STATUSES.SUBSCRIBED
-                    };
-
-                    DeviceModel.update(criteria, update, {multi: true}, function (err, quantity) {
-                        if (err) {
-                            return cb(err);
-                        }
-                        cb(null, user, quantity);
                     });
-
-                },
-
-                //update user.billings.subscribedDevices:
-                function (user, quantity ,cb) {
-                    self.incrementSubscribedDevicesCount(userId, quantity, function (err, updatedUser) {
-                        if (err) {
-                            return cb(err);
-                        }
-                        cb(null, updatedUser);
-                    });
-
                 }
 
             ], function (err, result) {
@@ -770,7 +712,7 @@ var DeviceHandler = function (db) {
                     return next(err);
                 }
                 res.status(200).send({success: 'subscribed'});
-            });*/
+            });
 
         });
     };
@@ -778,17 +720,17 @@ var DeviceHandler = function (db) {
     this.unsubscribeDevices = function (req, res, next) {
         var options = req.body;
         var userId = req.session.userId;
-        var deviceIds = options.deviceIds || options.devices; //TODO: deviceIds;
+        var deviceIds = options.deviceIds;
 
         if (!deviceIds) {
             return next(badRequests.NotEnParams({reqParams: 'deviceIds'}));
         }
 
-        try {
+        /*try {
             deviceIds = JSON.parse(deviceIds);
         } catch(err) {
             return next(badRequests.InvalidValue({param: 'deviceIds'}));
-        }
+        }*/
 
         async.waterfall([
 
@@ -832,7 +774,7 @@ var DeviceHandler = function (db) {
                 return next(err);
             }
 
-            res.status(200).send({success: 'unsubscribed', count: updatedDevicesCount, user: userModel});
+            res.status(200).send({success: 'unsubscribed'});
         });
 
     };
