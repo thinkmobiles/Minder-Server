@@ -1,7 +1,11 @@
 <ul class="pagination">
-
     <% for(page in pages) { %>
-    <li class="<% if(pages[page].active) { %>active<% } %>"><a href="#<%= url %>/<%= pages[page].data %>"><%= pages[page].html %></a></li>
+    <li class="<% if(pages[page].active) { %>active<% } %> item">
+        <% if(urlPagination) { %>
+        <a href="#<%= url %>/<%= pages[page].data %>"><%= pages[page].html %></a>
+        <% } else { %>
+        <a class="goToPage" href="<%= pages[page].data %>"><%= pages[page].html %></a>
+        <% } %>
+    </li>
     <% } %>
-
 </ul>
