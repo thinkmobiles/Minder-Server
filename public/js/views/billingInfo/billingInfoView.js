@@ -22,9 +22,12 @@ define([
             });
 
             App.sessionData.on('change:user', function () {
-                this.stateModel.set({
-                    renewal: App.sessionData.get('user').billings.renewEnabled
-                });
+                if(App.sessionData.get('user')){
+                    self.render();
+                    self.stateModel.set({
+                        renewal: App.sessionData.get('user').billings.renewEnabled
+                    });
+                }
             });
 
             this.Stripe = StripeCheckout.configure({
@@ -171,6 +174,21 @@ define([
                 },
                 error: function (err) {
                     App.error(err)
+                }
+            });
+        },
+
+        updateData:function(){
+            $.ajax({
+                url: "/currentUser",
+                type: "GET",
+                success: function (data) {
+                    App.sessionData.set({
+                        user:data
+                    })
+                },
+                error: function (data) {
+                    App.error(data);
                 }
             });
         },

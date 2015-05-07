@@ -77,7 +77,6 @@ define([
                 self.calculatePlan();
 
                 this.paginationView = new PaginationView(paginationOptions);
-                this.isNew = false;
             },
 
             deviceCheck: function (event) {
@@ -180,9 +179,11 @@ define([
             },
 
             afterUpend: function () {
-                if(this.isNew === false){
-                    this.paginationView.loadPage();
+                if(this.isNew){
+                    this.isNew = false;
+                    return
                 }
+                this.paginationView.refresh();
                 this.render();
             },
 

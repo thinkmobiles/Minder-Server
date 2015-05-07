@@ -87,6 +87,9 @@ define([
                 data: this.getFilters()
             });
         },
+        refresh:function(){
+            this.count();
+        },
 
         calculate: function () {
             var count = this.stateModel.get('count') || 0;

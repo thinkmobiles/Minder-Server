@@ -49,7 +49,13 @@ require(['app'], function (app) {
         if (xhr) {
             if (xhr.status === 401 || xhr.status === 403) {
                 if (xhr.status === 401) {
-                    Backbone.history.navigate("login", {trigger: true});
+                    if(App.sessionData.get('authorized')){
+                        Backbone.history.navigate("login", {trigger: true});
+                    }
+                    App.sessionData.set({
+                        authorized:false,
+                        user:null
+                    });
                 } else {
                     alert("You do not have permission to perform this action");
                 }

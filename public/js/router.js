@@ -37,12 +37,13 @@ define([
 
         initialize: function () {
             this.topMenuView = new TopMenuView();
+            console.log('router init', App.requestedURL, Backbone.history.fragment);
             //this.footerView = new FooterView();
         },
 
         loadWrapperView: function (name, params) {
 
-            console.log()
+            console.log('authorized', App.sessionData.get('authorized'));
             if (!App.sessionData.get('authorized')) {
                 var WrongRout = _.find(this.needAuthorize, function (rout) {
                     if (name === rout) {
@@ -50,7 +51,7 @@ define([
                     }
                 });
                 if (WrongRout) {
-                    Backbone.history.navigate("login", {trigger: true});
+                     return Backbone.history.navigate("login", {trigger: true});
                     //App.router.navigate("login", {trigger: true});
                 }
             }

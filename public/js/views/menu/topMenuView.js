@@ -37,7 +37,8 @@ define([
         ],
 
         initialize: function (options) {
-            this.listenTo(App.sessionData, 'change', this.render);
+            this.listenTo(App.sessionData, 'change:authorized', this.render);
+            this.render();
         },
 
         logout: function () {
@@ -58,6 +59,7 @@ define([
             });
         },
         render: function () {
+            console.log('top menu render');
             var authorized = App.sessionData.get('authorized');
             var data = {
                 top: [],

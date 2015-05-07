@@ -62,12 +62,14 @@
         if (plan) {
             result.costForThisMonth = (((devicesToPay * (plan.amount / 100)) / daysInThisMonth) * daysLeft);
             result.plan = plan.name;
+            result.planData = plan;
             result.planId = plan.id;
             result.plan_id = plan._id;
             result.maxDevices = plan.metadata.maxDevices;
             result.costForThisMonth = Math.round(result.costForThisMonth * 100) / 100;
             result.subscribedDevices = subscribedDevices;
         }
+        console.log(result);
         return result;
     }
 

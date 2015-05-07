@@ -50,19 +50,25 @@ define([
         }
 
         setInterval(getDateTime, 1000 * 60 * 50);
-        getDateTime();
-        getPlans();
+        //getDateTime();
+        //getPlans();
 
         App.sessionData.on('change:authorized', function () {
             if (App.sessionData.get('authorized')) {
                 getPlans();
+                getDateTime();
             }
         });
 
         appRouter = new Router();
         App.router = appRouter;
         Backbone.history.start({silent: true});
-        Communication.checkLogin(Custom.runApplication);
+        Communication.checkLogin(function(err, data){
+            Custom.runApplication(err, data);
+            //if(err){
+            //
+            //}
+        });
 
     };
     return {

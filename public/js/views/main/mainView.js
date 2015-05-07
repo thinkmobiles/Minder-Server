@@ -9,6 +9,7 @@ define([
 
     var MainView = Backbone.View.extend({
         className: "mainPage",
+        isNew : true,
         events: {
             'click #globalDevicesChecker': 'globalCheckTrigger',
             'click #mapLocateButton': 'locate',
@@ -56,16 +57,19 @@ define([
         },
 
         afterUpend: function () {
-            if (!App.map) {
-                this.mapView = new MapView();
-            }
-            this.renderDevices();
-            this.paginationView.render();
             if (App.map) {
                 var center = App.map.getCenter();
                 google.maps.event.trigger(App.map, "resize");
                 App.map.setCenter(center);
+            }else{
+                this.mapView = new MapView();
             }
+            if(this.isNew){
+                this.isNew = false;
+                return
+            }
+            //this.renderDevices();
+            this.paginationView.refresh();
         },
 
         search: function (event) {

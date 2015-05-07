@@ -1,9 +1,8 @@
 // Filename: communication.js
 define(function () {
     var checkLogin = function (callback) {
-        var url = "/currentUser";
         $.ajax({
-            url: url,
+            url: "/currentUser",
             type: "GET",
             success: function (data) {
                 return callback(null, data);
@@ -12,7 +11,7 @@ define(function () {
                 return callback(data);
             }
         });
-    }
+    };
 
     return {
         checkLogin: checkLogin

@@ -145,12 +145,12 @@ var DeviceHandler = function (db) {
 
 
                 var chargeParams = {
-                    amount: 50,
+                    amount: plan.devicesToPay,
                     source: token.id,
                     description: 'Charge for ' + user.email + ' plan T1',
                     metadata: {
-                        planId: 'sub_1',
-                        subscribedDevices: '',
+                        planId: plan._id,
+                        quantity: plan.devicesToPay,
                         expired: ''
                     }
                 };
