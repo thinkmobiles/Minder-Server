@@ -69,7 +69,16 @@ define([
                 token: null,
                 proceedSubscription: true
             });
+            var selectedDevices = this.devicesView.selectedDevicesCollection.models;
+            App.router.devicesView.selectedDevicesCollection.reset(selectedDevices);
+
             this.showStripe();
+        },
+
+        cancelSubscription:function(){
+            var selectedDevices = this.devicesView.selectedDevicesCollection.models;
+            App.router.devicesView.selectedDevicesCollection.reset(selectedDevices);
+            this.$el.find('#devicesModal').modal('hide');
         },
 
         setUserPlans: function () {
@@ -177,13 +186,11 @@ define([
             $.ajax({
                 url: '/devices/subscribe',
                 method: 'POST',
-                //type:'json',
                 contentType: 'application/json',
                 data: JSON.stringify(data),
                 success: function (data) {
-                    console.log(data);
                     App.router.devicesView.selectedDevicesCollection.reset();
-                    this.stateModel.set({
+                    self.stateModel.set({
                         token: null,
                         proceedSubscription: false
                     });

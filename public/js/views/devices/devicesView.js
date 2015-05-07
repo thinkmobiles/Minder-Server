@@ -9,6 +9,7 @@ define([
 ], function (Template, ModalTemplate, DevisesCollection, deviceMainListView, PaginationView, StripeCheckout, config) {
 
     var MainView = Backbone.View.extend({
+        isNew : true,
             events: {
                 'click #globalDevicesChecker': 'globalCheckTrigger',
                 'submit #searchForm': 'search',
@@ -61,17 +62,6 @@ define([
                     paginationOptions.urlPagination = false;
                 }
 
-
-                //this.Stripe = StripeCheckout.configure({
-                //    key: config.strypePublicKay,
-                //    image: '/images/logoForPaiments.jpg',
-                //    token: function (token) {
-                //        self.stripeTokenHandler(token);
-                //    },
-                //    //currency:'USD',
-                //    email: App.sessionData.get('user').email,
-                //    panelLabel: 'Subscribe'
-                //});
                 this.listenTo(this.stateModel, 'change:params', this.handleParams);
                 this.listenTo(this.devisesCollection, 'sync remove', this.render);
 
@@ -80,60 +70,16 @@ define([
                     self.render();
                 });
 
-                //this.selectedDevicesCollection.on('all', function (e) {
-                //    console.log('>>', e, self.selectedDevicesCollection.length);
-                //});
-
                 App.sessionData.on('change:date change:tariffPlans sync', function () {
                     self.calculatePlan();
                 });
 
                 self.calculatePlan();
 
-                //this.render();
-
-
                 this.paginationView = new PaginationView(paginationOptions);
-
+                this.isNew = false;
             },
-            //stripeTokenHandler: function (token) {
-            //    var self = this;
-            //    var Model;
-            //    var model;
-            //    var devices = self.selectedDevicesCollection.toJSON();
-            //    console.log(self);
-            //    console.log(token);
-            //    devices = _.pluck(devices, '_id');
-            //
-            //
-            //    Model = Backbone.Model.extend({
-            //        url: function () {
-            //            return '/tariffPlans/subscribe'
-            //        }
-            //    });
-            //    model = new Model();
-            //    console.log({
-            //        devices: devices,
-            //        tokenObject: token
-            //    });
-            //    model.save({
-            //        devices: devices,
-            //        tokenObject: token
-            //    }, {
-            //        error: function (err) {
-            //            App.error(err);
-            //        },
-            //        patch: true
-            //    });
-            //},
-            //showStripe: function (e) {
-            //    //e.preventDefault();
-            //    this.Stripe.open({
-            //        name: 'Demo Site',
-            //        description: '2 widgets'
-            //        //amount: 2500
-            //    });
-            //},
+
             deviceCheck: function (event) {
                 var self = this;
                 this.devisesCollection.map(function (model) {
@@ -147,6 +93,7 @@ define([
                     }
                 });
             },
+
             deviceDelete: function (event) {
                 this.devisesCollection.map(function (model) {
                     if (model.id === event.target.value) {
@@ -158,6 +105,7 @@ define([
                     }
                 });
             },
+
             deviceActivate: function (event) {
                 this.devisesCollection.map(function (model) {
                     if (model.id === event.target.value) {
@@ -170,6 +118,7 @@ define([
                     }
                 });
             },
+
             updateDevicesData: function () {
                 var self = this;
                 var devices = [];
@@ -197,6 +146,7 @@ define([
                     devices: devices
                 });
             },
+
             calculatePlan: function () {
                 var plans = App.sessionData.get('tariffPlans');
                 var date = App.sessionData.get('date');
@@ -218,42 +168,24 @@ define([
                 });
             },
 
-            //generateDropdown: function () {
-            //    var date = App.sessionData.get('date');
-            //    if (!date) return;
-            //    var monthArray = [];
-            //    var yearArray = [];
-            //    var year = date.getFullYear();
-            //    for (var i = 0; i < 12; i++) {
-            //        monthArray.push({
-            //            name: i,
-            //            value: i
-            //        });
-            //    }
-            //    for (var i = year; i < year + 6; i++) {
-            //        yearArray.push({
-            //            name: i,
-            //            value: i
-            //        });
-            //    }
-            //    this.stateModel.set({
-            //        yearArray: yearArray,
-            //        monthArray: monthArray
-            //    })
-            //},
-
             proceedSubscription: function () {
                 this.$el.find('#warningModal').modal({show: true});
             },
+
             search: function (event) {
                 event.preventDefault();
                 this.paginationView.setData({
                     name: this.$el.find('#search').val()
                 });
             },
+
             afterUpend: function () {
+                if(this.isNew === false){
+                    this.paginationView.loadPage();
+                }
                 this.render();
             },
+
             globalCheckTrigger: function () {
                 var checked = this.$el.find('#globalDevicesChecker').prop('checked');
                 var checkedDevices=[];
@@ -294,6 +226,7 @@ define([
             setParams: function (params) {
                 this.stateModel.set({params: params});
             },
+
             handleParams: function () {
                 var params = this.stateModel.get('params');
 
@@ -305,6 +238,7 @@ define([
                     }
                 }
             },
+
             unsubscribe: function () {
                 var self = this;
                 var selectedDevicesCollection = this.selectedDevicesCollection.pluck('_id');
@@ -325,8 +259,8 @@ define([
                 });
 
             }
-        })
-        ;
+        });
+
     return MainView;
 })
 ;

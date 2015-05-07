@@ -59,6 +59,11 @@ define([
                 this.mapView = new MapView();
             }
             this.renderDevices();
+            if(App.map){
+                var center = App.map.getCenter();
+                google.mиaps.event.trigger(App.map, "resize");
+                App.map.setCenter(center);
+            }
         },
 
         search: function (event) {
