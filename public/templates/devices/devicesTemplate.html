@@ -18,6 +18,7 @@
         <% } %>
     </div>
     <div class="row" id="devicesList">
+
         <table class="table">
             <tbody>
             <% for (i in devices) { %>
@@ -60,7 +61,6 @@
             </tbody>
         </table>
 
-
     </div>
     <div class="row" id="bottomMenu">
         <div id="pagination"></div>
@@ -74,27 +74,27 @@
 <% if(!params.modal) { %>
 <div class="col-md-4">
     <div class="panel panel-default">
-        <div class="panel-body proceedSubscription">
+        <div class="panel-body proceedSubscription calculator">
             <div>
-                <b>Plan</b> <br>
-                <%= calculations.plan %>
+                <span class="name">Plan</span> <br>
+                <span class="value"><%= calculations.plan %></span>
             </div>
             <div>
                 <b>Number of devices</b> <br>
-                <%= calculations.subscribedDevices %> of <%= calculations.maxDevices %> devices
+                <span class="value"><%= calculations.subscribedDevices %> of <%= calculations.maxDevices %> devices</span>
             </div>
             <div>
                 <b>Days left</b> <br>
-                <%= calculations.daysLeft %>
+                <span class="value"><%= calculations.daysLeft %></span>
             </div>
             <div>
                 <b>Total cost</b> <br>
-                <%= calculations.costForThisMonth %>$
+                <span class="value"><%= calculations.costForThisMonth %>$</span>
             </div>
             <div class="form-group">
-                <select class="form-control" id="periodSelect">
-                    <option value="month">Month</option>
-                    <option value="month">Month</option>
+                <select class="form-control" id="period">
+                    <option value="month" <% if(period === 'month') { %>selected<% } %> >Month</option>
+                    <option value="year" <% if(period === 'year') { %>selected<% } %> >Year</option>
                 </select>
             </div>
 

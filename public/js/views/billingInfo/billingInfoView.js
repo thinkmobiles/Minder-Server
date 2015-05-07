@@ -22,7 +22,7 @@ define([
             });
 
             App.sessionData.on('change:user', function () {
-                if(App.sessionData.get('user')){
+                if (App.sessionData.get('user')) {
                     self.render();
                     self.stateModel.set({
                         renewal: App.sessionData.get('user').billings.renewEnabled
@@ -78,7 +78,7 @@ define([
             this.showStripe();
         },
 
-        cancelSubscription:function(){
+        cancelSubscription: function () {
             var selectedDevices = this.devicesView.selectedDevicesCollection.models;
             App.router.devicesView.selectedDevicesCollection.reset(selectedDevices);
             this.$el.find('#devicesModal').modal('hide');
@@ -178,13 +178,13 @@ define([
             });
         },
 
-        updateData:function(){
+        updateData: function () {
             $.ajax({
                 url: "/currentUser",
                 type: "GET",
                 success: function (data) {
                     App.sessionData.set({
-                        user:data
+                        user: data
                     })
                 },
                 error: function (data) {
@@ -196,9 +196,11 @@ define([
         proceedSubscription: function () {
             var self = this;
             var devices = App.router.devicesView.selectedDevicesCollection.pluck('_id');
+            var period = App.router.devicesView.stateModel.get('period');
             var data = {
                 deviceIds: devices,
-                token: self.stateModel.get('token')
+                token: self.stateModel.get('token'),
+                period: period
             };
             console.log(data);
             $.ajax({

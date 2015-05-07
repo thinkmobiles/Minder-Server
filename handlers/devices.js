@@ -79,11 +79,11 @@ var DeviceHandler = function (db) {
                         }
 
                         /*stripeModule.createCard(customer.id, token.id, function (err, card) {
-                            if (err) {
-                                return cb(err);
-                            }
-                            cb(null, customer.id, userModel);
-                        });*/
+                         if (err) {
+                         return cb(err);
+                         }
+                         cb(null, customer.id, userModel);
+                         });*/
 
                         cb(null, customer.id, userModel);
                     });
@@ -131,21 +131,21 @@ var DeviceHandler = function (db) {
             function (user, cb) {
                 //cb(null, user); //TODO: ...
                 /*var subscriptionParams = {
-                    customerId: user.billings.stripeId,
-                    planId: 'sub_2',
-                    quantity: 2,
-                    source: token.id
-                };
-                stripeModule.createSubscription(subscriptionParams, function (err, result) {
-                    if (err) {
-                        return cb(err);
-                    }
-                    cb(null, user, result);
-                });*/
+                 customerId: user.billings.stripeId,
+                 planId: 'sub_2',
+                 quantity: 2,
+                 source: token.id
+                 };
+                 stripeModule.createSubscription(subscriptionParams, function (err, result) {
+                 if (err) {
+                 return cb(err);
+                 }
+                 cb(null, user, result);
+                 });*/
 
 
                 var chargeParams = {
-                    amount: plan.devicesToPay,
+                    amount: plan.costForThisMonth * 100,  //price // TODO
                     source: token.id,
                     description: 'Charge for ' + user.email + ' plan T1',
                     metadata: {
@@ -154,7 +154,7 @@ var DeviceHandler = function (db) {
                         expired: ''
                     }
                 };
-                stripeModule.createCharge(chargeParams, function(err, charge) {
+                stripeModule.createCharge(chargeParams, function (err, charge) {
                     if (err) {
                         return cb(err);
                     }
@@ -201,7 +201,7 @@ var DeviceHandler = function (db) {
             },
 
             //update user.billings.subscribedDevices:
-            function (quantity ,cb) {
+            function (quantity, cb) {
                 self.incrementSubscribedDevicesCount(userId, quantity, function (err, updatedUser) {
                     if (err) {
                         return cb(err);
@@ -497,25 +497,25 @@ var DeviceHandler = function (db) {
 
     this.removeDevice = function (req, res, next) {
         /*var id = req.params.id;
-        var userId = req.session.userId;
+         var userId = req.session.userId;
 
-        var criteria = {
-            _id: id
-        };
+         var criteria = {
+         _id: id
+         };
 
-        if (!session.isAdmin(req)) {
-            criteria.user = userId;
-        }
+         if (!session.isAdmin(req)) {
+         criteria.user = userId;
+         }
 
-        DeviceModel.findOneAndRemove(criteria, function (err, result) {
-            if (err) {
-                next(err);
-            } else if (!result) {
-                next(badRequests.NotFound());
-            } else {
-                res.status(200).send({success: 'removed'});
-            }
-        });*/
+         DeviceModel.findOneAndRemove(criteria, function (err, result) {
+         if (err) {
+         next(err);
+         } else if (!result) {
+         next(badRequests.NotFound());
+         } else {
+         res.status(200).send({success: 'removed'});
+         }
+         });*/
 
         res.status(500).send('Not implemented');
     };
@@ -531,7 +531,7 @@ var DeviceHandler = function (db) {
             return next(badRequests.NotEnParams({reqParams: 'status'}));
         }
 
-        if ((deviceStatus !== DEVICE_STATUSES.ACTIVE) && (deviceStatus !== DEVICE_STATUSES.DELETED) ){
+        if ((deviceStatus !== DEVICE_STATUSES.ACTIVE) && (deviceStatus !== DEVICE_STATUSES.DELETED)) {
             return next(badRequests.InvalidValue({param: 'status'}));
         }
 
@@ -588,7 +588,7 @@ var DeviceHandler = function (db) {
         });
     };
 
-    this.incrementSubscribedDevicesCount = function(userId, quantity, callback) {
+    this.incrementSubscribedDevicesCount = function (userId, quantity, callback) {
         var criteria = {
             _id: userId
         };
@@ -614,14 +614,20 @@ var DeviceHandler = function (db) {
     this.subscribeDevices = function (req, res, next) {
         var token = req.body.token;
         var deviceIds = req.body.deviceIds;
+        var period = req.body.period;
         var userId = req.session.userId;
+        var requiredParameters = ['token', 'deviceIds', 'period'];
 
         if (!token) {
-            return next(badRequests.NotEnParams({reqParams: ['token', 'deviceIds']}));
+            return next(badRequests.NotEnParams({reqParams: requiredParameters}));
         }
 
         if (!deviceIds || deviceIds.length === 0) {
-            return next(badRequests.NotEnParams({reqParams: ['token', 'deviceIds']}));
+            return next(badRequests.NotEnParams({reqParams: requiredParameters}));
+        }
+
+        if (!period) {
+            return next(badRequests.NotEnParams({reqParams: requiredParameters}));
         }
 
         async.parallel({
@@ -667,7 +673,7 @@ var DeviceHandler = function (db) {
                 });
             },
 
-            checkActiveDevices: function(cb) {
+            checkActiveDevices: function (cb) {
                 var criteria = {
                     user: userId,
                     status: DEVICE_STATUSES.ACTIVE,
@@ -705,6 +711,7 @@ var DeviceHandler = function (db) {
             calculateParams = {
                 date: new Date(),
                 plans: plans,
+                period: period,
                 user: userModel,
                 selectedDevicesCount: deviceIds.length //TODO: devicesCount
             };
@@ -778,7 +785,7 @@ var DeviceHandler = function (db) {
 
             //update Users.billings.subscribedDevices:
             function (updatedDevicesCount, cb) {
-                var quantity = ( -1 )* updatedDevicesCount;
+                var quantity = ( -1 ) * updatedDevicesCount;
 
                 self.incrementSubscribedDevicesCount(userId, quantity, function (err, userModel) {
                     if (err) {

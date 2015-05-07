@@ -9,23 +9,25 @@
         var selectedDevicesCount = data.selectedDevicesCount;
         var plans = data.plans;
         var devicesToPay = 0;
-        var newPlan = false;
-        var plan = data.user.currentPlan;
+        //var newPlan = false;
+        //var plan = data.user.currentPlan;
+        var plan;
         var date = data.date;
         var daysInThisMonth = daysInMonth((date.getMonth() + 1), date.getFullYear());
         var daysLeft = (daysInThisMonth - date.getDate() + 1);
+        var period = data.period;
 
-        if (plan) {
-            for (var i = 0; i < plans.length; i++) {
-                if (plans[i]._id === plan) {
-                    plan = plans[i].name;
-                    break;
-                }
-            }
-        }
+        //if (plan) {
+        //    for (var i = 0; i < plans.length; i++) {
+        //        if (plans[i]._id === plan) {
+        //            plan = plans[i].name;
+        //            break;
+        //        }
+        //    }
+        //}
 
         var result = {
-            plan: plan,
+            //plan: plan,
             costForThisMonth: 0,
             devicesToPay: 0,
             subscribedDevices: subscribedDevices,
@@ -37,24 +39,28 @@
         devicesToPay = selectedDevicesCount;
         subscribedDevices = subscribedDevices + selectedDevicesCount;
 
-        if (subscribedDevices) {
+        //if (subscribedDevices) {
             for (var i = 0; i < plans.length; i++) {
-                if (subscribedDevices >= plans[i].metadata.minDevices && subscribedDevices <= plans[i].metadata.maxDevices) {
+                if (
+                    (subscribedDevices >= plans[i].metadata.minDevices)
+                    && (subscribedDevices <= plans[i].metadata.maxDevices)
+                    && (plans[i].metadata.type === period)
+                ) {
                     plan = plans[i];
-                    newPlan = true;
+                    //newPlan = true;
                     break;
                 }
             }
-        }
+        //}
 
-        if (!newPlan) {
-            for (var i = 0; i < plans.length; i++) {
-                if (plan === plans[i].name) {
-                    plan = plans[i];
-                    break;
-                }
-            }
-        }
+        //if (!newPlan) {
+        //    for (var i = 0; i < plans.length; i++) {
+        //        if (plan === plans[i].name) {
+        //            plan = plans[i];
+        //            break;
+        //        }
+        //    }
+        //}
 
 
 
@@ -65,6 +71,7 @@
             result.planData = plan;
             result.planId = plan.id;
             result.plan_id = plan._id;
+            result.period = period;
             result.maxDevices = plan.metadata.maxDevices;
             result.costForThisMonth = Math.round(result.costForThisMonth * 100) / 100;
             result.subscribedDevices = subscribedDevices;
