@@ -42,6 +42,7 @@ define([
 
         loadWrapperView: function (name, params) {
 
+            console.log()
             if (!App.sessionData.get('authorized')) {
                 var WrongRout = _.find(this.needAuthorize, function (rout) {
                     if (name === rout) {
@@ -49,7 +50,8 @@ define([
                     }
                 });
                 if (WrongRout) {
-                    App.router.navigate("login", {trigger: true});
+                    Backbone.history.navigate("login", {trigger: true});
+                    //App.router.navigate("login", {trigger: true});
                 }
             }
 
@@ -96,6 +98,7 @@ define([
         },
 
         login: function () {
+            console.log('login rout triggered');
             this.loadWrapperView('login');
         },
 

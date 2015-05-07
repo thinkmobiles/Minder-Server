@@ -6,6 +6,7 @@ define([
 ], function (Router, Communication, Custom) {
 
     var initialize = function () {
+        var appRouter;
         App.sessionData = new Backbone.Model({
             authorized: false,
             admin: false,
@@ -58,7 +59,7 @@ define([
             }
         });
 
-        var appRouter = new Router();
+        appRouter = new Router();
         App.router = appRouter;
         Backbone.history.start({silent: true});
         Communication.checkLogin(Custom.runApplication);

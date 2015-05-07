@@ -41,12 +41,13 @@ define([
 
             this.paginationView = new PaginationView({
                 collection: this.devisesCollection,
-                onPage: 10,
+                onPage: 7,
                 padding: 2,
                 page: 1,
                 ends: true,
                 steps: true,
                 url: 'main/page',
+                //urlPagination: true,
                 data: {
                     status: 'subscribed'
                 }
@@ -59,9 +60,10 @@ define([
                 this.mapView = new MapView();
             }
             this.renderDevices();
-            if(App.map){
+            this.paginationView.render();
+            if (App.map) {
                 var center = App.map.getCenter();
-                google.mиaps.event.trigger(App.map, "resize");
+                google.maps.event.trigger(App.map, "resize");
                 App.map.setCenter(center);
             }
         },
@@ -70,9 +72,8 @@ define([
             event.preventDefault();
             event.stopImmediatePropagation();
             this.paginationView.setData({
-                isPayed: true,
-                enabledTrackLocation: true,
-                name: this.$el.find('#search').val()
+                status: 'subscribed',
+                name: this.$el.find('#search').val().trim()
             });
         },
 
@@ -81,15 +82,12 @@ define([
             this.$el.find('#globalDevicesChecker').prop('checked', false);
             var self = this;
             var devicesList = this.$el.find('#devicesMainList');
-            //devicesList.html('');
             _.each(this.views, function (view) {
                 self.stopListening(view.stateModel);
                 view.remove();
             });
 
-
             this.devisesCollection.map(function (device) {
-                //var isSelected = false;
 
                 var selectedDevice = self.selectedDevicesCollection.find(function (model) {
                     if (model.id === device.id) return true;
