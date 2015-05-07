@@ -32,13 +32,14 @@ module.exports = function (db) {
                 async.eachSeries(adminsAndUsers,
                     function (user, cb) {
                         var newUser;
-                        var encrPass = getEncryptedPass(user.pass);
+                        var pass = user.pass;
 
-                        user.pass = encrPass;
+                        user.pass = getEncryptedPass(pass);
                         //user._id = userId;
                         //userId++;
                         newUser = new UserModel(user);
                         newUser.save(function (err) {
+                            user.pass = pass;
                             if (err) {
                                 cb(err);
                             } else {

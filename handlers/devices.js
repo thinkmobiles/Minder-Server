@@ -70,13 +70,20 @@ var DeviceHandler = function (db) {
                         email: userModel.email,
                         metadata: {
                             userId: userModel._id.toString()
-                        },
-                        source: token.id
+                        }//,
+                        //source: token.id
                     };
                     stripeModule.createCustomer(customerData, function (err, customer) {
                         if (err) {
                             return cb(err);
                         }
+
+                        /*stripeModule.createCard(customer.id, token.id, function (err, card) {
+                            if (err) {
+                                return cb(err);
+                            }
+                            cb(null, customer.id, userModel);
+                        });*/
 
                         cb(null, customer.id, userModel);
                     });
@@ -126,13 +133,26 @@ var DeviceHandler = function (db) {
                 /*var subscriptionParams = {
                     customerId: user.billings.stripeId,
                     planId: 'sub_2',
-                    quantity: 2
+                    quantity: 2,
+                    source: token.id
                 };
                 stripeModule.createSubscription(subscriptionParams, function (err, result) {
                     if (err) {
                         return cb(err);
                     }
                     cb(null, user, result);
+                });*/
+
+
+                /*var chargeParams = {
+                    amount: 2.5,
+                    source: token.id
+                };
+                stripeModule.createCharge(chargeParams, function(err, charge) {
+                    if (err) {
+                        return cb(err);
+                    }
+                    cb(null, user, charge);
                 });*/
             },
 

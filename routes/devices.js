@@ -10,15 +10,14 @@ module.exports = function (db) {
     var deviceHandler = new DeviceHandler(db);
 
     router.put('/locate', session.authenticatedUser, deviceHandler.setLocation);
-    router.get('/', deviceHandler.getDevices);
-    router.get('/count', deviceHandler.countDevices);
-    router.get('/:id', deviceHandler.getDevice);
-    router.put('/:id', deviceHandler.updateDevice);
-    //router.delete('/:id', deviceHandler.removeDevice);
-    router.patch('/:id', deviceHandler.updateStatus); //req.body.status = "active" | "deleted"
-    router.post('/getLocations', deviceHandler.getLocation);
-    router.post('/subscribe', deviceHandler.subscribeDevices);
-    router.post('/unsubscribe', deviceHandler.unsubscribeDevices);
+    router.get('/', session.authenticatedUser, deviceHandler.getDevices);
+    router.get('/count', session.authenticatedUser, deviceHandler.countDevices);
+    router.get('/:id', session.authenticatedUser, deviceHandler.getDevice);
+    router.put('/:id', session.authenticatedUser, deviceHandler.updateDevice);
+    router.patch('/:id', session.authenticatedUser, deviceHandler.updateStatus); //req.body.status = "active" | "deleted"
+    router.post('/getLocations', session.authenticatedUser, deviceHandler.getLocation);
+    router.post('/subscribe', session.authenticatedUser, deviceHandler.subscribeDevices);
+    router.post('/unsubscribe', session.authenticatedUser, deviceHandler.unsubscribeDevices);
 
     return router;
 };

@@ -98,6 +98,37 @@ describe('Devices', function () {
                 });
         });
 
+        it('User2 can signIn', function (done) {
+            var signInData = testData.users[3];
+
+            signInData.pass = '1';
+            signInData.rememberMe = true;
+
+            userAgent2
+                .post('/signIn')
+                .send(signInData)
+                .end(function (err, res) {
+                    if (err) {
+                        done(err);
+                    } else {
+                        expect(res.status).to.equals(200);
+
+                        setTimeout(function () {
+                            userAgent2
+                                .get('/isAuth')
+                                .expect(200) //Status code
+                                .end(function (err, res) {
+                                    if (err) {
+                                        done(err);
+                                    } else {
+                                        done(null);
+                                    }
+                                });
+                        }, 200);
+                    }
+                });
+        });
+
     });
 
     describe('PUT /location', function () {
@@ -395,24 +426,6 @@ describe('Devices', function () {
     describe('POST /devices/unsubscribe', function () {
         var url = '/devices/unsubscribe';
 
-        it('User can\'t unsubscribe devices with invalid param', function (done) {
-            var data = {
-                deviceIds: "foo"
-            };
-
-            userAgent1
-                .post(url)
-                .send(data)
-                .end(function (err, res) {
-                    if (err) {
-                        done(err);
-                    } else {
-                        expect(res.status).to.equals(400);
-                        done();
-                    }
-                });
-        });
-
         it('User can unsubscribe devices', function (done) {
             var deviceIds = [
                 testData.devices[3]._id.toString(),
@@ -421,7 +434,7 @@ describe('Devices', function () {
                 testData.devices[6]._id.toString()
             ];
             var data = {
-                deviceIds: JSON.stringify(deviceIds)
+                deviceIds: deviceIds
             };
 
             userAgent1
