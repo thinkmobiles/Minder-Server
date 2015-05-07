@@ -129,7 +129,7 @@ var DeviceHandler = function (db) {
 
             //make subscription:
             function (user, cb) {
-                cb(null, user); //TODO: ...
+                //cb(null, user); //TODO: ...
                 /*var subscriptionParams = {
                     customerId: user.billings.stripeId,
                     planId: 'sub_2',
@@ -144,16 +144,22 @@ var DeviceHandler = function (db) {
                 });*/
 
 
-                /*var chargeParams = {
-                    amount: 2.5,
-                    source: token.id
+                var chargeParams = {
+                    amount: 50,
+                    source: token.id,
+                    description: 'Charge for ' + user.email + ' plan T1',
+                    metadata: {
+                        planId: 'sub_1',
+                        subscribedDevices: '',
+                        expired: ''
+                    }
                 };
                 stripeModule.createCharge(chargeParams, function(err, charge) {
                     if (err) {
                         return cb(err);
                     }
                     cb(null, user, charge);
-                });*/
+                });
             },
 
         ], function (err, result) {
@@ -689,21 +695,21 @@ var DeviceHandler = function (db) {
             var userModel = results.user;
             var plans = results.plans;
             var activeDeviceIds = results.checkActiveDevices;
-            var tariffParams;
+            var calculateParams;
             var plan;
 
             if (err) {
                 return next(err);
             }
 
-            tariffParams = {
+            calculateParams = {
                 date: new Date(),
                 plans: plans,
                 user: userModel,
                 selectedDevicesCount: deviceIds.length //TODO: devicesCount
             };
 
-            plan = calculateTariff(tariffParams);
+            plan = calculateTariff(calculateParams);
 
             async.waterfall([
 
@@ -745,12 +751,6 @@ var DeviceHandler = function (db) {
         if (!deviceIds) {
             return next(badRequests.NotEnParams({reqParams: 'deviceIds'}));
         }
-
-        /*try {
-            deviceIds = JSON.parse(deviceIds);
-        } catch(err) {
-            return next(badRequests.InvalidValue({param: 'deviceIds'}));
-        }*/
 
         async.waterfall([
 

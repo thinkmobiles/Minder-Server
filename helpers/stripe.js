@@ -133,9 +133,6 @@ var StripeModule = function () {
     this.createCharge = function (params, callback) {
         var err;
         var amount;
-        var metadata;
-        var token;
-        var description;
         var chargeParams;
 
         if (!params || !params.amount || !params.source) {
