@@ -28,8 +28,12 @@ var DeviceHandler = function (db) {
             deviceData.deviceId = data.deviceId;
         }
 
+        if (data && data.name) {
+            deviceData.name = data.name;
+        }
+
         if (data && data.deviceName) {
-            deviceData.deviceName = data.deviceName;
+            deviceData.name = data.deviceName; //TODO: use data.name
         }
 
         if (data && data.deviceType) {
