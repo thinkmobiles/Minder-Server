@@ -4,7 +4,7 @@ var MailerModule = function () {
     var _ = require('./../public/js/libs/underscore-min.map.1.6.0.js');
     var nodemailer = require("nodemailer");
     var fs = require('fs');
-    var FROM = ( process.env.NODE_ENV.mailerUserName ) ? "Minder <" + 'info@minderweb.com' + ">" : "Minder";
+    var FROM = "Minder <" + 'info@minderweb.com' + ">";
 
     this.emailConfirmation = function (options) {
         var templateOptions = {

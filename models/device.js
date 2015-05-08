@@ -17,6 +17,11 @@ module.exports = (function () {
             //accuracy: {type: Number},  // meters
             dateTime: {type: Date, default: Date.now}
         },
+        billings: {
+            subscriptionId: {type: String},
+            subscriptionDateTime: {type: Date},
+            expirationDate: {type: Date}
+        },
         createdAt: {type: Date, default: Date.now},
         updatedAt: {type: Date, default: Date.now}
     }, {collection: 'Devices'});

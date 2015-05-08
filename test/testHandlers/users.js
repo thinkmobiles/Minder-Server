@@ -170,6 +170,118 @@ describe('Users', function() {
                 });
         });
 
+        it('User can\'t signUp with to short password', function (done) {
+            var ticks = new Date().valueOf();
+            var data = {
+                email: 'test_' + ticks + '@mail.com',
+                pass: '1234',
+                firstName: 'testFirstName',
+                lastName: 'testLastName'
+            };
+
+            userAgent1
+                .post(url)
+                .set('user-agent', conf.mobileUserAgent)
+                .send(data)
+                .end(function (err, res) {
+                    if (err) {
+                        done(err);
+                    } else {
+
+                        expect(res.status).to.equal(400);
+                        expect(res.body).to.be.instanceOf(Object);
+                        expect(res.body).to.have.property('error');
+                        expect(res.body.error).to.include('Password cannot contain less than');
+
+                        done();
+                    }
+                });
+        });
+
+        it('User can\'t signUp with to long password', function (done) {
+            var ticks = new Date().valueOf();
+            var data = {
+                email: 'test_' + ticks + '@mail.com',
+                pass: '123456789_123456789_123456789_123456',
+                firstName: 'testFirstName',
+                lastName: 'testLastName'
+            };
+
+            userAgent1
+                .post(url)
+                .set('user-agent', conf.mobileUserAgent)
+                .send(data)
+                .end(function (err, res) {
+                    if (err) {
+                        done(err);
+                    } else {
+
+                        expect(res.status).to.equal(400);
+                        expect(res.body).to.be.instanceOf(Object);
+                        expect(res.body).to.have.property('error');
+                        expect(res.body.error).to.include('Password cannot contain more than');
+
+                        done();
+                    }
+                });
+        });
+
+        it('User can\'t signUp with to long firstName', function (done) {
+            var ticks = new Date().valueOf();
+            var data = {
+                email: 'test_' + ticks + '@mail.com',
+                pass: '1q2w3e4r',
+                firstName: '123456789_123456789_123456789_123456',
+                lastName: 'testLastName'
+            };
+
+            userAgent1
+                .post(url)
+                .set('user-agent', conf.mobileUserAgent)
+                .send(data)
+                .end(function (err, res) {
+                    if (err) {
+                        done(err);
+                    } else {
+
+                        expect(res.status).to.equal(400);
+                        expect(res.body).to.be.instanceOf(Object);
+                        expect(res.body).to.have.property('error');
+                        expect(res.body.error).to.include('First name cannot contain more than');
+
+                        done();
+                    }
+                });
+        });
+
+        it('User can\'t signUp with to long lastName', function (done) {
+            var ticks = new Date().valueOf();
+            var data = {
+                email: 'test_' + ticks + '@mail.com',
+                pass: '1q2w3e4r',
+                firstName: 'testFirstName',
+                lastName: '123456789_123456789_123456789_123456'
+            };
+
+            userAgent1
+                .post(url)
+                .set('user-agent', conf.mobileUserAgent)
+                .send(data)
+                .end(function (err, res) {
+                    if (err) {
+                        done(err);
+                    } else {
+
+                        expect(res.status).to.equal(400);
+                        expect(res.body).to.be.instanceOf(Object);
+                        expect(res.body).to.have.property('error');
+                        expect(res.body.error).to.include('Last name cannot contain more than');
+
+                        done();
+                    }
+                });
+        });
+
         it('User can\'t signUp from with exists email', function (done) {
             var data = testData.users[0];
 
@@ -191,7 +303,7 @@ describe('Users', function() {
             var ticks = new Date().valueOf();
             var data = {
                 email: 'test_' + ticks + '@mail.com',
-                pass: '1',
+                pass: '1q2w3e4r3',
                 firstName: 'testFirstName',
                 lastName: 'testLastName',
                 deviceId: 'device_' + ticks,
