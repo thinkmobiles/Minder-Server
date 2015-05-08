@@ -127,7 +127,8 @@ define([
             this.devisesCollection.map(function (model) {
                 if (model.id === event.target.value) {
                     model.save({
-                        status: STATUSES.ACTIVE,
+                        status: STATUSES.ACTIVE
+                    }, {
                         patch: true
                     });
                     console.log(model.toJSON())
