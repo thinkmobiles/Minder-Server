@@ -50,8 +50,13 @@ define([
 
         events: {
             'click #saveRenewal': "renewal",
+            'click #showProceedSubscription': "showProceedSubscriptionModal",
+            'click .cancelSubscription': "cancelProceedSubscriptionModal",
+            'click #confirmSubscription': "confirmProceedSubscriptionModal",
+            'click #confirmUnSubscribe': "confirmUnSubscribeModal"
+
             //'click #confirmSubscription': "confirmSubscription",
-            'hidden.bs.modal #devicesModal': 'confirmSubscription'
+            //'hidden.bs.modal #devicesModal': 'confirmSubscription'
         },
 
         stripeTokenHandler: function (token) {
@@ -75,7 +80,7 @@ define([
             var selectedDevices = this.devicesView.selectedDevicesCollection.models;
             App.router.devicesView.selectedDevicesCollection.reset(selectedDevices);
 
-            this.showStripe();
+            //this.showStripe();
         },
 
         cancelSubscription: function () {
@@ -151,7 +156,7 @@ define([
                 proceedRenewal: true
             });
             if (checked) {
-                this.showStripe();
+                //this.showStripe();
             } else {
                 this.proceedRenewal();
             }
@@ -234,20 +239,40 @@ define([
                 this.showModal();
             }
         },
-        showModal: function () {
-            if (!App.router.devicesView) {
-                return;
-            }
-            if (this.devicesView) {
-                this.devicesView.undelegateEvents();
-                this.devicesView.remove();
-            }
+        //showModal: function () {
+        //    if (!App.router.devicesView) {
+        //        return;
+        //    }
+        //    if (this.devicesView) {
+        //        this.devicesView.undelegateEvents();
+        //        this.devicesView.remove();
+        //    }
+        //
+        //    this.devicesView = new DevicesView({modal: true});
+        //    this.devicesView.selectedDevicesCollection.reset(App.router.devicesView.selectedDevicesCollection.models);
+        //
+        //    this.$el.find('#modalContent').append(this.devicesView.el);
+        //    this.$el.find('#devicesModal').modal({show: true});
+        //},
 
-            this.devicesView = new DevicesView({modal: true});
-            this.devicesView.selectedDevicesCollection.reset(App.router.devicesView.selectedDevicesCollection.models);
 
-            this.$el.find('#modalContent').append(this.devicesView.el);
-            this.$el.find('#devicesModal').modal({show: true});
+        showProceedSubscriptionModal: function () {
+            this.$el.find('#proceedSubscriptionModal').modal({
+                show :true,
+                backdrop:'static'
+            });
+        },
+
+        cancelProceedSubscriptionModal: function () {
+            this.$el.find('#proceedSubscriptionModal').modal('hide');
+        },
+
+        confirmProceedSubscriptionModal: function () {
+            this.$el.find('#proceedSubscriptionModal').modal('hide');
+        },
+
+        confirmUnSubscribeModal: function () {
+            this.$el.find('#proceedSubscriptionModal').modal('hide');
         }
     });
 

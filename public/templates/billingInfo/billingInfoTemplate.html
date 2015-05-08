@@ -104,19 +104,26 @@
     </div>
 </div>
 
-<div class="modal fade" id="devicesModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+<div class="modal fade container" id="proceedSubscriptionModal" tabindex="-1" role="dialog">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                <button type="button" class="close cancelSubscription" aria-label="Close"><span
                         aria-hidden="true">&times;</span></button>
                 <h5 class="modal-title" id="myModalLabel">Proceed subscription</h5>
             </div>
             <div class="modal-body"  id="modalContent">
+
+
+
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" data-dismiss="modal" id="confirmSubscription">Ok</button>
+                <button type="button" class="btn subscribe" id="confirmSubscription">Confirm subscription</button>
+                <button type="button" class="btn unsubscribe" id="confirmUnSubscribe">Unsubscribe</button>
+                <button type="button" class="btn cancelSubscription" >Close</button>
             </div>
         </div>
     </div>
 </div>
+
+<button type="button" class="btn btn-success" id="showProceedSubscription">Proceed subscription</button>

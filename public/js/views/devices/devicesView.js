@@ -4,12 +4,12 @@ define([
     'collections/devicesCollection',
     'views/device/deviceMainListView',
     'views/customElements/paginationView',
-    'stripeCheckout',
-    'config/config'
-], function (Template, ModalTemplate, DevisesCollection, deviceMainListView, PaginationView, StripeCheckout, config) {
+    'constants/statuses'
+], function (Template, ModalTemplate, DevisesCollection, deviceMainListView, PaginationView, STATUSES) {
 
     var MainView = Backbone.View.extend({
-        isNew: true,
+        isNew: true, // prevent query duplication
+
         events: {
             'click #globalDevicesChecker': 'globalCheckTrigger',
             'submit #searchForm': 'search',
@@ -24,11 +24,11 @@ define([
 
         initialize: function (options) {
             var self = this;
-            var modal = false;
+            var modal = false; // in modal window mode
             var paginationOptions;
 
             if (options) {
-                modal = options.modal || false;
+                modal = options.modal || false; // is modal or not
             }
 
             this.stateModel = new Backbone.Model({
@@ -86,12 +86,14 @@ define([
             this.paginationView = new PaginationView(paginationOptions);
         },
 
+        // update period
         periodObserver: function () {
             this.stateModel.set({
                 period:this.$('#period').val()
             });
         },
 
+        // select and unselect devices
         deviceCheck: function (event) {
             var self = this;
             this.devisesCollection.map(function (model) {
@@ -106,11 +108,13 @@ define([
             });
         },
 
+        // set device deleted
         deviceDelete: function (event) {
+            console.log(STATUSES);
             this.devisesCollection.map(function (model) {
                 if (model.id === event.target.value) {
                     model.save({
-                        status: 'deleted'
+                        status: STATUSES.DELETED
                     }, {
                         patch: true
                     });
