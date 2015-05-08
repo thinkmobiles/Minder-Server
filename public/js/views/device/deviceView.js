@@ -3,14 +3,23 @@ define([
     'models/deviceModel'
 ], function (template, DeviceModel) {
 
-    var forgotPasswordView = Backbone.View.extend({
-        initialize: function (options) {
+    var View;
+    View = Backbone.View.extend({
+        initialize: function () {
             this.stateModel = new Backbone.Model();
+
+            // keep actual
             this.listenTo(this.stateModel, 'change', this.render);
-            //this.listenTo(this.model, 'change', this.render);
+
             this.render();
         },
 
+        events: {
+            'submit #editDevice': 'update',
+            'click .save': 'update'
+        },
+
+        // remove old model
         afterUpend: function () {
             if (this.model) {
                 this.stopListening(this.model);
@@ -18,11 +27,13 @@ define([
             }
         },
 
+        // get device by url id
         setParams: function (params) {
             this.stateModel.set(params);
             this.getDevice()
         },
 
+        // get device from serer or from catch collection
         getDevice: function () {
             var device = null;
             var self = this;
@@ -34,6 +45,7 @@ define([
                     }
                 })
             }
+
             if (!device) {
                 device = new DeviceModel({
                     _id: this.stateModel.get('id')
@@ -41,10 +53,14 @@ define([
                 device.fetch();
 
             }
+
             this.model = device;
+
             this.listenTo(this.model, 'change', function () {
                 self.render();
             });
+
+            // return to devices view after update
             this.listenTo(this.model, 'sync', function () {
                 if (this.model.changed.success) {
                     self.afterUpend();
@@ -54,16 +70,10 @@ define([
                         }
                     }
                 }
-
             });
+
             this.render();
         },
-
-        events: {
-            'submit #editDevice': 'update',
-            'click .save': 'update'
-        },
-
 
         update: function (event) {
             event.preventDefault();
@@ -71,16 +81,21 @@ define([
                 name: this.$el.find('#name').val()
             });
         },
-        render: function (options) {
+
+        render: function () {
+
             var data = this.stateModel.toJSON();
+
             if (this.model) {
+                // concat current name inserted by user with model data
                 data = _.extend(this.model.toJSON(), data);
             }
             this.$el.html(_.template(template, data));
+
             return this;
         }
     });
 
-    return forgotPasswordView;
+    return View;
 
 });

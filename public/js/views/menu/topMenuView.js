@@ -2,7 +2,8 @@ define([
     'text!templates/menu/topMenuTemplate.html'
 ], function (topMenuTemplate) {
 
-    var MainView = Backbone.View.extend({
+    var View;
+    View = Backbone.View.extend({
         el: '#topMenu',
 
         events: {
@@ -27,6 +28,7 @@ define([
                 authorized: true
             }
         ],
+
         topMenuRightDropdownItemsRaw: [
             {
                 name: "Profile",
@@ -36,17 +38,24 @@ define([
             }
         ],
 
-        initialize: function (options) {
+        initialize: function () {
+            // keep menu actual
             this.listenTo(App.sessionData, 'change:authorized', this.render);
+
             this.render();
         },
 
+        // logout action
         logout: function () {
             $.ajax({
                 url: "/signOut",
                 type: "POST",
-                success: function (response) {
+                success: function () {
                     App.router.navigate("login", {trigger: true});
+
+                    // remove user data
+                    // and trigger other views to clean up
+                    // and block routs
                     App.sessionData.set({
                         authorized: false,
                         admin: false,
@@ -58,6 +67,7 @@ define([
                 }
             });
         },
+
         render: function () {
             console.log('top menu render');
             var authorized = App.sessionData.get('authorized');
@@ -80,5 +90,5 @@ define([
             return this;
         }
     });
-    return MainView;
+    return View;
 });

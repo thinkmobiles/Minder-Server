@@ -1,4 +1,3 @@
-// Filename: app.js
 define([
     'router',
     'communication',
@@ -50,8 +49,6 @@ define([
         }
 
         setInterval(getDateTime, 1000 * 60 * 50);
-        //getDateTime();
-        //getPlans();
 
         App.sessionData.on('change:authorized', function () {
             if (App.sessionData.get('authorized')) {
@@ -65,9 +62,6 @@ define([
         Backbone.history.start({silent: true});
         Communication.checkLogin(function(err, data){
             Custom.runApplication(err, data);
-            //if(err){
-            //
-            //}
         });
 
     };

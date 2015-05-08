@@ -702,7 +702,6 @@ var DeviceHandler = function (db) {
             var plans = results.plans;
             var activeDeviceIds = results.checkActiveDevices;
             var calculateParams;
-            var plan;
 
             if (err) {
                 return next(err);
@@ -716,37 +715,39 @@ var DeviceHandler = function (db) {
                 selectedDevicesCount: deviceIds.length //TODO: devicesCount
             };
 
-            plan = calculateTariff(calculateParams);
-
-            async.waterfall([
-
-                //subscription:
-                function (cb) {
-                    subscribe(userModel, plan, token, function (err, subscriptionResult) {
-                        if (err) {
-                            return cb(err);
-                        }
-                        cb(null, subscriptionResult);
-                    });
-                },
-
-                //update Devices.status to "subscribed" and User.billings.subscribedDevices
-                function (subscriptionResult, cb) {
-                    updateStatusToSubscribed(userId, activeDeviceIds, function (err, user) {
-                        if (err) {
-                            return cb(err);
-                        }
-                        cb(null, user);
-                    });
-                }
-
-            ], function (err, result) {
-                if (err) {
+            calculateTariff(calculateParams, function(err, plan){
+                if(err){
                     return next(err);
                 }
-                res.status(200).send({success: 'subscribed'});
-            });
+                async.waterfall([
 
+                    //subscription:
+                    function (cb) {
+                        subscribe(userModel, plan, token, function (err, subscriptionResult) {
+                            if (err) {
+                                return cb(err);
+                            }
+                            cb(null, subscriptionResult);
+                        });
+                    },
+
+                    //update Devices.status to "subscribed" and User.billings.subscribedDevices
+                    function (subscriptionResult, cb) {
+                        updateStatusToSubscribed(userId, activeDeviceIds, function (err, user) {
+                            if (err) {
+                                return cb(err);
+                            }
+                            cb(null, user);
+                        });
+                    }
+
+                ], function (err, result) {
+                    if (err) {
+                        return next(err);
+                    }
+                    res.status(200).send({success: 'subscribed'});
+                });
+            });
         });
     };
 

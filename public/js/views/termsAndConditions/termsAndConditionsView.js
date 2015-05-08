@@ -2,8 +2,9 @@ define([
     'text!templates/termsAndConditions/termsAndConditionsTemplate.html'
 ], function (template) {
 
-    var View = Backbone.View.extend({
-        //el: '#wrapper',
+    var View;
+    View = Backbone.View.extend({
+
         initialize: function () {
             this.render();
         },

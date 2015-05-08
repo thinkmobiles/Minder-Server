@@ -4,12 +4,14 @@ define([
     'views/map/markerView',
     'collections/devicesCollection',
     'views/device/deviceMainListView',
-    'views/customElements/paginationView'
-], function (MainTemplate, MapView, markerView, DevisesCollection, deviceMainListView, PaginationView) {
+    'views/customElements/paginationView',
+    'constants/statuses'
+], function (MainTemplate, MapView, markerView, DevisesCollection, deviceMainListView, PaginationView, STATUSES) {
 
-    var MainView = Backbone.View.extend({
+    var View;
+    View = Backbone.View.extend({
         className: "mainPage",
-        isNew : true,
+        isNew: true,
         events: {
             'click #globalDevicesChecker': 'globalCheckTrigger',
             'click #mapLocateButton': 'locate',
@@ -18,28 +20,30 @@ define([
 
         initialize: function () {
             var self = this;
-            this.stateModel = new Backbone.Model({
-                params: {}
-            });
 
             this.selectedDevicesCollection = new DevisesCollection();
             this.curnetMarkersOnMap = [];
             this.views = [];
+            this.stateModel = new Backbone.Model({
+                params: {} // for page param
+            });
 
-            this.render();
 
             this.devicesCoordinatesCollection = new DevisesCollection();
-
             this.devisesCollection = new DevisesCollection();
 
+            // keep data actual
             this.listenTo(this.devisesCollection, 'sync remove', this.renderDevices);
-            this.listenTo(this.devisesCollection, 'change', this.renderDevices);
+
+            // change page ....
             this.listenTo(this.stateModel, 'change:params', this.handleParams);
 
+            // set markers on map from data
             this.devicesCoordinatesCollection.on('reset', function () {
                 self.setMarkers()
             });
 
+            // set pagination to control devices collection
             this.paginationView = new PaginationView({
                 collection: this.devisesCollection,
                 onPage: 7,
@@ -47,75 +51,94 @@ define([
                 page: 1,
                 ends: true,
                 steps: true,
-                url: 'main/page',
-                //urlPagination: true,
                 data: {
-                    status: 'subscribed'
+                    status: STATUSES.SUBSCRIBED
                 }
             });
+
+            this.render();
+
+            // append pagination to page
             this.$el.find('#pagination').append(this.paginationView.$el);
         },
 
         afterUpend: function () {
+            // create map if not exist
+            // if exist normalize it size....
+
             if (App.map) {
                 var center = App.map.getCenter();
                 google.maps.event.trigger(App.map, "resize");
                 App.map.setCenter(center);
-            }else{
+            } else {
                 this.mapView = new MapView();
             }
-            if(this.isNew){
+
+            if (this.isNew) {
                 this.isNew = false;
                 return
             }
-            //this.renderDevices();
+
             this.paginationView.refresh();
         },
 
         search: function (event) {
             event.preventDefault();
             event.stopImmediatePropagation();
+
+            // set filter on pagination ... (for fetch query)
             this.paginationView.setData({
-                status: 'subscribed',
+                status: STATUSES.SUBSCRIBED,
                 name: this.$el.find('#search').val().trim()
             });
         },
 
-
+        // render devices views
         renderDevices: function () {
             this.$el.find('#globalDevicesChecker').prop('checked', false);
             var self = this;
             var devicesList = this.$el.find('#devicesMainList');
+
             _.each(this.views, function (view) {
                 self.stopListening(view.stateModel);
                 view.remove();
             });
 
             this.devisesCollection.map(function (device) {
+                var selectedDevice;
+                var view;
 
-                var selectedDevice = self.selectedDevicesCollection.find(function (model) {
+                selectedDevice = self.selectedDevicesCollection.find(function (model) {
                     if (model.id === device.id) return true;
                 });
 
-                var view = new deviceMainListView({model: device});
+                view = new deviceMainListView({
+                    model: device
+                });
 
                 if (selectedDevice) {
-                    view.stateModel.set({checked: true});
+                    view.stateModel.set({
+                        checked: true
+                    });
                 }
 
+                // keep checked devices collection actual
                 self.listenTo(view.stateModel, 'change', self.itemChecked);
+
                 self.views.push(view);
                 devicesList.append(view.$el);
             });
         },
 
+        // check unCheck all devices on current page
         globalCheckTrigger: function () {
             var checked = this.$el.find('#globalDevicesChecker').prop('checked');
             _.each(this.views, function (view) {
                 view.stateModel.set({checked: checked});
             });
-
         },
+
+        // observe checked items on page and add/remove from checked collection
         itemChecked: function (model) {
             if (model.get('checked')) {
                 this.selectedDevicesCollection.add(this.devisesCollection.find(function (device) {
@@ -128,9 +151,10 @@ define([
             }
         },
 
+        // get devices positions
         locate: function () {
-            this.clearMarkers();
             var self = this;
+            this.clearMarkers(); // remove old markers
             var deviceIds = [];
             var data;
 
@@ -161,6 +185,7 @@ define([
             }
         },
 
+        // remove old markers from map
         clearMarkers: function () {
             _.each(this.curnetMarkersOnMap, function (view) {
                 view.removeMarker();
@@ -169,6 +194,7 @@ define([
             this.curnetMarkersOnMap = [];
         },
 
+        // set new markers on map
         setMarkers: function () {
             var self = this;
             this.devicesCoordinatesCollection.map(function (model) {
@@ -191,14 +217,18 @@ define([
             }
         },
 
-
+        // render template (once! because google maps)
         render: function () {
             this.$el.html(_.template(MainTemplate));
             return this;
         },
+
+        // set current page
         setParams: function (params) {
             this.stateModel.set({params: params});
         },
+
+        // set current page if is exist
         handleParams: function () {
             var params = this.stateModel.get('params');
             if (params) {
@@ -210,5 +240,5 @@ define([
             }
         }
     });
-    return MainView;
+    return View;
 });

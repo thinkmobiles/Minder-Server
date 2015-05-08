@@ -3,31 +3,19 @@
         return new Date(year, month, 0).getDate();
     }
 
-    function costCounter(data) {
-        //var monthSubscribedDevices = data.user.billings.monthSubscribedDevices;
+    function costCounter(data, cb) {
         var subscribedDevices = data.user.billings.subscribedDevices;
         var selectedDevicesCount = data.selectedDevicesCount;
         var plans = data.plans;
         var devicesToPay = 0;
-        //var newPlan = false;
-        //var plan = data.user.currentPlan;
         var plan;
         var date = data.date;
         var daysInThisMonth = daysInMonth((date.getMonth() + 1), date.getFullYear());
         var daysLeft = (daysInThisMonth - date.getDate() + 1);
         var period = data.period;
-
-        //if (plan) {
-        //    for (var i = 0; i < plans.length; i++) {
-        //        if (plans[i]._id === plan) {
-        //            plan = plans[i].name;
-        //            break;
-        //        }
-        //    }
-        //}
+        var MAX_DEVICES = 1;
 
         var result = {
-            //plan: plan,
             costForThisMonth: 0,
             devicesToPay: 0,
             subscribedDevices: subscribedDevices,
@@ -39,30 +27,21 @@
         devicesToPay = selectedDevicesCount;
         subscribedDevices = subscribedDevices + selectedDevicesCount;
 
-        //if (subscribedDevices) {
-            for (var i = 0; i < plans.length; i++) {
-                if (
-                    (subscribedDevices >= plans[i].metadata.minDevices)
-                    && (subscribedDevices <= plans[i].metadata.maxDevices)
-                    && (plans[i].metadata.type === period)
-                ) {
-                    plan = plans[i];
-                    //newPlan = true;
-                    break;
-                }
+        if (subscribedDevices > MAX_DEVICES) { // TODO
+            cb('Out of maximum limit! Not allowed!');
+        }
+
+        for (var i = 0; i < plans.length; i++) {
+            if (
+                (subscribedDevices >= plans[i].metadata.minDevices)
+                && (subscribedDevices <= plans[i].metadata.maxDevices)
+                && (plans[i].metadata.type === period)
+            ) {
+                plan = plans[i];
+
+                break;
             }
-        //}
-
-        //if (!newPlan) {
-        //    for (var i = 0; i < plans.length; i++) {
-        //        if (plan === plans[i].name) {
-        //            plan = plans[i];
-        //            break;
-        //        }
-        //    }
-        //}
-
-
+        }
 
         result.devicesToPay = devicesToPay;
         if (plan) {
@@ -77,7 +56,7 @@
             result.subscribedDevices = subscribedDevices;
         }
         console.log(result);
-        return result;
+        cb(null, result);
     }
 
     if (typeof module === "undefined") {

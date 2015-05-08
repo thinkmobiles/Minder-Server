@@ -1,11 +1,10 @@
 define([
     'custom',
-    'views/menu/topMenuView',
-    'views/menu/footerView',
-    'common'
-], function (custom, TopMenuView, FooterView, common) {
+    'views/menu/topMenuView'
+], function (custom, TopMenuView) {
 
-    var appRouter = Backbone.Router.extend({
+    var appRouter;
+    appRouter = Backbone.Router.extend({
 
         wrapperView: null,
         mainView: null,
@@ -36,14 +35,11 @@ define([
         ],
 
         initialize: function () {
-            this.topMenuView = new TopMenuView();
-            console.log('router init', App.requestedURL, Backbone.history.fragment);
-            //this.footerView = new FooterView();
+            new TopMenuView();
         },
 
         loadWrapperView: function (name, params) {
 
-            console.log('authorized', App.sessionData.get('authorized'));
             if (!App.sessionData.get('authorized')) {
                 var WrongRout = _.find(this.needAuthorize, function (rout) {
                     if (name === rout) {
@@ -93,20 +89,15 @@ define([
                 modal: false
             });
         },
-
         any: function () {
             this.loadWrapperView('main');
         },
-
         login: function () {
-            console.log('login rout triggered');
             this.loadWrapperView('login');
         },
-
         forgotPassword: function () {
             this.loadWrapperView('forgotPassword');
         },
-
         signUp: function () {
             this.loadWrapperView('signUp');
         },

@@ -10,7 +10,7 @@
 
             <div class="form-group">
                 <label class="sr-only" for="search">Email address</label>
-                <input type="text" class="form-control" id="search" placeholder="Search...">
+                <input type="text" class="form-control" id="search" placeholder="Search..." value="<%= search %>">
             </div>
 
             <button type="submit" class="btn btn-default" id="searchButton">search</button>
@@ -36,14 +36,6 @@
                         <tr class="activate">
                     <% } %>
                 <% } %>
-
-                <!--<td>-->
-                    <!--<% if (devices[i].device.status === "deleted") { %>-->
-                        <!--&lt;!&ndash;<input disabled type="checkbox" name="device" class="deviceCheckbox" value="<%= devices[i].device._id %>" <% if(devices[i].selected) { %>checked<% } %> >&ndash;&gt;-->
-                    <!--<% } else { %>-->
-                        <!--<input type="checkbox" name="device" class="deviceCheckbox" value="<%= devices[i].device._id %>" <% if(devices[i].selected) { %>checked<% } %> >-->
-                    <!--<% } %>-->
-                <!--</td>-->
                 <td><%= devices[i].device.name %></td>
                 <td>
                     <% if (devices[i].device.status === "deleted") { %>
@@ -70,45 +62,6 @@
     </div>
 
 </div>
-
-<!--<% if(!params.modal) { %>-->
-<!--<div class="col-md-4">-->
-    <!--<div class="panel panel-default">-->
-        <!--<div class="panel-body proceedSubscription calculator">-->
-            <!--<div>-->
-                <!--<span class="name">Plan</span> <br>-->
-                <!--<span class="value"><%= calculations.plan %></span>-->
-            <!--</div>-->
-            <!--<div>-->
-                <!--<b>Number of devices</b> <br>-->
-                <!--<span class="value"><%= calculations.subscribedDevices %> of <%= calculations.maxDevices %> devices</span>-->
-            <!--</div>-->
-            <!--<div>-->
-                <!--<b>Days left</b> <br>-->
-                <!--<span class="value"><%= calculations.daysLeft %></span>-->
-            <!--</div>-->
-            <!--<div>-->
-                <!--<b>Total cost</b> <br>-->
-                <!--<span class="value"><%= calculations.costForThisMonth %>$</span>-->
-            <!--</div>-->
-            <!--<div class="form-group">-->
-                <!--<select class="form-control" id="period">-->
-                    <!--<option value="month" <% if(period === 'month') { %>selected<% } %> >Month</option>-->
-                    <!--<option value="year" <% if(period === 'year') { %>selected<% } %> >Year</option>-->
-                <!--</select>-->
-            <!--</div>-->
-
-            <!--<button type="button" class="btn btn-success" id="proceedSubscription">-->
-                <!--Proceed subscription-->
-            <!--</button>-->
-            <!--<div>-->
-                <!--<img src="images/credit-card.png" class="col-md-12 logos">-->
-            <!--</div>-->
-
-        <!--</div>-->
-    <!--</div>-->
-<!--</div>-->
-<!--<% } %>-->
 
 <div class="modal fade" id="warningModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-dialog">

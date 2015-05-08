@@ -1,13 +1,13 @@
 define([
     'text!templates/login/LoginTemplate.html',
     'custom',
-    'validation',
-    'communication'
-], function (LoginTemplate, Custom, validation, Communication) {
+    'validation'
+], function (LoginTemplate, Custom, validation) {
 
-    var LoginView = Backbone.View.extend({
-        //el: '#wrapper',
-        initialize: function (options) {
+    var View;
+    View = Backbone.View.extend({
+
+        initialize: function () {
             this.stateModel = new Backbone.Model({
                 rememberMe:false,
                 email: '',
@@ -15,17 +15,19 @@ define([
                 errors: false,
                 messages: false
             });
+
+            // keep data actual
             this.listenTo(this.stateModel, 'change', this.render);
+
             this.render();
         },
-
 
         events: {
             "submit #loginForm": "login",
             "click .login-button": "login"
         },
 
-        render: function (options) {
+        render: function () {
             this.$el.html(_.template(LoginTemplate, this.stateModel.toJSON()));
             return this;
         },
@@ -92,8 +94,9 @@ define([
                         admin: false,
                         user: null
                     });
+
                     App.error(err);
-                    console.log(err);
+
                     self.stateModel.set({
                         errors: [err.responseJSON.error],
                         password: null
@@ -104,6 +107,6 @@ define([
         }
     });
 
-    return LoginView;
+    return View;
 
 });

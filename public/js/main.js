@@ -1,5 +1,4 @@
-var App = App ||
-    {
+var App = {
         File: {
             MAXSIZE: 10485760,  //size in kilobytes  = 3 MB
             MaxFileSizeDisplay: "10 MB"
@@ -64,7 +63,7 @@ require(['app'], function (app) {
                     alert(xhr.responseJSON.error);
                 } else {
                     console.log(xhr);
-                    Backbone.history.navigate("home", {trigger: true});
+                    //Backbone.history.navigate("home", {trigger: true});
                 }
             }
         }

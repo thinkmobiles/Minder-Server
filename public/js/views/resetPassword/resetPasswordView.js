@@ -5,14 +5,14 @@ define([
     'validation'
 ], function (router, template, Custom, validation) {
 
-    var View = Backbone.View.extend({
-        //el: '#wrapper',
-        initialize: function (options) {
+    var View;
+    View = Backbone.View.extend({
+
+        initialize: function () {
             this.setDefaultStateModel();
             this.listenTo(this.stateModel, 'change', this.render);
             this.render();
         },
-
 
         events: {
             "submit #resetPasswordForm": "resetPassword",
@@ -29,7 +29,7 @@ define([
             })
         },
 
-        render: function (options) {
+        render: function () {
             var data = App.sessionData.toJSON().user;
             data = _.extend(data, this.stateModel.toJSON());
             this.$el.html(_.template(template, data));
@@ -47,9 +47,12 @@ define([
         },
 
         resetPassword: function (event) {
+            event.preventDefault();
+
             var self = this;
             var errors = [];
             var messages = [];
+
             var stateModelUpdate = {
                 errors: false,
                 messages: false,
@@ -57,8 +60,6 @@ define([
                 newPassword: this.$el.find("#newPassword").val().trim(),
                 confirmPassword: this.$el.find("#confirmPassword").val().trim()
             };
-
-            event.preventDefault();
 
             this.stateModel.set(stateModelUpdate);
 
@@ -85,7 +86,7 @@ define([
                 data: {
                     password: stateModelUpdate.newPassword
                 },
-                success: function (response) {
+                success: function () {
                     self.stateModel.set({
                         password: '',
                         newPassword: '',
@@ -93,13 +94,16 @@ define([
                         errors: false,
                         messages: false
                     });
+
                     alert('Password updated successfully');
-                    App.router.navigate("login", {trigger: true});
+
+                    App.router.navigate("login", {
+                        trigger: true
+                    });
                 },
-                error: function () {
-                    // TODO
+                error: function (err) {
+                    App.error(err);
                     self.stateModel.set({
-                        errors: ["Error"],
                         password: '',
                         confirmPassword: '',
                         newPassword: ''

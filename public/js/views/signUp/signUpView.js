@@ -3,12 +3,13 @@ define([
     'text!templates/signUp/signUpTemplate.html',
     'custom',
     'validation',
-    'config/config',
-    'recaptcha'
-], function (router, template, Custom, validation, config, recaptcha) {
+    'config/config'
+], function (router, template, Custom, validation, config) {
 
-    var View = Backbone.View.extend({
-        initialize: function (options) {
+    var View;
+    View = Backbone.View.extend({
+        initialize: function () {
+
             this.stateModel = new Backbone.Model({
                 email: '',
                 password: '',
@@ -19,40 +20,37 @@ define([
                 errors: false,
                 messages: false
             });
+
             this.listenTo(this.stateModel, 'change:errors change:messages', this.render);
+
             this.render();
         },
 
 
         events: {
-            "submit #loginForm": "sendMail",
-            "click .sendMailButton": "sendMail"
-        },
-
-        render: function (options) {
-            this.$el.html(_.template(template, this.stateModel.toJSON()));
-            Recaptcha.create(config.recaptchaSyteKay, 'captcha', {
-                tabindex: 4,
-                theme: "clean"
-            });
-            return this;
+            "submit #loginForm": "signUp",
+            "click .signUpButton": "signUp"
         },
 
         afterUpend: function () {
+            //update page when reopened
             this.render()
         },
 
-        sendMail: function (event) {
-
+        signUp: function (event) {
             event.preventDefault();
 
             var self = this;
+
             var errors = [];
             var messages = [];
-            var grecaptchaData = {
+            var captchaData;
+
+            captchaData = {
                 challenge: Recaptcha.get_challenge(),
                 response: Recaptcha.get_response()
             };
+
             var stateModelUpdate = {
                 errors: false,
                 messages: false,
@@ -85,7 +83,7 @@ define([
                 messages.push('terms and conditions is not checked');
             }
 
-            if(!grecaptchaData || grecaptchaData===''){
+            if(!captchaData || captchaData===''){
                 messages.push('please check reCAPTCHA');
             }
 
@@ -107,10 +105,10 @@ define([
                     pass: stateModelUpdate.password,
                     firstName: stateModelUpdate.firstName,
                     lastName: stateModelUpdate.lastName,
-                    captchaChallenge: grecaptchaData.challenge,
-                    captchaResponse: grecaptchaData.response
+                    captchaChallenge: captchaData.challenge,
+                    captchaResponse: captchaData.response
                 },
-                success: function (response) {
+                success: function () {
                     self.stateModel.set({
                         password: '',
                         confirmPassword: '',
@@ -130,6 +128,17 @@ define([
                     });
                 }
             });
+            return this;
+        },
+
+        render: function () {
+            this.$el.html(_.template(template, this.stateModel.toJSON()));
+
+            Recaptcha.create(config.recaptchaSyteKay, 'captcha', {
+                tabindex: 4,
+                theme: "clean"
+            });
+
             return this;
         }
     });

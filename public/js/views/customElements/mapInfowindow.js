@@ -3,27 +3,45 @@ define([
     'moment'
 ], function (template, moment) {
 
-    var View = Backbone.View.extend({
-        initialize: function (options) {
+    var View;
+    View = Backbone.View.extend({
+
+        initialize: function () {
             var self = this;
+
             this.stateModel = new Backbone.Model({
                 address: '',
                 updatedAt: ''
             });
+
             this.listenTo(this.stateModel, 'change', this.updateData);
-            this.infowindow = new google.maps.InfoWindow({
-                content: '',
-                position: new google.maps.LatLng(-25.363882, 131.044922)
+
+            this.infowindow = new google.maps.InfoWindow({ // google maps infoWindow object
+                content: ''
             });
-            google.maps.event.addListener(App.map, 'click', function (e) {
+            /** @namespace google.maps.event.addListener */
+            /** @namespace google.maps.InfoWindow */
+            google.maps.event.addListener(App.map, 'click', function () { // close windows by clicking on map
                 self.infowindow.close();
             });
         },
-        setDeviceInfowindow: function (model, marker) {
+
+        updateData: function () { // render the infoWindow content
+            this.infowindow.setContent(_.template(template, this.stateModel.toJSON()));
+        },
+
+        setDeviceInfoWindow: function (model, marker) {  // set the content and position of window
             var self = this;
+
+            //format date
             this.stateModel.set({
-                updatDate: moment(model.get('lastLocation').dateTime).format('YYYY/MM/DD HH:mm:ss')
+                updateDate: moment(model.get('lastLocation').dateTime).format('YYYY/MM/DD HH:mm:ss')
             });
+
+            // concat the model and the stateModel data and set the marker
+            // and set the marker position
+            // and set the content
+            // and use the cashed address
             if (model.get('address')) {
                 self.stateModel.set({
                     address: model.get('address')
@@ -33,12 +51,15 @@ define([
                 this.infowindow.open(marker.get('map'), marker);
                 return;
             }
+
+            // the same but get the address
             this.stateModel.set(_.extend(this.stateModel.toJSON(), model.toJSON()));
+
             self.stateModel.set({
                 address: ''
             });
             this.updateData();
-            this.infowindow.open(marker.get('map'), marker);
+            this.infowindow.open(marker.get('map'), marker); // get the address by google geocode
             $.ajax({
                 url: 'http://maps.googleapis.com/maps/api/geocode/json?latlng=' + model.get('lastLocation').lat + ',' + model.get('lastLocation').long + '&sensor=false',
                 dataType: "json",
@@ -46,24 +67,23 @@ define([
                     if (result.status === 'OK') {
                         self.stateModel.set({
                             address: result.results[0].formatted_address,
-                            modelId: model.id,
+                            modelId: model.id
                         });
                         model.set({
+                            /** @namespace result.results.formatted_address */
+                            // catch the address on model for traffic economy
                             address: result.results[0].formatted_address
                         })
                     } else {
                         self.stateModel.set({
-                            address: ''
+                            address: '' // set empty address if is not exist
                         })
                     }
                 },
                 error: function (err) {
-                    App.error(err);
+                    App.error(err); // global error handler
                 }
             })
-        },
-        updateData: function () {
-            this.infowindow.setContent(_.template(template, this.stateModel.toJSON()));
         }
     });
 

@@ -5,20 +5,23 @@ define([
     'validation'
 ], function (router, template, Custom, validation) {
 
-    var View = Backbone.View.extend({
-        //el: '#wrapper',
-        initialize: function (options) {
+    var View;
+    View = Backbone.View.extend({
+
+        initialize: function () {
             this.setDefaultStateModel();
+
             this.listenTo(this.stateModel, 'change', this.render);
+
             this.render();
         },
-
 
         events: {
             "submit #profileEditForm": "changeProfile",
             "click .profileFormSubmit": "changeProfile"
         },
 
+        // set default data
         setDefaultStateModel: function () {
             var user = App.sessionData.toJSON().user;
             this.stateModel = new Backbone.Model({
@@ -33,23 +36,20 @@ define([
             })
         },
 
-        render: function (options) {
-            var data = App.sessionData.toJSON().user;
-            data = _.extend(data, this.stateModel.toJSON());
-            this.$el.html(_.template(template, data));
-            return this;
-        },
-
+        // set default data when reopen the page
         afterUpend: function () {
-
+            this.setDefaultStateModel();
         },
 
+        // validate and snd set data on server
         changeProfile: function (event) {
             event.preventDefault();
 
             var self = this;
             var errors = [];
             var messages = [];
+            var data;
+
             var stateModelUpdate = {
                 errors: false,
                 messages: false,
@@ -85,15 +85,18 @@ define([
                 this.stateModel.set(stateModelUpdate);
                 return this;
             }
-            var data = {
+
+            data = {
                 email: stateModelUpdate.email,
                 password: stateModelUpdate.password,
                 firstName: stateModelUpdate.firstName,
                 lastName: stateModelUpdate.lastName
             };
+
             if(stateModelUpdate.newPasswor){
                 data.newPasswor = stateModelUpdate.newPasswor;
             }
+
             $.ajax({
                 url: "/profile",
                 type: "PUT",
@@ -119,6 +122,18 @@ define([
                     });
                 }
             });
+
+            return this;
+        },
+
+        render: function () {
+            var data = App.sessionData.toJSON().user;
+
+            // concat user old and new data
+            data = _.extend(data, this.stateModel.toJSON());
+
+            this.$el.html(_.template(template, data));
+
             return this;
         }
     });

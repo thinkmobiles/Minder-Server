@@ -7,47 +7,45 @@ define([
     'constants/statuses'
 ], function (Template, ModalTemplate, DevisesCollection, deviceMainListView, PaginationView, STATUSES) {
 
-    var MainView = Backbone.View.extend({
+    var View;
+    View = Backbone.View.extend({
         isNew: true, // prevent query duplication
 
         events: {
-            'click #globalDevicesChecker': 'globalCheckTrigger',
+            'click #globalDevicesChecker': 'globalCheckTrigger', // check all devices
             'submit #searchForm': 'search',
-            'click #proceedSubscription': 'proceedSubscription',
-            'click .deviceCheckbox': 'deviceCheck',
+            'click .deviceCheckbox': 'deviceCheck', // check separate devices
             'click .setDelete': 'deviceDelete',
             'click .setActive': 'deviceActivate',
-            'click .unsubscribe': 'unsubscribe',
-            'hidden.bs.modal #warningModal': 'modalAccept',
-            'change #period': 'periodObserver'
+            'change #period': 'periodObserver' // period observer
         },
 
         initialize: function (options) {
             var self = this;
-            var modal = false; // in modal window mode
-            var paginationOptions;
+            var modal = false; // modal window status property
+            var paginationOptions; // pagination settings
 
             if (options) {
-                modal = options.modal || false; // is modal or not
+                // set modal status
+                modal = options.modal || false;
             }
 
             this.stateModel = new Backbone.Model({
-                params: {},
-                devices: [],
-                checked: false,
-                monthArray: [],
-                yearArray: [],
+                params: {}, // current view url params (page)
+                devices: [], // devices array to render
+                checked: false, // global checker status
                 selectedDevicesCount: 0,
-                currentPlan: null,
-                newPlan: null,
-                costForThisMonth: 0,
-                modal: modal,
-                period: 'month'
+                newPlan: null, // user new plan by calculator
+                costForThisMonth: 0, // render the cost
+                modal: modal, // the view mode (modal or not, bool)
+                period: 'month', // for subscription (for calculator),
+                search: ''
             });
 
-            this.devisesCollection = new DevisesCollection();
 
-            this.selectedDevicesCollection = new DevisesCollection();
+            this.devisesCollection = new DevisesCollection(); // current page devices
+
+            this.selectedDevicesCollection = new DevisesCollection(); // all selected devices on all pages
 
             paginationOptions = {
                 collection: this.devisesCollection,
@@ -60,40 +58,42 @@ define([
                 urlPagination: true
             };
 
-            if (modal) {
-                paginationOptions.urlPagination = false;
-            }
-
+            // if the page is change fetch new models
             this.listenTo(this.stateModel, 'change:params', this.handleParams);
+
+            // keep data actual
             this.listenTo(this.devisesCollection, 'sync remove', this.render);
 
-            this.listenTo(this.selectedDevicesCollection, 'add remove', function () {
+
+            if (modal) {
+                this.listenTo(this.selectedDevicesCollection, 'add remove', function () {
+                    self.calculatePlan();
+                    self.render();
+                });
+                App.sessionData.on('change:date change:tariffPlans sync', function () {
+                    self.calculatePlan();
+                });
+                paginationOptions.urlPagination = false;
+                this.listenTo(this.stateModel, 'change:period', function () {
+                    this.calculatePlan();
+                    this.render();
+                });
                 self.calculatePlan();
-                self.render();
-            });
+            }
 
-            App.sessionData.on('change:date change:tariffPlans sync', function () {
-                self.calculatePlan();
-            });
-
-            this.listenTo(this.stateModel, 'change:period', function(){
-                this.calculatePlan();
-                this.render();
-            });
-
-            self.calculatePlan();
-
+            // create pagination to control devices collection
             this.paginationView = new PaginationView(paginationOptions);
         },
 
-        // update period
+        // update period, keep actual
         periodObserver: function () {
             this.stateModel.set({
-                period:this.$('#period').val()
+                period: this.$('#period').val()
             });
         },
 
-        // select and unselect devices
+        // select and unSelect devices
+        // add / remove from selected devices collection
         deviceCheck: function (event) {
             var self = this;
             this.devisesCollection.map(function (model) {
@@ -122,12 +122,12 @@ define([
             });
         },
 
+        // set deleted device active again
         deviceActivate: function (event) {
             this.devisesCollection.map(function (model) {
                 if (model.id === event.target.value) {
                     model.save({
-                        status: 'active'
-                    }, {
+                        status: STATUSES.ACTIVE,
                         patch: true
                     });
                     console.log(model.toJSON())
@@ -135,6 +135,8 @@ define([
             });
         },
 
+        // create devices array ro render
+        // and check is selected or not
         updateDevicesData: function () {
             var self = this;
             var devices = [];
@@ -163,57 +165,64 @@ define([
             });
         },
 
+        // calculate plan for user to preview
         calculatePlan: function () {
-            var sessionData =  App.sessionData.toJSON();
+            var self = this;
+            var sessionData = App.sessionData.toJSON();
             var plans = sessionData.tariffPlans;
             var date = sessionData.date;
             if (!plans && !date) return;
             var user = sessionData.user;
             var period = this.stateModel.get('period');
-            var plan;
 
 
-            var result = window.costCounter({
+            window.costCounter({
                 date: date,
                 plans: plans,
                 user: user,
-                period:period,
-                //plan:plan,
+                period: period,
                 selectedDevicesCount: this.selectedDevicesCollection.length
-            });
-
-            this.stateModel.set({
-                calculations: result
+            }, function (err, result) {
+                if (err) {
+                    return App.error(err);
+                }
+                self.stateModel.set({
+                    calculations: result
+                });
             });
         },
 
-        proceedSubscription: function () {
-            this.$el.find('#warningModal').modal({show: true});
-        },
-
+        // set search filter for pagination
         search: function (event) {
+            var search =  this.$el.find('#search').val().trim();
             event.preventDefault();
+            this.stateModel.set({
+                search:search
+            });
             this.paginationView.setData({
-                name: this.$el.find('#search').val()
+                name: search
             });
         },
 
+        // if not new view update devices (keep data actual)
         afterUpend: function () {
             if (this.isNew) {
                 this.isNew = false;
                 return
             }
-            this.paginationView.refresh();
+            this.paginationView.refresh(); // refresh current page
             this.render();
         },
 
+        // observes global checker and add or remove all
+        // objects from page to checked collection
         globalCheckTrigger: function () {
             var checked = this.$el.find('#globalDevicesChecker').prop('checked');
             var checkedDevices = [];
             this.stateModel.set({checked: checked});
             if (checked) {
                 checkedDevices = this.devisesCollection.filter(function (model) {
-                    if (model.get('status') !== 'deleted') {
+                    if (model.get('status') !== STATUSES.DELETED) {
                         return true
                     }
                 });
@@ -223,31 +232,12 @@ define([
             }
         },
 
-        render: function () {
-            this.updateDevicesData();
-            var data = this.stateModel.toJSON();
-
-            if (data.modal) {
-                this.$el.html(_.template(ModalTemplate, data));
-            } else {
-                this.$el.html(_.template(Template, data));
-            }
-
-            this.$el.find('#pagination').append(this.paginationView.render().$el);
-
-            return this;
-        },
-
-        modalAccept: function () {
-            Backbone.history.navigate('#billingInfo/subscribe', {
-                trigger: true
-            });
-        },
-
+        // set the page parameter for pagination
         setParams: function (params) {
             this.stateModel.set({params: params});
         },
 
+        // set page if exist (wil fetch data)
         handleParams: function () {
             var params = this.stateModel.get('params');
 
@@ -260,28 +250,24 @@ define([
             }
         },
 
-        unsubscribe: function () {
-            var self = this;
-            var selectedDevicesCollection = this.selectedDevicesCollection.pluck('_id');
-            $.ajax({
-                data: JSON.stringify({
-                    deviceIds: selectedDevicesCollection
-                }),
-                method: 'POST',
-                contentType: 'application/json',
-                url: '/devices/unsubscribe',
-                success: function () {
-                    self.selectedDevicesCollection.reset();
-                    self.paginationView.loadPage();
-                },
-                error: function (err) {
-                    App.error(err);
-                }
-            });
+        render: function () {
+            this.updateDevicesData();
+            var data = this.stateModel.toJSON();
 
+            // set template
+            if (data.modal) {
+                this.$el.html(_.template(ModalTemplate, data));
+            } else {
+                this.$el.html(_.template(Template, data));
+            }
+
+            this.$el.find('#pagination').append(this.paginationView.render().$el);
+
+            return this;
         }
+
     });
 
-    return MainView;
+    return View;
 })
 ;
