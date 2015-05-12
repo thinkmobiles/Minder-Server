@@ -60,6 +60,10 @@ var DeviceHandler = function (db) {
 
     function subscribe(userModel, plan, token, callback) {
         var userId = userModel._id.toString();
+        var freeDevice = false;
+        if (!plan.amount) {
+            freeDevice = true;
+        }
 
         async.waterfall([
 
@@ -67,6 +71,10 @@ var DeviceHandler = function (db) {
             function (cb) {
                 var stripeId = userModel.billings.stripeId;
                 var customerData;
+
+                if (freeDevice) { // do nothing if free account
+                    return cb(null, null, userModel);
+                }
 
                 if (!stripeId) {
 
@@ -116,6 +124,11 @@ var DeviceHandler = function (db) {
 
             //update user.stripeId if need:
             function (stripeId, user, cb) {
+
+                if (freeDevice) { // do nothing if free account
+                    return cb(null, user);
+                }
+
                 if (!user.billings.stripeId) {
 
                     user.billings.stripeId = stripeId;
@@ -147,9 +160,12 @@ var DeviceHandler = function (db) {
                  cb(null, user, result);
                  });*/
 
+                if (freeDevice) { // do nothing if free account
+                    return cb(null, user, null);
+                }
 
                 var chargeParams = {
-                    amount: plan.costForThisMonth * 100,  //price // TODO
+                    amount: plan.amount,  //price // TODO
                     source: token.id,
                     description: 'Charge for ' + user.email + ' plan T1',
                     metadata: {
@@ -162,11 +178,11 @@ var DeviceHandler = function (db) {
                     if (err) {
                         return cb(err);
                     }
-                    cb(null, user, charge);
+                    cb(null, charge);
                 });
             },
 
-        ], function (err, result) {
+        ], function (err, charge) {
             if (err) {
                 if (callback && (typeof callback === 'function')) {
                     callback(err);
@@ -174,16 +190,23 @@ var DeviceHandler = function (db) {
                 return;
             }
             if (callback && (typeof callback === 'function')) {
-                callback(null, result);
+                callback(null, charge);
             }
         });
     };
 
-    function updateStatusToSubscribed(userId, deviceIds, callback) {
+    function updateStatusToSubscribed(userId, deviceIds, plan, subscriptionId, callback) {
+        var freeAccount = false;
+        if (!plan.amount) {
+            freeAccount = true;
+        }
         async.waterfall([
 
             //update devices status = "subscribed":
             function (cb) {
+                var period = plan.period;
+                var update;
+                var dateNow = new Date();
                 var criteria = {
                     user: userId,
                     status: DEVICE_STATUSES.ACTIVE,
@@ -191,9 +214,36 @@ var DeviceHandler = function (db) {
                         $in: deviceIds
                     }
                 };
-                var update = {
-                    status: DEVICE_STATUSES.SUBSCRIBED
-                };
+
+                if (freeAccount) {
+                    update = {
+                        status: DEVICE_STATUSES.SUBSCRIBED,
+                        billings: {
+                            subscriptionId: null,
+                            subscriptionDateTime: dateNow,
+                            expirationDate: null
+                        }
+                    };
+                } else if (period === 'year') {
+                    update = {
+                        status: DEVICE_STATUSES.SUBSCRIBED,
+                        billings: {
+                            subscriptionId: subscriptionId,
+                            subscriptionDateTime: dateNow,
+                            expirationDate: new Date(new Date().setYear(dateNow.getFullYear() + 1))
+                        }
+                    };
+                } else {
+                    update = {
+                        status: DEVICE_STATUSES.SUBSCRIBED,
+                        billings: {
+                            subscriptionId: subscriptionId,
+                            subscriptionDateTime: dateNow,
+                            expirationDate: new Date(new Date().setMonth(dateNow.getMonth() + 1))
+                        }
+                    };
+                }
+
 
                 DeviceModel.update(criteria, update, {multi: true}, function (err, quantity) {
                     if (err) {
@@ -380,7 +430,7 @@ var DeviceHandler = function (db) {
             criteria.status = params.status;
         }
 
-        DeviceModel.find(criteria, 'name status _id')
+        DeviceModel.find(criteria, 'billings.expirationDate name status _id')
             .sort('name')
             .limit(count)
             .skip(skip)
@@ -622,10 +672,6 @@ var DeviceHandler = function (db) {
         var userId = req.session.userId;
         var requiredParameters = ['token', 'deviceIds', 'period'];
 
-        if (!token) {
-            return next(badRequests.NotEnParams({reqParams: requiredParameters}));
-        }
-
         if (!deviceIds || deviceIds.length === 0) {
             return next(badRequests.NotEnParams({reqParams: requiredParameters}));
         }
@@ -719,10 +765,15 @@ var DeviceHandler = function (db) {
                 selectedDevicesCount: deviceIds.length //TODO: devicesCount
             };
 
-            calculateTariff(calculateParams, function(err, plan){
-                if(err){
+            calculateTariff(calculateParams, function (err, plan) {
+                if (err) {
                     return next(err);
                 }
+
+                if (!token && plan.amount !== 0) {
+                    return next(badRequests.NotEnParams({reqParams: requiredParameters}));
+                }
+
                 async.waterfall([
 
                     //subscription:
@@ -736,8 +787,9 @@ var DeviceHandler = function (db) {
                     },
 
                     //update Devices.status to "subscribed" and User.billings.subscribedDevices
+                    // subscriptionResult is chargeId
                     function (subscriptionResult, cb) {
-                        updateStatusToSubscribed(userId, activeDeviceIds, function (err, user) {
+                        updateStatusToSubscribed(userId, activeDeviceIds, plan, subscriptionResult, function (err, user) {
                             if (err) {
                                 return cb(err);
                             }

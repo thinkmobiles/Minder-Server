@@ -1,7 +1,6 @@
 define([
     'text!templates/customElements/mapInfowindowTemplate.html',
-    'moment'
-], function (template, moment) {
+], function (template) {
 
     var View;
     View = Backbone.View.extend({

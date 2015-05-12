@@ -19,7 +19,6 @@ require.config({
         less: './libs/less.min',
         templates: '../templates',
         text: './libs/text',
-        moment: './libs/moment',
         common: 'common',
         recaptcha: "//www.google.com/recaptcha/api/js/recaptcha_ajax",
         stripeCheckout: '//checkout.stripe.com/checkout'
@@ -28,17 +27,12 @@ require.config({
         'ajaxForm': ['jQuery'],
         'Bootstrap': ['jQuery'],
         'Backbone': ['Underscore', 'jQuery'],
-        'app': ['Backbone', 'less', 'Bootstrap', 'moment', 'costCounter'],
+        'app': ['Backbone', 'less', 'Bootstrap', 'costCounter'],
         "recaptcha": {
             exports: 'Recaptcha'
         },
         "stripeCheckout": {
             exports: 'StripeCheckout'
-        }
-    },
-    config: {
-        moment: {
-            noGlobal: true
         }
     }
 });

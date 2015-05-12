@@ -16,7 +16,7 @@
         var MAX_DEVICES = 1;
 
         var result = {
-            costForThisMonth: 0,
+            amount: 0,
             devicesToPay: 0,
             subscribedDevices: subscribedDevices,
             maxDevices: 0,
@@ -28,7 +28,7 @@
         subscribedDevices = subscribedDevices + selectedDevicesCount;
 
         if (subscribedDevices > MAX_DEVICES) { // TODO
-            cb('Out of maximum limit! Not allowed!');
+            return cb(new Error('Out of maximum limit! Not allowed!'));
         }
 
         for (var i = 0; i < plans.length; i++) {
@@ -45,14 +45,15 @@
 
         result.devicesToPay = devicesToPay;
         if (plan) {
-            result.costForThisMonth = (((devicesToPay * (plan.amount / 100)) / daysInThisMonth) * daysLeft);
+            //result.amount = (((devicesToPay * (plan.amount / 100)) / daysInThisMonth) * daysLeft);
+            result.amount = devicesToPay * plan.amount;
             result.plan = plan.name;
             result.planData = plan;
             result.planId = plan.id;
             result.plan_id = plan._id;
             result.period = period;
             result.maxDevices = plan.metadata.maxDevices;
-            result.costForThisMonth = Math.round(result.costForThisMonth * 100) / 100;
+            //result.amount = Math.round(result.amount * 100) / 100;
             result.subscribedDevices = subscribedDevices;
         }
         console.log(result);

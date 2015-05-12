@@ -108,15 +108,33 @@ define([
             });
         },
 
+        updateUserData: function () {
+            $.ajax({
+                url: "/currentUser",
+                type: "GET",
+                success: function (data) {
+                    App.sessionData.set({
+                        user: data
+                    })
+                },
+                error: function (data) {
+                    App.error(data);
+                }
+            });
+        },
+
         // set device deleted
         deviceDelete: function (event) {
-            console.log(STATUSES);
+            var self = this;
             this.devisesCollection.map(function (model) {
                 if (model.id === event.target.value) {
                     model.save({
                         status: STATUSES.DELETED
                     }, {
-                        patch: true
+                        patch: true,
+                        success: function () {
+                            self.updateUserData();
+                        }
                     });
                 }
             });
@@ -124,14 +142,17 @@ define([
 
         // set deleted device active again
         deviceActivate: function (event) {
+            var self = this;
             this.devisesCollection.map(function (model) {
                 if (model.id === event.target.value) {
                     model.save({
                         status: STATUSES.ACTIVE
                     }, {
-                        patch: true
+                        patch: true,
+                        success: function () {
+                            self.updateUserData();
+                        }
                     });
-                    console.log(model.toJSON())
                 }
             });
         },
@@ -175,6 +196,9 @@ define([
             if (!plans && !date) return;
             var user = sessionData.user;
             var period = this.stateModel.get('period');
+            var selectedDevices = this.selectedDevicesCollection.filter(function (device) {
+                if (device.get('status') === STATUSES.ACTIVE) return true
+            });
 
 
             window.costCounter({
@@ -182,7 +206,7 @@ define([
                 plans: plans,
                 user: user,
                 period: period,
-                selectedDevicesCount: this.selectedDevicesCollection.length
+                selectedDevicesCount: selectedDevices
             }, function (err, result) {
                 if (err) {
                     return App.error(err);
@@ -195,10 +219,10 @@ define([
 
         // set search filter for pagination
         search: function (event) {
-            var search =  this.$el.find('#search').val().trim();
+            var search = this.$el.find('#search').val().trim();
             event.preventDefault();
             this.stateModel.set({
-                search:search
+                search: search
             });
             this.paginationView.setData({
                 name: search
@@ -251,14 +275,41 @@ define([
             }
         },
 
+        getDateUntil: function (now, until) {
+            console.log(typeof now, now);
+            var months = moment(until).diff(moment(now), 'months');
+
+            now.setMonth(now.getMonth() + months);
+
+            var weeks = moment(until).diff(now, 'weeks');
+
+            now.setDate(now.getDate() + (7 * weeks));
+
+            var days = moment(until).diff(now, 'days');
+            var result = {
+                months: months,
+                weeks: weeks,
+                days: days
+            };
+
+            console.log('result', result);
+            return result
+        },
+
         render: function () {
             this.updateDevicesData();
             var data = this.stateModel.toJSON();
+            var now = App.sessionData.get('date');
+            var self = this;
 
             // set template
             if (data.modal) {
                 this.$el.html(_.template(ModalTemplate, data));
             } else {
+                _.each(data.devices, function (device) {
+                    device.expirationDate = self.getDateUntil(new Date(now), device.device.billings.expirationDate); // format date (until style)
+                });
+
                 this.$el.html(_.template(Template, data));
             }
 

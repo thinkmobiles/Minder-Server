@@ -1,34 +1,70 @@
-<table class="table">
-    <tbody>
-    <% for (i in devices) { %>
+<div class="row">
+    <div class="col-md-8">
+        <table class="table">
+            <tbody>
+            <% for (i in devices) { %>
 
-    <% if (devices[i].selected) { %>
-    <tr class="active">
-        <% } else { %>
-        <% if (devices[i].device.status === "deleted") { %>
-    <tr class="deleted">
-        <% } %>
-        <% if (devices[i].device.status === "subscribed") { %>
-    <tr class="subscribed">
-        <% } %>
-        <% if (devices[i].device.status === "active") { %>
-    <tr class="activate">
-        <% } %>
-        <% } %>
+            <% if (devices[i].selected) { %>
+            <tr class="active">
+                <% } else { %>
+                <% if (devices[i].device.status === "deleted") { %>
+            <tr class="deleted">
+                <% } %>
+                <% if (devices[i].device.status === "subscribed") { %>
+            <tr class="subscribed">
+                <% } %>
+                <% if (devices[i].device.status === "active") { %>
+            <tr class="activate">
+                <% } %>
+                <% } %>
 
-        <td>
-            <% if (devices[i].device.status === "deleted") { %>
-            <!--<input disabled type="checkbox" name="device" class="deviceCheckbox" value="<%= devices[i].device._id %>" <% if(devices[i].selected) { %>checked<% } %> >-->
-            <% } else { %>
-            <input type="checkbox" name="device" class="deviceCheckbox" value="<%= devices[i].device._id %>" <%
-            if(devices[i].selected) { %>checked<% } %> >
+                <td>
+                    <% if (devices[i].device.status === "deleted") { %>
+                    <!--<input disabled type="checkbox" name="device" class="deviceCheckbox" value="<%= devices[i].device._id %>" <% if(devices[i].selected) { %>checked<% } %> >-->
+                    <% } else { %>
+                    <input type="checkbox" name="device" class="deviceCheckbox" value="<%= devices[i].device._id %>" <%
+                    if(devices[i].selected) { %>checked<% } %> >
+                    <% } %>
+                </td>
+                <td><%= devices[i].device.name %></td>
+
+            </tr>
             <% } %>
-        </td>
-        <td><%= devices[i].device.name %></td>
+            </tbody>
+        </table>
 
-    </tr>
-    <% } %>
-    </tbody>
-</table>
+        <div id="pagination"></div>
+    </div>
+    <div class="col-md-4">
 
-<div id="pagination"></div>
+                    <div>
+                        <span class="name">Plan</span> <br>
+                        <span class="value"><%= calculations.plan %></span>
+                    </div>
+                    <div>
+                        <b>Number of devices</b> <br>
+                        <span class="value"><%= calculations.subscribedDevices %> of <%= calculations.maxDevices %> devices</span>
+                    </div>
+                    <div>
+                        <b>Days left</b> <br>
+                        <span class="value"><%= calculations.daysLeft %></span>
+                    </div>
+                    <div>
+                        <b>Total cost</b> <br>
+                        <span class="value"><%= calculations.costForThisMonth %>$</span>
+                    </div>
+                    <div class="form-group">
+                        <select class="form-control" id="period">
+                            <option value="month" <% if(period === 'month') { %>selected<% } %> >Month</option>
+                            <option value="year" <% if(period === 'year') { %>selected<% } %> >Year</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <img src="images/credit-card.png" class="col-md-12 logos">
+                    </div>
+
+
+    </div>
+</div>
+

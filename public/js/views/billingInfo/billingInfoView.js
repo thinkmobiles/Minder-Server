@@ -221,13 +221,18 @@ define([
                     name: 'subscribe',
                     data: {
                         deviceIds: deviceIds,
-                        period: period
+                        period: period,
+                        plan: self.devicesView.stateModel.get('calculations')
                     }
                 }
             });
 
             this.closeDevicesView();
             this.onModalHide(function () {
+                var action = self.stateModel.get('action');
+                if(!action.data.plan.amount){
+                    return self.subscribeHandler();
+                }
                 self.showStripe();
             });
         },
@@ -265,8 +270,10 @@ define([
                 success: function () {
                     self.stateModel.set({
                         token: null,
-                        action: null
+                        action: null,
+                        plan:null
                     });
+                    self.updateData();
                 },
                 error: function (err) {
                     App.error(err);
@@ -291,6 +298,7 @@ define([
                         token: null,
                         action: null
                     });
+                    self.updateData(); //:TODO OPTIMIZE
                 },
                 error: function (err) {
                     App.error(err);

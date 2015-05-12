@@ -9,8 +9,8 @@ var CreateTestData = function (db) {
     var UserModel = db.model('User', userSchema);
     var deviceSchema = mongoose.Schemas['Device'];
     var DeviceModel = db.model('Device', deviceSchema);
-    var tariffPlanSchema = mongoose.Schemas['TariffPlan'];
-    var TariffPlan = db.model('TariffPlan', tariffPlanSchema);
+    //var tariffPlanSchema = mongoose.Schemas['TariffPlan'];
+    //var TariffPlan = db.model('TariffPlan', tariffPlanSchema);
 
     var data = require('./testData');
 
@@ -88,37 +88,37 @@ var CreateTestData = function (db) {
         });
     };
 
-    this.createDevices = function (callback) {
-        var tariffPlans = data.tariffPlans || [];
-
-        //console.log(tariffPlans);
-
-        TariffPlan.remove({}, function (err) {
-            if (err) {
-                callback(err);
-            } else {
-                async.eachSeries(tariffPlans,
-                    function (device, cb) {
-                        var newPlan = new TariffPlan(device);
-
-                        newPlan.save(function (err) {
-                            if (err) {
-                                cb(err);
-                            } else {
-                                cb();
-                            }
-                        });
-                    },
-                    function (err) {
-                        if (err) {
-                            callback(err)
-                        } else {
-                            callback();
-                        }
-                    });
-            }
-        });
-    };
+    //this.createDevices = function (callback) {
+    //    var tariffPlans = data.tariffPlans || [];
+    //
+    //    //console.log(tariffPlans);
+    //
+    //    TariffPlan.remove({}, function (err) {
+    //        if (err) {
+    //            callback(err);
+    //        } else {
+    //            async.eachSeries(tariffPlans,
+    //                function (device, cb) {
+    //                    var newPlan = new TariffPlan(device);
+    //
+    //                    newPlan.save(function (err) {
+    //                        if (err) {
+    //                            cb(err);
+    //                        } else {
+    //                            cb();
+    //                        }
+    //                    });
+    //                },
+    //                function (err) {
+    //                    if (err) {
+    //                        callback(err)
+    //                    } else {
+    //                        callback();
+    //                    }
+    //                });
+    //        }
+    //    });
+    //};
 
 };
 

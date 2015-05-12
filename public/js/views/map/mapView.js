@@ -18,7 +18,9 @@ define([
             var mapOptions = {
                 center: new google.maps.LatLng(0, 0),
                 zoom: 2,
-                mapTypeId: google.maps.MapTypeId.ROADMAP
+                mapTypeId: google.maps.MapTypeId.ROADMAP,
+                minZoom:2,
+                streetViewControl:false
             };
 
             this.map = new google.maps.Map(document.getElementById("map"), mapOptions);
