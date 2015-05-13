@@ -3,8 +3,9 @@ define([
     'text!templates/signUp/signUpTemplate.html',
     'custom',
     'validation',
-    'config/config'
-], function (router, template, Custom, validation, config) {
+    'config/config',
+    'recaptcha'
+], function (router, template, Custom, validation, config, Recaptcha) {
 
     var View;
     View = Backbone.View.extend({

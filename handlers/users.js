@@ -216,7 +216,7 @@ var UserHandler = function (db) {
             },
 
             //create user:
-             function (cb) {
+            function (cb) {
                 createUser(options, function (err, user) {
                     if (err) {
                         return cb(err);
@@ -450,7 +450,7 @@ var UserHandler = function (db) {
                 res.status(200).send(user);
             }
         });
-    }
+    };
 
     this.getUsers = function (req, res, next) {
         var options = req.query;
@@ -526,14 +526,55 @@ var UserHandler = function (db) {
     this.updateCurrentUserProfile = function (req, res, next) {
         var userId = req.session.userId;
         var options = req.body;
+        var password = null;
+        var newPassword = null;
 
-        updateUserProfile(userId, options, function (err, user) {
-            if (err) {
-                next(err);
-            } else {
-                res.status(200).send({success: 'udpated', model: user});
+        if (options.newPassword) { // check to need to update password
+            if (!options.password) {
+                return next(badRequests.NotEnParams(['password']));
             }
-        });
+            var newPassword = options.newPassword;
+        } else {
+            delete options.password; // delete password if coms from user
+        }
+
+        if (newPassword) {
+            // update profile and password
+            UserModel.findOne({ // find a user to compare passwords
+                _id: userId
+            }, function (err, user) {
+                if (err) {
+                    next(err);
+                } else if (!user) {
+                    next(badRequests.NotFound());
+                } else {
+
+                    password = getEncryptedPass(options.password);
+
+                    if (user.pass !== password) { //compare passwords
+                        return next(badRequests.NotFound());
+                    }
+
+                    options.pass = getEncryptedPass(newPassword); // encrypt new password and add to options
+
+                    updateUserProfile(userId, options, function (err, user) {
+                        if (err) {
+                            next(err);
+                        } else {
+                            res.status(200).send({success: 'udpated', model: user});
+                        }
+                    });
+                }
+            });
+        } else { // update only profile
+            updateUserProfile(userId, options, function (err, user) {
+                if (err) {
+                    next(err);
+                } else {
+                    res.status(200).send({success: 'udpated', model: user});
+                }
+            });
+        }
     };
 
     /*this.incrementSubscribedDevicesCount = function(userId, quantity, callback) {

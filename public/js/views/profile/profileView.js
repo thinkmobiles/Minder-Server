@@ -9,11 +9,15 @@ define([
     View = Backbone.View.extend({
 
         initialize: function () {
+            var self = this;
+
             this.setDefaultStateModel();
 
-            this.listenTo(this.stateModel, 'change', this.render);
-
-            this.render();
+            this.listenTo(this.stateModel, 'change', function () {
+                console.log('Trigger');
+                self.render();
+            });
+            self.render();
         },
 
         events: {
@@ -24,7 +28,8 @@ define([
         // set default data
         setDefaultStateModel: function () {
             var user = App.sessionData.toJSON().user;
-            this.stateModel = new Backbone.Model({
+
+            var defaulData = {
                 email: user.email || '',
                 password: '',
                 newPassword: '',
@@ -33,7 +38,13 @@ define([
                 lastName: user.lastName || '',
                 errors: false,
                 messages: false
-            })
+            };
+
+            if (this.stateModel) {
+                this.stateModel.set(defaulData);
+            } else {
+                this.stateModel = new Backbone.Model(defaulData);
+            }
         },
 
         // set default data when reopen the page
@@ -66,7 +77,7 @@ define([
             validation.checkEmailField(messages, true, stateModelUpdate.email, 'Email');
             validation.checkNameField(messages, true, stateModelUpdate.firstName, 'First name');
             validation.checkNameField(messages, true, stateModelUpdate.lastName, 'Last name');
-            if(stateModelUpdate.newPassword || stateModelUpdate.password){
+            if (stateModelUpdate.newPassword || stateModelUpdate.password) {
                 validation.checkPasswordField(messages, true, stateModelUpdate.password, 'Password');
                 validation.checkPasswordField(messages, true, stateModelUpdate.newPassword, 'New password');
                 validation.checkPasswordField(messages, true, stateModelUpdate.confirmPassword, 'Confirm password');
@@ -83,6 +94,7 @@ define([
                     stateModelUpdate.messages = messages;
                 }
                 this.stateModel.set(stateModelUpdate);
+                console.log('stateModel', this.stateModel.toJSON());
                 return this;
             }
 
@@ -93,14 +105,14 @@ define([
                 lastName: stateModelUpdate.lastName
             };
 
-            if(stateModelUpdate.newPasswor){
-                data.newPasswor = stateModelUpdate.newPasswor;
+            if (stateModelUpdate.newPassword) {
+                data.newPassword = stateModelUpdate.newPassword;
             }
 
             $.ajax({
                 url: "/profile",
                 type: "PUT",
-                data:data,
+                data: data,
                 success: function (response) {
                     self.stateModel.set({
                         password: '',
@@ -112,8 +124,8 @@ define([
                     alert('Profile updated successfully');
                     App.router.navigate("main", {trigger: true});
                 },
-                error: function () {
-                    // TODO
+                error: function (err) {
+                    App.error(err);
                     self.stateModel.set({
                         errors: ["Error"],
                         password: '',
@@ -131,6 +143,8 @@ define([
 
             // concat user old and new data
             data = _.extend(data, this.stateModel.toJSON());
+
+            console.log('data', data);
 
             this.$el.html(_.template(template, data));
 

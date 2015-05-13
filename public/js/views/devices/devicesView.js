@@ -14,6 +14,7 @@ define([
         events: {
             'click #globalDevicesChecker': 'globalCheckTrigger', // check all devices
             'submit #searchForm': 'search',
+            'click .clearSearch': 'clearSearch',
             'click .deviceCheckbox': 'deviceCheck', // check separate devices
             'click .setDelete': 'deviceDelete',
             'click .setActive': 'deviceActivate',
@@ -74,6 +75,12 @@ define([
                     self.calculatePlan();
                 });
                 paginationOptions.urlPagination = false;
+                paginationOptions.data ={
+                    status:[
+                        STATUSES.ACTIVE,
+                        STATUSES.SUBSCRIBED
+                    ]
+                };
                 this.listenTo(this.stateModel, 'change:period', function () {
                     this.calculatePlan();
                     this.render();
@@ -98,7 +105,6 @@ define([
             var self = this;
             this.devisesCollection.map(function (model) {
                 if (model.id === event.target.value) {
-                    //console.log(event.toElement.checked);
                     if (event.toElement.checked) {
                         self.selectedDevicesCollection.add(model);
                     } else {
@@ -219,13 +225,24 @@ define([
 
         // set search filter for pagination
         search: function (event) {
-            var search = this.$el.find('#search').val().trim();
             event.preventDefault();
+            var search = this.$el.find('#search').val().trim();
             this.stateModel.set({
                 search: search
             });
             this.paginationView.setData({
                 name: search
+            });
+        },
+
+        clearSearch:function(){
+            event.preventDefault();
+            this.$el.find('#search').val('');
+            this.stateModel.set({
+                search: ''
+            });
+            this.paginationView.setData({
+                name: null
             });
         },
 
@@ -275,8 +292,8 @@ define([
             }
         },
 
+        // get delta date
         getDateUntil: function (now, until) {
-            console.log(typeof now, now);
             var months = moment(until).diff(moment(now), 'months');
 
             now.setMonth(now.getMonth() + months);
@@ -292,7 +309,6 @@ define([
                 days: days
             };
 
-            console.log('result', result);
             return result
         },
 

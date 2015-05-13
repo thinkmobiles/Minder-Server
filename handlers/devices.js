@@ -1,4 +1,5 @@
 'use strict';
+var util = require('util');
 var DEVICE_OS = require('../constants/deviceOs');
 var DEVICE_STATUSES = require('../constants/deviceStatuses');
 var _ = require('lodash');
@@ -424,11 +425,20 @@ var DeviceHandler = function (db) {
             criteria.name = new RegExp(params.name.trim(), "i");
         }
 
-        if ((params.status === DEVICE_STATUSES.ACTIVE) ||
-            (params.status === DEVICE_STATUSES.SUBSCRIBED) ||
-            (params.status === DEVICE_STATUSES.DELETED)) {
-            criteria.status = params.status;
+        if (params) {
+            if (typeof params.status === 'string') {
+                if ((params.status === DEVICE_STATUSES.ACTIVE) ||
+                    (params.status === DEVICE_STATUSES.SUBSCRIBED) ||
+                    (params.status === DEVICE_STATUSES.DELETED)) {
+                    criteria.status = params.status;
+                }
+            } else if (util.isArray(params.status)) {
+                criteria.status = {
+                    $in: params.status
+                };
+            }
         }
+
 
         DeviceModel.find(criteria, 'billings.expirationDate name status _id')
             .sort('name')
@@ -462,12 +472,18 @@ var DeviceHandler = function (db) {
             criteria.name = new RegExp(params.name.trim(), "i");
         }
 
-        if (params.status === 'subscribed') {
-            criteria.status = 'subscribed';
-        } else if (params.status === 'active') {
-            criteria.status = 'active';
-        } else if (params.status === 'deleted') {
-            criteria.status = 'deleted';
+        if (params.status) {
+            if (typeof params.status === 'string') {
+                if ((params.status === DEVICE_STATUSES.ACTIVE) ||
+                    (params.status === DEVICE_STATUSES.SUBSCRIBED) ||
+                    (params.status === DEVICE_STATUSES.DELETED)) {
+                    criteria.status = params.status;
+                }
+            } else if (util.isArray(params.status)) {
+                params.status = {
+                    $in: params.status
+                };
+            }
         }
 
         //console.log(params, skip);

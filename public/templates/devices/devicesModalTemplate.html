@@ -1,5 +1,24 @@
 <div class="row">
     <div class="col-md-8">
+
+        <form class="form-inline" id="searchForm">
+            <div class="checkbox">
+                <label>
+                    <input id="globalDevicesChecker" type="checkbox" <% if (checked) { %>checked<% } %>>
+                </label>
+            </div>
+
+            <div class="form-group">
+                <label class="sr-only" for="search">Email address</label>
+                <input type="text" class="form-control" id="search" placeholder="Search..." value="<%= search %>">
+                <i class="clearSearch glyphicon glyphicon-remove"></i>
+            </div>
+
+            <button type="submit" class="btn btn-default" id="searchButton">search</button>
+        </form>
+
+
+
         <table class="table">
             <tbody>
             <% for (i in devices) { %>
@@ -37,32 +56,34 @@
     </div>
     <div class="col-md-4">
 
-                    <div>
-                        <span class="name">Plan</span> <br>
-                        <span class="value"><%= calculations.plan %></span>
-                    </div>
-                    <div>
-                        <b>Number of devices</b> <br>
-                        <span class="value"><%= calculations.subscribedDevices %> of <%= calculations.maxDevices %> devices</span>
-                    </div>
-                    <div>
-                        <b>Days left</b> <br>
-                        <span class="value"><%= calculations.daysLeft %></span>
-                    </div>
-                    <div>
-                        <b>Total cost</b> <br>
-                        <span class="value"><%= calculations.costForThisMonth %>$</span>
-                    </div>
-                    <div class="form-group">
-                        <select class="form-control" id="period">
-                            <option value="month" <% if(period === 'month') { %>selected<% } %> >Month</option>
-                            <option value="year" <% if(period === 'year') { %>selected<% } %> >Year</option>
-                        </select>
-                    </div>
+        <div>
+            <span class="name">Plan</span> <br>
+            <span class="value"><%= calculations.plan %></span>
+        </div>
+        <div>
+            <b>Number of devices</b> <br>
+            <span class="value"><%= calculations.subscribedDevices %> of <%= calculations.maxDevices %> devices</span>
+        </div>
+        <div>
+            <b>Days left</b> <br>
+            <span class="value"><%= calculations.daysLeft %></span>
+        </div>
+        <div>
+            <b>Total cost</b> <br>
+            <span class="value"><%= calculations.costForThisMonth %>$</span>
+        </div>
+        <div class="form-group">
+            <select class="form-control" id="period">
+                <option value="month"
+                <% if(period === 'month') { %>selected<% } %> >Month</option>
+                <option value="year"
+                <% if(period === 'year') { %>selected<% } %> >Year</option>
+            </select>
+        </div>
 
-                    <div>
-                        <img src="images/credit-card.png" class="col-md-12 logos">
-                    </div>
+        <div>
+            <img src="images/credit-card.png" class="col-md-12 logos">
+        </div>
 
 
     </div>

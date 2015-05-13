@@ -1,21 +1,15 @@
 <div class="col-md-12">
     <div class="row">
-        <% if(!params.modal) { %>
         <form class="form-inline" id="searchForm">
-            <div class="checkbox">
-                <label>
-                    <input id="globalDevicesChecker" type="checkbox" <% if (checked) { %>checked<% } %>>
-                </label>
-            </div>
-
+            
             <div class="form-group">
                 <label class="sr-only" for="search">Email address</label>
                 <input type="text" class="form-control" id="search" placeholder="Search..." value="<%= search %>">
+                <i class="clearSearch glyphicon glyphicon-remove"></i>
             </div>
 
             <button type="submit" class="btn btn-default" id="searchButton">search</button>
         </form>
-        <% } %>
     </div>
     <div class="row" id="devicesList">
 

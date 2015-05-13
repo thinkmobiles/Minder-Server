@@ -32,8 +32,8 @@ module.exports = function (app, db) {
         var now = new Date();
         res.status(200).send({
             now: now/*,
-            expires: req.session.cookie.expires,
-            maxAge: req.session.cookie.maxAge*/
+             expires: req.session.cookie.expires,
+             maxAge: req.session.cookie.maxAge*/
         });
     });
     app.get('/currentUser', session.authenticatedUser, userHandler.getCurrentUser);
@@ -54,7 +54,6 @@ module.exports = function (app, db) {
 
     tariffPlansRouter = require('./tariffPlan')(db);
     app.use('/tariffPlans', tariffPlansRouter);
-
 
 
     // ----------------------------------------------------------
