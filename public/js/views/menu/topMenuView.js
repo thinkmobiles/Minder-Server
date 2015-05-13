@@ -14,18 +14,15 @@ define([
             {
                 name: "Home",
                 url: "#main",
-                title: "Home page",
-                authorized: true
+                title: "Home page"
             }, {
                 name: "Devices",
                 url: "#devices",
-                title: "User devices management",
-                authorized: true
+                title: "User devices management"
             }, {
                 name: "Billing info",
                 url: "#billingInfo",
-                title: "User billing info",
-                authorized: true
+                title: "User billing info"
             }
         ],
 
@@ -33,8 +30,19 @@ define([
             {
                 name: "Profile",
                 url: "#profile",
-                title: "User profile",
-                authorized: true
+                title: "User profile"
+            }
+        ],
+
+        topRightMenuItemsRaw:[
+            {
+                name: "Sign in",
+                url: "#login",
+                title: "Sign in to MinderWeb"
+            }, {
+                name: "Sign up",
+                url: "#signUp",
+                title: "Sign up to MinderWeb"
             }
         ],
 
@@ -72,20 +80,13 @@ define([
             console.log('top menu render');
             var authorized = App.sessionData.get('authorized');
             var data = {
-                top: [],
-                dropDown: [],
+                top: this.topMenuLeftItemsRaw,
+                dropDown: this.topMenuRightDropdownItemsRaw,
+                topRight: this.topRightMenuItemsRaw,
                 authorized: authorized
             };
-            _.each(this.topMenuLeftItemsRaw, function (item) {
-                if (item.authorized === authorized) {
-                    data.top.push(item);
-                }
-            });
-            _.each(this.topMenuRightDropdownItemsRaw, function (item) {
-                if (item.authorized === authorized) {
-                    data.dropDown.push(item);
-                }
-            });
+
+
             this.$el.html(_.template(topMenuTemplate, data));
             return this;
         }

@@ -1,27 +1,53 @@
 <nav class="navBar topMenu">
-    <div id="logo">
+    <div id="logo"></div>
 
-    </div>
-    <div class="menu">
+    <% if (authorized) { %>
+    <div class="menu loggedMenu">
         <% for (i in top) { %>
         <div class="menuItem topMenuItem">
-            <a href="<%= top[i].url %>"><%= top[i].name %></a>
+            <a class="btn btn-default" href="<%= top[i].url %>"><%= top[i].name %></a>
         </div>
         <% } %>
     </div>
-    <% for (i in dropDown) { %>
-        <div class="dropDown">
-            User
-            <div class="dropContent">
+    <div class="dropDown">
+        <!--User-->
+        <!--<div class="dropContent">-->
+            <!--<% for (i in dropDown) { %>-->
+            <!--<div class="menuItem topMenuItem">-->
+                <!--<a href="<%= dropDown[i].url %>"><%= dropDown[i].name %></a>-->
+            <!--</div>-->
+            <!--<% } %>-->
+            <!--<div class="menuItem dropDownMenuItem">-->
+                <!--<a id="logOut">Log out</a>-->
+            <!--</div>-->
+        <!--</div>-->
+
+        <div class="dropdown">
+            <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
+                Dropdown
+                <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
                 <% for (i in dropDown) { %>
-                <div class="menuItem topMenuItem">
-                    <a href="<%= dropDown[i].url %>"><%= dropDown[i].name %></a>
-                </div>
+                    <li role="presentation">
+                        <a role="menuitem" tabindex="-1" href="<%= dropDown[i].url %>"><%= dropDown[i].name %></a>
+                    </li>
                 <% } %>
-                <div class="menuItem dropDownMenuItem">
-                    <a id="logOut">Log out</a>
-                </div>
-            </div>
+                <li role="presentation">
+                    <a id="logOut" role="menuitem" tabindex="-1" >Log out</a>
+                </li>
+            </ul>
         </div>
+    </div>
+    <% } else { %>
+    <div class="menu notLoggedMenu">
+        <% for (i in topRight) { %>
+        <div class="menuItem topMenuItem">
+            <a class="btn btn-default" href="<%= topRight[i].url %>"><%= topRight[i].name %></a>
+        </div>
+        <% } %>
+    </div>
     <% } %>
+
+
 </nav>

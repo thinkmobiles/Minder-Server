@@ -75,18 +75,18 @@ define([
                     rememberMe : stateModelUpdate.rememberMe
                 },
                 success: function (response) {
-                    self.stateModel.set({
-                        password: '',
-                        errors: false,
-                        messages: false,
-                        email: ''
-                    });
                     App.sessionData.set({
                         authorized: true,
                         admin: false,
                         user: response.user
                     });
                     App.router.navigate("main", {trigger: true});
+                    self.stateModel.set({
+                        password: '',
+                        errors: false,
+                        messages: false,
+                        email: ''
+                    });
                 },
                 error: function (err) {
                     App.sessionData.set({

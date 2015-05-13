@@ -577,6 +577,83 @@ var UserHandler = function (db) {
         }
     };
 
+    this.forgotPassword = function (req, res, next) {
+        var email = req.body.email;
+        var mailOptions = {};
+        var token = '';
+
+        if (!email) {
+            next(badRequests.NotEnParams(['email']));
+        }
+
+        UserModel.findOne({ // find a user to compare passwords
+            email: email
+        }, function (err, user) {
+            if (err) {
+                next(err);
+            } else if (!user) {
+                next(badRequests.NotFound());
+            } else {
+
+                token = tokenGenerator.generate();
+
+                user.forgotToken = token; // set new token to user
+
+                user.save(function (err) { // save changes and send email
+                    if (err) {
+                        return next(err);
+                    }
+
+                    mailOptions = {
+                        firstName: user.firstName,
+                        lastName: user.lastName,
+                        email: user.email,
+                        minderId: user.minderId,
+                        url: process.env.HOST + '/#resetPassword/' + token
+                    };
+
+                    mailer.forgotPassword(mailOptions);
+
+                    res.status(200).send();
+                });
+            }
+        });
+
+    };
+
+    this.resetPassword = function (req, res, next) {
+        var token = req.body.token;
+        var password = req.body.password;
+        var needParams = ['token', 'password'];
+
+        if (!token) {
+            next(badRequests.NotEnParams(needParams));
+        }
+
+        if (!password) {
+            next(badRequests.NotEnParams(needParams));
+        }
+
+        UserModel.findOne({ // find a user to compare passwords
+            forgotToken: token
+        }, function (err, user) {
+            if (err) {
+                next(err);
+            } else if (!user) {
+                next(badRequests.NotFound());
+            } else {
+                user.pass = getEncryptedPass(password);
+                user.forgotToken = null;
+                user.save(function (err) {
+                    if (err) {
+                        next(err);
+                    }
+                    res.send('');
+                });
+            }
+        });
+    };
+
     /*this.incrementSubscribedDevicesCount = function(userId, quantity, callback) {
      var criteria = {
      _id: userId

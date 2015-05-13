@@ -20,29 +20,27 @@ define([
         },
 
         setDefaultStateModel: function () {
-            this.stateModel = new Backbone.Model({
-                password: '',
+            var defaultData = {
                 newPassword: '',
                 confirmPassword: '',
                 errors: false,
                 messages: false
-            })
-        },
+            };
 
-        render: function () {
-            var data = App.sessionData.toJSON().user;
-            data = _.extend(data, this.stateModel.toJSON());
-            this.$el.html(_.template(template, data));
-            return this;
+            if (this.stateModel) {
+                this.stateModel.set(defaultData);
+            } else {
+                this.stateModel = new Backbone.Model(defaultData);
+            }
         },
 
         afterUpend: function () {
+            this.setDefaultStateModel();
+        },
+
+        setParams: function (params) {
             this.stateModel.set({
-                password: '',
-                newPassword: '',
-                confirmPassword: '',
-                errors: false,
-                messages: false
+                token: params.token
             });
         },
 
@@ -56,7 +54,6 @@ define([
             var stateModelUpdate = {
                 errors: false,
                 messages: false,
-                password: this.$el.find("#password").val().trim(),
                 newPassword: this.$el.find("#newPassword").val().trim(),
                 confirmPassword: this.$el.find("#confirmPassword").val().trim()
             };
@@ -84,32 +81,26 @@ define([
                 url: "/resetPassword",
                 type: "POST",
                 data: {
+                    token: self.stateModel.get('token'),
                     password: stateModelUpdate.newPassword
                 },
                 success: function () {
-                    self.stateModel.set({
-                        password: '',
-                        newPassword: '',
-                        confirmPassword: '',
-                        errors: false,
-                        messages: false
-                    });
-
-                    alert('Password updated successfully');
-
+                    self.setDefaultStateModel();
                     App.router.navigate("login", {
                         trigger: true
                     });
                 },
                 error: function (err) {
                     App.error(err);
-                    self.stateModel.set({
-                        password: '',
-                        confirmPassword: '',
-                        newPassword: ''
-                    });
+                    self.setDefaultStateModel();
                 }
             });
+            return this;
+        },
+
+        render: function () {
+            var data = this.stateModel.toJSON();
+            this.$el.html(_.template(template, data));
             return this;
         }
     });

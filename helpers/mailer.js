@@ -5,6 +5,7 @@ var MailerModule = function () {
     var nodemailer = require("nodemailer");
     var fs = require('fs');
     var FROM = "Minder <" + 'info@minderweb.com' + ">";
+    var forgotPasswordTemplate = fs.readFileSync('public/templates/mailer/forgotPassword.html', 'utf8');
 
     this.emailConfirmation = function (options) {
         var templateOptions = {
@@ -22,7 +23,25 @@ var MailerModule = function () {
             subject: 'Please verify your MinderWeb account',
             generateTextFromHTML: true,
             html: _.template(fs.readFileSync('public/templates/mailer/confirmEmail.html', 'utf8'), templateOptions)
+        };
 
+        deliver(mailOptions);
+    };
+
+    this.forgotPassword = function (options) {
+        var templateOptions = {
+            name: options.firstName + ' ' + options.lastName,
+            email: options.email,
+            minderId: options.minderId,
+            url: options.url
+        };
+
+        var mailOptions = {
+            from: FROM,
+            to: options.email,
+            subject: 'Set a new password to your MinderWeb account',
+            generateTextFromHTML: true,
+            html: _.template(forgotPasswordTemplate, templateOptions)
         };
 
         deliver(mailOptions);

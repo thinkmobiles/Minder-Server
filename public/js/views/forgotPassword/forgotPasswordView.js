@@ -66,16 +66,24 @@ define([
                 url: "/forgotPassword",
                 type: "POST",
                 data: {
-                    login: stateModelUpdate.login
+                    email: stateModelUpdate.email
                 },
                 success: function () {
-                    // TODO
-                    Custom.runApplication(true);
-                },
-                error: function () {
                     self.stateModel.set({
-                        errors: ["Such user doesn't registered"]
+                        email: '',
+                        errors: false,
+                        messages: false
                     });
+                    App.router.navigate('login', {
+                        trigger: true
+                    })
+                },
+                error: function (err) {
+                    self.stateModel.set({
+                        errors: false,
+                        messages: false
+                    });
+                    App.error(err);
                 }
             });
 

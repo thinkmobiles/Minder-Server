@@ -1,7 +1,8 @@
 define([
     'text!templates/device/deviceTemplate.html',
-    'models/deviceModel'
-], function (template, DeviceModel) {
+    'models/deviceModel',
+    'validation'
+], function (template, DeviceModel, validation) {
 
     var View;
     View = Backbone.View.extend({
@@ -77,6 +78,18 @@ define([
 
         update: function (event) {
             event.preventDefault();
+
+            var stateModelUpdate = {
+                errors: false,
+                messages: false,
+                name: this.$el.find("#email").val().trim()
+            };
+
+            this.stateModel.set(stateModelUpdate);
+
+            validation.checkNameField(messages, true, stateModelUpdate.firstName, 'name');
+
+
             this.model.save({
                 name: this.$el.find('#name').val()
             });
