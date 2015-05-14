@@ -47,7 +47,7 @@ var UserHandler = function (db) {
         }
 
         if (userData.firstName.length > CONSTANTS.USERNAME_MAX_LENGTH) {
-            errMessage = 'First name cannot contain more than ' + CONSTANTS.PASS_MIN_LENGTH + ' symbols';
+            errMessage = 'First name cannot contain more than ' + CONSTANTS.USERNAME_MAX_LENGTH + ' symbols';
             return callback(badRequests.InvalidValue({message: errMessage}));
         }
 
@@ -374,20 +374,6 @@ var UserHandler = function (db) {
 
             res.render('successConfirm');
 
-            //res.redirect(process.env.HOST + '/successConfirm');
-
-            //return res.status(500).send('NotImplementedYet');
-            /*//FIXME: update the userModel:
-             userModel
-             .save({confirmToken: null}, function (err, user) {
-             if (err) {
-             return self.renderError(err, req, res);
-             }
-
-             res.redirect(process.env.HOST + '/successConfirm');
-
-             });*/
-
         });
 
     };
@@ -440,181 +426,128 @@ var UserHandler = function (db) {
         });
     };
 
-    this.getUser = function (req, res, next) {
-        var userId = req.params.id;
-
-        self.getUserById(userId, null, function (err, user) {
-            if (err) {
-                next(err);
-            } else {
-                res.status(200).send(user);
-            }
-        });
-    };
-
-    this.getUsers = function (req, res, next) {
-        var options = req.query;
-        var page;
-        var count;
-        var query;
-        var fields;
-        var searchTerm;
-        var criteria;
-
-        if (options && options.count) {
-            count = parseInt(options.count);
-        } else {
-            count = 10;
-        }
-
-        if (options && options.page) {
-            page = (parseInt(options.page) - 1) * count;
-        } else {
-            page = 1;
-        }
-
-        criteria = {};
-        fields = {
-            pass: false
-        };
-
-        query = UserModel
-            .find(criteria, fields)
-            .sort('email')
-            .limit(count)
-            .skip(page);
-
-        query.exec(function (err, users) {
-            if (err) {
-                next(err);
-            } else {
-                res.status(200).send(users);
-            }
-        });
-
-    };
-
-    this.getUsersCount = function (req, res, next) {
-        var options = req.query;
-        var criteria = {};
-        var query;
-
-        query = UserModel.count(criteria);
-
-        query.exec(function (err, count) {
-            if (err) {
-                next(err);
-            } else {
-                res.status(200).send({count: count});
-            }
-        });
-    };
-
-    this.updateUser = function (req, res, next) {
-        var userId = req.params.id;
-        var options = req.body;
-
-        updateUserProfile(userId, options, function (err, user) {
-            if (err) {
-                next(err);
-            } else {
-                res.status(200).send({success: 'udpated', model: user});
-            }
-        });
-    };
-
     this.updateCurrentUserProfile = function (req, res, next) {
         var userId = req.session.userId;
         var options = req.body;
-        var password = null;
-        var newPassword = null;
+        var password = options.password;
+        var newPassword = options.newPassword;
+        var updateData = {};
+        var errMessage = '';
 
-        if (options.newPassword) { // check to need to update password
-            if (!options.password) {
-                return next(badRequests.NotEnParams(['password']));
+        if (options.firstName) {
+            if (options.firstName.length > CONSTANTS.USERNAME_MAX_LENGTH) {
+                errMessage = 'First name cannot contain more than ' + CONSTANTS.USERNAME_MAX_LENGTH + ' symbols';
+                return next(badRequests.InvalidValue({message: errMessage}));
             }
-            var newPassword = options.newPassword;
-        } else {
-            delete options.password; // delete password if coms from user
+            updateData.firstName = options.firstName;
         }
 
-        if (newPassword) {
-            // update profile and password
-            UserModel.findOne({ // find a user to compare passwords
-                _id: userId
-            }, function (err, user) {
-                if (err) {
-                    next(err);
-                } else if (!user) {
-                    next(badRequests.NotFound());
-                } else {
+        if (options.lastName) {
+            if (options.lastName.length > CONSTANTS.USERNAME_MAX_LENGTH) {
+                errMessage = 'Last name cannot contain more than ' + CONSTANTS.PASS_MIN_LENGTH + ' symbols';
+                return next(badRequests.InvalidValue({message: errMessage}));
+            }
+            updateData.lastName = options.lastName;
+        }
 
-                    password = getEncryptedPass(options.password);
+        if (options.email) {
+            if (!REG_EXP.EMAIL_REGEXP.test(options.email)) {
+                return next(badRequests.InvalidEmail());
+            }
+            updateData.email = options.email;
+        }
 
-                    if (user.pass !== password) { //compare passwords
-                        return next(badRequests.NotFound());
-                    }
+        if (newPassword || password) {
+            if (!newPassword || !password) { //most exists booth (password && newPassword) params
+                return next(badRequests.NotEnParams({reqParams: ['password', 'newPassword']}));
+            }
 
-                    options.pass = getEncryptedPass(newPassword); // encrypt new password and add to options
+            if (newPassword.length < CONSTANTS.PASS_MIN_LENGTH) {
+                errMessage = 'Password cannot contain less than ' + CONSTANTS.PASS_MIN_LENGTH + ' symbols';
+                return next(badRequests.InvalidValue({message: errMessage}));
+            }
 
-                    updateUserProfile(userId, options, function (err, user) {
+            if (newPassword.length > CONSTANTS.PASS_MAX_LENGTH) {
+                errMessage = 'Password cannot contain more than ' + CONSTANTS.PASS_MAX_LENGTH + ' symbols';
+                return next(badRequests.InvalidValue({message: errMessage}));
+            }
+        }
+
+        async.series([
+
+            //check newPassword and modify the updateData:
+            function (cb) {
+
+                if (newPassword) {
+
+                    UserModel.findOne({ // find a user to compare user's password ws options.password
+                        _id: userId
+                    }, function (err, user) {
                         if (err) {
-                            next(err);
-                        } else {
-                            res.status(200).send({success: 'udpated', model: user});
+                            return cb(err);
+                        } else if (!user) {
+                            return cb(badRequests.NotFound());
                         }
+
+                        if (user.pass !== getEncryptedPass(password)) { //compare user's password ws options.password
+                            return cb(badRequests.InvalidValue({message: 'Incorrect password'}));
+                        }
+
+                        updateData.pass = getEncryptedPass(newPassword); // encrypt new password and add to updateData:
+
+                        cb();
                     });
-                }
-            });
-        } else { // update only profile
-            updateUserProfile(userId, options, function (err, user) {
-                if (err) {
-                    next(err);
+
                 } else {
-                    res.status(200).send({success: 'udpated', model: user});
+                    cb();
                 }
-            });
-        }
+            },
+
+            //update profile data (firstName, lastName, email). Pass was checked in previous function;
+            function (cb) {
+                updateUserProfile(userId, updateData, function (err, user) {
+                    if (err) {
+                        return cb(err);
+                    }
+                    cb(null, user);
+                });
+            }
+
+        ], function (err, result) {
+            if (err) {
+                return next(err);
+            }
+            res.status(200).send({success: 'updated', model: result[1]});
+        });
+
     };
 
     this.forgotPassword = function (req, res, next) {
         var email = req.body.email;
-        var mailOptions = {};
-        var token = '';
 
         if (!email) {
-            next(badRequests.NotEnParams(['email']));
+            return next(badRequests.NotEnParams({reqParams: ['email']}));
         }
 
         UserModel.findOne({ // find a user to compare passwords
             email: email
         }, function (err, user) {
             if (err) {
-                next(err);
+                return next(err);
             } else if (!user) {
-                next(badRequests.NotFound());
+                return next(badRequests.NotFound());
             } else {
 
-                token = tokenGenerator.generate();
+                user.forgotToken = tokenGenerator.generate();
 
-                user.forgotToken = token; // set new token to user
-
-                user.save(function (err) { // save changes and send email
+                user.save(function (err, userModel) { // save changes and send email
                     if (err) {
                         return next(err);
                     }
 
-                    mailOptions = {
-                        firstName: user.firstName,
-                        lastName: user.lastName,
-                        email: user.email,
-                        minderId: user.minderId,
-                        url: process.env.HOST + '/#resetPassword/' + token
-                    };
+                    mailer.forgotPassword(userModel);
 
-                    mailer.forgotPassword(mailOptions);
-
-                    res.status(200).send();
+                    res.status(200).send({success: 'updated'});
                 });
             }
         });
@@ -624,31 +557,26 @@ var UserHandler = function (db) {
     this.resetPassword = function (req, res, next) {
         var token = req.body.token;
         var password = req.body.password;
-        var needParams = ['token', 'password'];
 
-        if (!token) {
-            next(badRequests.NotEnParams(needParams));
+        if (!token || !password) {
+            return next(badRequests.NotEnParams({reqParams: ['token', 'password']}));
         }
 
-        if (!password) {
-            next(badRequests.NotEnParams(needParams));
-        }
-
-        UserModel.findOne({ // find a user to compare passwords
+        UserModel.findOne({
             forgotToken: token
         }, function (err, user) {
             if (err) {
-                next(err);
+                return next(err);
             } else if (!user) {
-                next(badRequests.NotFound());
+                return next(badRequests.NotFound());
             } else {
                 user.pass = getEncryptedPass(password);
                 user.forgotToken = null;
                 user.save(function (err) {
                     if (err) {
-                        next(err);
+                        return next(err);
                     }
-                    res.send('');
+                    res.status(200).send({success: 'updated'});
                 });
             }
         });

@@ -31,15 +31,13 @@ var MailerModule = function () {
     this.forgotPassword = function (options) {
         var templateOptions = {
             name: options.firstName + ' ' + options.lastName,
-            email: options.email,
-            minderId: options.minderId,
-            url: options.url
+            url: process.env.HOST + '/#resetPassword/' + options.forgotToken
         };
 
         var mailOptions = {
             from: FROM,
             to: options.email,
-            subject: 'Set a new password to your MinderWeb account',
+            subject: 'Forgot password',
             generateTextFromHTML: true,
             html: _.template(forgotPasswordTemplate, templateOptions)
         };

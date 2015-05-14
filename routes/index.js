@@ -9,7 +9,6 @@ var UserHandler = require('../handlers/users');
 module.exports = function (app, db) {
     var session = new SessionHandler();
     var userHandler = new UserHandler(db);
-    var usersRouter;
     var devicesRouter;
     var tariffPlansRouter;
 
@@ -31,9 +30,7 @@ module.exports = function (app, db) {
     app.get('/now', session.authenticatedUser, function (req, res, next) {
         var now = new Date();
         res.status(200).send({
-            now: now/*,
-             expires: req.session.cookie.expires,
-             maxAge: req.session.cookie.maxAge*/
+            now: now
         });
     });
     app.get('/currentUser', session.authenticatedUser, userHandler.getCurrentUser);
@@ -41,9 +38,6 @@ module.exports = function (app, db) {
     app.put('/profile', userHandler.updateCurrentUserProfile);
     app.post('/forgotPassword', userHandler.forgotPassword);
     app.post('/resetPassword', userHandler.resetPassword);
-
-    usersRouter = require('./users')(db);
-    app.use('/users', usersRouter);
 
     devicesRouter = require('./devices')(db);
     app.use('/devices', devicesRouter);

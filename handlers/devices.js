@@ -312,8 +312,6 @@ var DeviceHandler = function (db) {
     };
 
     this.createDevice = function (deviceData, userModel, callback) {
-        'use strict';
-
         var newDevice;
 
         newDevice = new DeviceModel(deviceData);
@@ -334,8 +332,6 @@ var DeviceHandler = function (db) {
     };
 
     this.setLocation = function (req, res, next) {
-        'use strict';
-
         var options = req.body;
         var criteria;
         var update;
