@@ -449,64 +449,6 @@ describe('Users', function() {
 
     });
 
-    describe('GET /users', function (){
-        it('Admin can get the users', function (done) {
-            var url = '/users?count=2&page=1';
-
-            adminAgent
-                .get(url)
-                .end(function (err, res) {
-                    expect(res.status).to.equals(200);
-                    expect(res.body).to.be.instanceOf(Array);
-                    expect(res.body).to.have.length(2);
-                    done();
-                });
-        });
-    });
-
-    describe('GET /users/:id', function() {
-
-        it ('Admin can get users by id', function (done){
-            var userId = testData.users[0]._id;
-            var url = '/users/' + userId;
-
-            adminAgent
-                .get(url)
-                .end(function (err, res) {
-                    expect(res.status).to.equals(200);
-                    expect(res.body).to.be.instanceOf(Object);
-                    expect(res.body).to.have.property('_id');
-                    expect(res.body._id).to.equals(userId);
-                    done();
-                });
-        });
-
-    });
-
-    describe('PUT /users/:id', function () {
-        it('Admin can update the users profile', function (done) {
-            var userId = testData.users[0]._id;
-            var url = '/users/' + userId;
-            var data = {
-                firstName: 'new_first_name'
-            };
-
-            adminAgent
-                .put(url)
-                .send(data)
-                .end(function (err, res) {
-                    if (err) {
-                        done(err);
-                    } else {
-                        expect(res.status).to.equals(200);
-                        expect(res.body).to.be.instanceOf(Object);
-                        expect(res.body).to.have.property('success');
-                        done();
-                    }
-                });
-        });
-    });
-
     describe('PUT /profile', function () {
         it('User can update the profile', function (done) {
             var url = '/profile';
