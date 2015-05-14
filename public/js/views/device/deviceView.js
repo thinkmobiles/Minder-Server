@@ -7,7 +7,7 @@ define([
     var View;
     View = Backbone.View.extend({
         initialize: function () {
-            this.stateModel = new Backbone.Model();
+            this.setThisStateModel();
 
             // keep actual
             this.listenTo(this.stateModel, 'change', this.render);
@@ -20,12 +20,30 @@ define([
             'click .save': 'update'
         },
 
-        // remove old model
-        afterUpend: function () {
+        cleanPageData:function(){
             if (this.model) {
                 this.stopListening(this.model);
                 this.model = null;
             }
+            this.setThisStateModel();
+        },
+
+        setThisStateModel:function(){
+            var defaultData = {
+                errors:null,
+                messages:null
+            };
+            if(this.stateModel){
+                this.stateModel.set(defaultData);
+            }else{
+                this.stateModel = new Backbone.Model(defaultData);
+            }
+
+        },
+
+        // remove old model
+        afterUpend: function () {
+            this.cleanPageData();
         },
 
         // get device by url id
@@ -61,37 +79,61 @@ define([
                 self.render();
             });
 
-            // return to devices view after update
-            this.listenTo(this.model, 'sync', function () {
-                if (this.model.changed.success) {
-                    self.afterUpend();
-                    if (window.history) {
-                        if (window.history.back) {
-                            window.history.back();
-                        }
-                    }
-                }
-            });
+            //// return to devices view after update
+            //this.listenTo(this.model, 'sync', function () {
+            //    if (this.model.changed.success) {
+            //        self.afterUpend();
+            //        if (window.history) {
+            //            if (window.history.back) {
+            //                window.history.back();
+            //            }
+            //        }
+            //    }
+            //});
 
             this.render();
         },
 
         update: function (event) {
             event.preventDefault();
+            var self = this;
+            var errors = [];
+            var messages = [];
 
             var stateModelUpdate = {
                 errors: false,
                 messages: false,
-                name: this.$el.find("#email").val().trim()
+                name: this.$el.find("#name").val().trim()
             };
 
             this.stateModel.set(stateModelUpdate);
 
-            validation.checkNameField(messages, true, stateModelUpdate.firstName, 'name');
+            validation.checkNameField(messages, true, stateModelUpdate.name, 'name');
 
+            if (errors.length > 0 || messages.length > 0) {
+                if (errors.length > 0) {
+                    stateModelUpdate.errors = errors;
+                }
+                if (messages.length > 0) {
+                    stateModelUpdate.messages = messages;
+                }
+                this.stateModel.set(stateModelUpdate);
+                return this;
+            }
 
             this.model.save({
-                name: this.$el.find('#name').val()
+                name: stateModelUpdate.name
+            },{
+                success:function(){
+                    alert('Updated');
+                    self.cleanPageData();
+                    if(window.history){
+                        window.history.back();
+                    }
+                },
+                error:function(err){
+                    App.error(err);
+                }
             });
         },
 
