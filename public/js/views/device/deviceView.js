@@ -125,7 +125,7 @@ define([
                 name: stateModelUpdate.name
             },{
                 success:function(){
-                    alert('Updated');
+                    alert('Updated successfully');
                     self.cleanPageData();
                     if(window.history){
                         window.history.back();

@@ -128,7 +128,7 @@ define([
                         lastName: '',
                         iAcceptConditions: false
                     });
-                    App.router.navigate("login", {trigger: true});
+                    App.router.navigate("confirm", {trigger: true});
                 },
                 error: function (err) {
                     App.error(err);

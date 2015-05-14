@@ -254,6 +254,7 @@ define([
                         action: null,
                         plan:null
                     });
+                    alert()
                     App.updateUser();
                 },
                 error: function (err) {

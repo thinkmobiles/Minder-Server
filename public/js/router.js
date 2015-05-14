@@ -23,6 +23,7 @@ define([
             "device(/:id)": "device",
             "devices(/page/:page)": "devices",
             "profile": "profile",
+            "confirm":"confirm",
             "*any": "any"
         },
 
@@ -38,7 +39,8 @@ define([
             'login',
             'signUp',
             'forgotPassword',
-            'resetPassword'
+            'resetPassword',
+            'confirm'
         ],
 
         initialize: function () {
@@ -142,13 +144,10 @@ define([
         resetPassword: function (token) {
             this.loadWrapperView('resetPassword', {token: token});
         },
-        userManagement: function (page) {
-            if (!App.sessionData.get('admin')) {
-                return
-            }
-            if (page) page = parseInt(page);
-            this.loadWrapperView('userManagement', {page: page});
+        confirm:function(){
+            this.loadWrapperView('confirm');
         }
+
     });
 
     return appRouter;

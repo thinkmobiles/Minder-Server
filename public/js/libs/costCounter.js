@@ -27,9 +27,9 @@
         devicesToPay = selectedDevicesCount;
         subscribedDevices = subscribedDevices + selectedDevicesCount;
 
-        //if (subscribedDevices > MAX_DEVICES) { // TODO
-        //    return cb(new Error('Out of maximum limit! Not allowed! Current is ' + subscribedDevices));
-        //}
+        if (subscribedDevices > MAX_DEVICES) { // TODO
+            return cb(new Error('Out of maximum limit! Not allowed! Current is ' + subscribedDevices));
+        }
 
         for (var i = 0; i < plans.length; i++) {
             if (
