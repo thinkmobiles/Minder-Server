@@ -294,7 +294,7 @@ var DeviceHandler = function (db) {
             return DEVICE_OS.ANDROID;
         }
 
-        if (userAgent.indexOf('trident') !== -1) {
+        if (userAgent.indexOf('trident') !== -1) { //TODO: trident - InternetExplorer
             return DEVICE_OS.WINDOWS_PHONE;
         }
 

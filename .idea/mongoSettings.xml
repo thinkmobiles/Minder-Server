@@ -4,15 +4,23 @@
     <option name="serverConfigurations">
       <list>
         <ServerConfiguration>
+          <option name="label" value="localhost" />
           <option name="serverUrls">
             <list>
               <option value="localhost:27017" />
             </list>
           </option>
-          <option name="userDatabase" value="minderDev" />
+        </ServerConfiguration>
+        <ServerConfiguration>
+          <option name="label" value="SERVER" />
+          <option name="serverUrls">
+            <list>
+              <option value="192.168.88.250:27017" />
+            </list>
+          </option>
         </ServerConfiguration>
       </list>
     </option>
-    <option name="shellPath" value="C:\mongodb\bin\mongo.exe" />
+    <option name="shellPath" value="127.0.0.1:27017" />
   </component>
 </project>
