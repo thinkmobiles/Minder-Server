@@ -34,7 +34,7 @@ define([
             }
         ],
 
-        topRightMenuItemsRaw:[
+        topRightMenuItemsRaw: [
             {
                 name: "Sign in",
                 url: "#login",
@@ -49,6 +49,7 @@ define([
         initialize: function () {
             // keep menu actual
             this.listenTo(App.sessionData, 'change:authorized', this.render);
+            this.listenTo(App.sessionData, 'change:user', this.render);
 
             this.render();
         },
@@ -76,15 +77,29 @@ define([
             });
         },
 
+        prettifyString: function (string, size) {
+            if (!size) {
+                size = 20;
+            }
+            if (string.length > size) {
+                return string.slice(0, size - 3) + '...';
+            }
+            return string;
+        },
+
         render: function () {
-            console.log('top menu render');
             var authorized = App.sessionData.get('authorized');
+            var user = App.sessionData.get('user');
             var data = {
                 top: this.topMenuLeftItemsRaw,
                 dropDown: this.topMenuRightDropdownItemsRaw,
                 topRight: this.topRightMenuItemsRaw,
                 authorized: authorized
             };
+
+            if (user) {
+                data.username = this.prettifyString(user.firstName + ' ' + user.lastName, 20);
+            }
 
 
             this.$el.html(_.template(topMenuTemplate, data));

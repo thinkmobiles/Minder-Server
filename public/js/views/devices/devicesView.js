@@ -217,7 +217,6 @@ define([
                 if (err) {
                     return App.error(err);
                 }
-                console.log('PLAN', result);
                 self.stateModel.set({
                     calculations: result
                 });

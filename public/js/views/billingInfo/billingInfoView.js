@@ -21,7 +21,7 @@ define([
 
             ///////// update user plan and renewal
 
-            App.sessionData.on('change:user', function () {
+            App.sessionData.on('change:user change:tariffPlans', function () {
                 if (App.sessionData.get('user')) {
                     self.setUserPlans();
                     self.render();
@@ -45,11 +45,6 @@ define([
 
             this.setUserPlans();
             this.render();
-            this.listenTo(this.collection, 'reset', function () {
-                self.setUserPlans(); // find and set user plan
-                self.render();// render tariff plans when get from server
-            });
-            //this.listenTo(App.sessionData, 'change:tariffPlans', ); // set1
         },
 
         events: {
@@ -58,21 +53,6 @@ define([
             'click .cancelSubscription': "cancelProceedSubscriptionModal",
             'click #confirmSubscription': "confirmProceedSubscriptionModal",
             'click #confirmUnSubscribe': "confirmUnSubscribeModal"
-        },
-
-        updateData: function () {  //update user data when subscription is change
-            $.ajax({
-                url: "/currentUser",
-                type: "GET",
-                success: function (data) {
-                    App.sessionData.set({
-                        user: data
-                    })
-                },
-                error: function (data) {
-                    App.error(data);
-                }
-            });
         },
 
         setUserPlans: function () { // find and set user plan
@@ -180,7 +160,6 @@ define([
 
         onModalHide: function (cb) {
             this.$el.find('#proceedSubscriptionModal').on('hidden.bs.modal', function () {
-                console.log('proceedSubscriptionModal CB');
                 cb();
             });
         },
@@ -238,6 +217,7 @@ define([
         },
 
         confirmUnSubscribeModal: function () { // set action and data for it
+            var self = this;
             var deviceIds = this.devicesView.selectedDevicesCollection.pluck('_id');
 
             this.stateModel.set({
@@ -248,9 +228,10 @@ define([
                     }
                 }
             });
-
             this.closeDevicesView();
-            this.unSubscribeHandler();
+            this.onModalHide(function () {
+                self.unSubscribeHandler();
+            });
         },
 
         subscribeHandler: function () { // handel action
@@ -273,7 +254,7 @@ define([
                         action: null,
                         plan:null
                     });
-                    self.updateData();
+                    App.updateUser();
                 },
                 error: function (err) {
                     App.error(err);
@@ -298,7 +279,7 @@ define([
                         token: null,
                         action: null
                     });
-                    self.updateData(); //:TODO OPTIMIZE
+                   App.updateUser(); //:TODO OPTIMIZE
                 },
                 error: function (err) {
                     App.error(err);

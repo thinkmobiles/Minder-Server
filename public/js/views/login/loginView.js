@@ -61,12 +61,9 @@ define([
 
             this.stateModel.set(stateModelUpdate);
 
-            if (!stateModelUpdate.email || !validation.validEmail(stateModelUpdate.email)) {
-                messages.push('Email is invalid');
-            }
-            if (stateModelUpdate.password.length < 4) {
-                messages.push('Password must be longer than 3 characters');
-            }
+            validation.checkEmailField(messages, true, stateModelUpdate.email, 'Email');
+            validation.checkPasswordField(messages, true, stateModelUpdate.password, 'Password');
+
             if (errors.length > 0 || messages.length > 0) {
                 if (errors.length > 0) {
                     stateModelUpdate.errors = errors;

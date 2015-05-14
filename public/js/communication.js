@@ -1,4 +1,3 @@
-// Filename: communication.js
 define(function () {
     var checkLogin = function (callback) {
         $.ajax({

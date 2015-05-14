@@ -467,8 +467,8 @@ define(
                     errorArray.push([fieldName, errorMessages.invalidCharsMsg].join(' '));
                     return;
                 }
-                if (fieldValue.length < 4) {
-                    errorArray.push([fieldName, errorMessages.minLengthMsg(3)].join(' '));
+                if (fieldValue.length < 6) {
+                    errorArray.push([fieldName, errorMessages.minLengthMsg(6)].join(' '));
                     return;
                 }
                 if (!validatePass(fieldValue)) errorArray.push([fieldName, errorMessages.invalidLoginMsg].join(' '));
@@ -478,8 +478,8 @@ define(
                         errorArray.push([fieldName, errorMessages.invalidCharsMsg].join(' '));
                         return;
                     }
-                    if (fieldValue.length < 4) {
-                        errorArray.push([fieldName, errorMessages.minLengthMsg(3)].join(' '));
+                    if (fieldValue.length < 6) {
+                        errorArray.push([fieldName, errorMessages.minLengthMsg(6)].join(' '));
                         return;
                     }
                     if (!validatePass(fieldValue)) errorArray.push([fieldName, errorMessages.invalidLoginMsg].join(' '));

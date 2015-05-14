@@ -45,7 +45,6 @@
 
         result.devicesToPay = devicesToPay;
         if (plan) {
-            //result.amount = (((devicesToPay * (plan.amount / 100)) / daysInThisMonth) * daysLeft);
             result.amount = devicesToPay * plan.amount;
             result.plan = plan.name;
             result.planData = plan;
@@ -53,7 +52,6 @@
             result.plan_id = plan._id;
             result.period = period;
             result.maxDevices = plan.metadata.maxDevices;
-            //result.amount = Math.round(result.amount * 100) / 100;
             result.subscribedDevices = subscribedDevices;
         }
 

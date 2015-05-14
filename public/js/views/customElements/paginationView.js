@@ -48,7 +48,6 @@ define([
             event.preventDefault();
             var page = event.currentTarget.getAttribute('value');
             page = parseInt(page);
-            console.log('>>', page, typeof page);
             this.stateModel.set({
                 page: page
             });

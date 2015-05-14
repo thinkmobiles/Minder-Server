@@ -14,7 +14,6 @@ define([
             this.setDefaultStateModel();
 
             this.listenTo(this.stateModel, 'change', function () {
-                console.log('Trigger');
                 self.render();
             });
             self.render();
@@ -94,7 +93,6 @@ define([
                     stateModelUpdate.messages = messages;
                 }
                 this.stateModel.set(stateModelUpdate);
-                console.log('stateModel', this.stateModel.toJSON());
                 return this;
             }
 
@@ -122,6 +120,7 @@ define([
                         messages: false
                     });
                     alert('Profile updated successfully');
+                    App.updateUser();
                     App.router.navigate("main", {trigger: true});
                 },
                 error: function (err) {
@@ -143,8 +142,6 @@ define([
 
             // concat user old and new data
             data = _.extend(data, this.stateModel.toJSON());
-
-            console.log('data', data);
 
             this.$el.html(_.template(template, data));
 

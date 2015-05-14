@@ -1,6 +1,5 @@
 define(function () {
     var MyModel = Backbone.Model.extend({
-        //idAttribute: '_id'
     });
 
     var MenuItems = Backbone.Collection.extend({

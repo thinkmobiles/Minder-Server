@@ -8,7 +8,7 @@ var TestDataModule = function () {
         _id: '55312b475bcd9d3016000001',
         minderId: 'minder_1',
         email: 'test@test.com',
-        pass: '1234',
+        pass: '123456',
         firstName: 'existsFirstName',
         lastName: 'existsLastName'
     }, {

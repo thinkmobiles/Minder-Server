@@ -58,11 +58,26 @@ require(['app'], function (app) {
                 } else if (xhr.message) {
                     alert(xhr.message);
                 } else {
-                    console.log(xhr);
+                    console.error(xhr);
                 }
             }
         }
     };
+
+    App.updateUser = function () {  //update user data when subscription is change
+        $.ajax({
+            url: "/currentUser",
+            type: "GET",
+            success: function (data) {
+                App.sessionData.set({
+                    user: data
+                })
+            },
+            error: function (data) {
+                App.error(data);
+            }
+        });
+    },
 
 
     app.initialize();

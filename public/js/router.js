@@ -34,23 +34,40 @@ define([
             "profile"
         ],
 
+        redirectWhenAuthorize: [
+            'login',
+            'signUp',
+            'forgotPassword',
+            'resetPassword'
+        ],
+
         initialize: function () {
             new TopMenuView();
         },
 
         loadWrapperView: function (name, params) {
+            var WrongRout = null;
 
             if (!App.sessionData.get('authorized')) {
-                var WrongRout = _.find(this.needAuthorize, function (rout) {
+                WrongRout = _.find(this.needAuthorize, function (rout) {
                     if (name === rout) {
                         return true
                     }
                 });
                 if (WrongRout) {
-                     return Backbone.history.navigate("login", {trigger: true});
-                    //App.router.navigate("login", {trigger: true});
+                    return Backbone.history.navigate("login", {trigger: true});
+                }
+            } else {
+                WrongRout = _.find(this.redirectWhenAuthorize, function (rout) {
+                    if (name === rout) {
+                        return true
+                    }
+                });
+                if (WrongRout) {
+                    return Backbone.history.navigate("main", {trigger: true});
                 }
             }
+
 
             var self = this;
             require(['views/' + name + '/' + name + 'View'], function (View) {
