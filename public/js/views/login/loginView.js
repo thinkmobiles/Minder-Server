@@ -8,13 +8,7 @@ define([
     View = Backbone.View.extend({
 
         initialize: function () {
-            this.stateModel = new Backbone.Model({
-                rememberMe:false,
-                email: '',
-                password: '',
-                errors: false,
-                messages: false
-            });
+            this.setDefaultData();
 
             // keep data actual
             this.listenTo(this.stateModel, 'change', this.render);
@@ -27,9 +21,27 @@ define([
             "click .login-button": "login"
         },
 
-        render: function () {
-            this.$el.html(_.template(LoginTemplate, this.stateModel.toJSON()));
-            return this;
+        //reset the data
+        setDefaultData: function () {
+            var defaultData = {
+                rememberMe:false,
+                email: '',
+                password: '',
+                errors: false,
+                messages: false
+            };
+
+            if (this.stateModel) {
+                this.stateModel.set(defaultData);
+            } else {
+                this.stateModel = new Backbone.Model(defaultData);
+            }
+        },
+
+        afterUpend: function () {
+            //update page when reopened
+            this.setDefaultData();
+            this.render();
         },
 
         login: function (event) {
@@ -104,7 +116,13 @@ define([
                 }
             });
             return this;
+        },
+
+        render: function () {
+            this.$el.html(_.template(LoginTemplate, this.stateModel.toJSON()));
+            return this;
         }
+
     });
 
     return View;

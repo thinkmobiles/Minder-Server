@@ -1,13 +1,13 @@
 var App = {
-        File: {
-            MAXSIZE: 10485760,  //size in kilobytes  = 3 MB
-            MaxFileSizeDisplay: "10 MB"
-        },
-        requestedURL: null,
-        Calendar: {
-            currentCalendarId: ""
-        }
-    };
+    File: {
+        MAXSIZE: 10485760,  //size in kilobytes  = 3 MB
+        MaxFileSizeDisplay: "10 MB"
+    },
+    requestedURL: null,
+    Calendar: {
+        currentCalendarId: ""
+    }
+};
 
 require.config({
     paths: {
@@ -42,12 +42,12 @@ require(['app'], function (app) {
         if (xhr) {
             if (xhr.status === 401 || xhr.status === 403) {
                 if (xhr.status === 401) {
-                    if(App.sessionData.get('authorized')){
+                    if (App.sessionData.get('authorized')) {
                         Backbone.history.navigate("login", {trigger: true});
                     }
                     App.sessionData.set({
-                        authorized:false,
-                        user:null
+                        authorized: false,
+                        user: null
                     });
                 } else {
                     alert("You do not have permission to perform this action");
@@ -55,9 +55,10 @@ require(['app'], function (app) {
             } else {
                 if (xhr.responseJSON) {
                     alert(xhr.responseJSON.error);
+                } else if (xhr.message) {
+                    alert(xhr.message);
                 } else {
                     console.log(xhr);
-                    //Backbone.history.navigate("home", {trigger: true});
                 }
             }
         }

@@ -75,8 +75,8 @@ define([
                     self.calculatePlan();
                 });
                 paginationOptions.urlPagination = false;
-                paginationOptions.data ={
-                    status:[
+                paginationOptions.data = {
+                    status: [
                         STATUSES.ACTIVE,
                         STATUSES.SUBSCRIBED
                     ]
@@ -212,11 +212,12 @@ define([
                 plans: plans,
                 user: user,
                 period: period,
-                selectedDevicesCount: selectedDevices
+                selectedDevicesCount: selectedDevices.length
             }, function (err, result) {
                 if (err) {
                     return App.error(err);
                 }
+                console.log('PLAN', result);
                 self.stateModel.set({
                     calculations: result
                 });
@@ -235,7 +236,7 @@ define([
             });
         },
 
-        clearSearch:function(){
+        clearSearch: function () {
             event.preventDefault();
             this.$el.find('#search').val('');
             this.stateModel.set({

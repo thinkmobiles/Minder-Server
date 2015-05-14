@@ -11,16 +11,7 @@ define([
     View = Backbone.View.extend({
         initialize: function () {
 
-            this.stateModel = new Backbone.Model({
-                email: '',
-                password: '',
-                confirmPassword: '',
-                firstName: '',
-                lastName: '',
-                iAcceptConditions: false,
-                errors: false,
-                messages: false
-            });
+            this.setDefaultData();
 
             this.listenTo(this.stateModel, 'change:errors change:messages', this.render);
 
@@ -33,9 +24,29 @@ define([
             "click .signUpButton": "signUp"
         },
 
+        //reset the data
+        setDefaultData: function () {
+            var defaultData = {
+                email: '',
+                password: '',
+                confirmPassword: '',
+                firstName: '',
+                lastName: '',
+                iAcceptConditions: false,
+                errors: false,
+                messages: false
+            };
+            if (this.stateModel) {
+                this.stateModel.set(defaultData);
+            } else {
+                this.stateModel = new Backbone.Model(defaultData);
+            }
+        },
+
         afterUpend: function () {
             //update page when reopened
-            this.render()
+            this.setDefaultData();
+            this.render();
         },
 
         signUp: function (event) {
@@ -64,7 +75,6 @@ define([
             };
 
 
-
             this.stateModel.set(stateModelUpdate);
 
             if (!stateModelUpdate.email || !validation.validEmail(stateModelUpdate.email)) {
@@ -84,7 +94,7 @@ define([
                 messages.push('terms and conditions is not checked');
             }
 
-            if(!captchaData || captchaData===''){
+            if (!captchaData || captchaData === '') {
                 messages.push('please check reCAPTCHA');
             }
 
