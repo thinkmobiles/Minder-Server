@@ -18,9 +18,9 @@ module.exports = (function () {
             dateTime: {type: Date, default: Date.now}
         },
         billings: {
-            subscriptionId: {type: String},
-            subscriptionDateTime: {type: Date},
-            expirationDate: {type: Date}
+            subscriptionId: {type: String, default: null},
+            subscriptionDateTime: {type: Date, default: null},
+            expirationDate: {type: Date, default: null}
         },
         createdAt: {type: Date, default: Date.now},
         updatedAt: {type: Date, default: Date.now}

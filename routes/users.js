@@ -11,10 +11,10 @@ module.exports = function (db) {
     var userHandler = new UserHandler(db);
     var session = new SessionHandler();
 
-    router.get('/', session.authenticatedAdmin, userHandler.getUsers);
+    /*router.get('/', session.authenticatedAdmin, userHandler.getUsers);
     router.get('/count', userHandler.getUsersCount);
     router.get('/:id', userHandler.getUser);
-    router.put('/:id', session.authenticatedAdmin, userHandler.updateUser);
+    router.put('/:id', session.authenticatedAdmin, userHandler.updateUser);*/
 
     return router;
 };
