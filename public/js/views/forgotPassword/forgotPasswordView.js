@@ -69,6 +69,7 @@ define([
                     email: stateModelUpdate.email
                 },
                 success: function () {
+                    alert('Email send');
                     self.stateModel.set({
                         email: '',
                         errors: false,

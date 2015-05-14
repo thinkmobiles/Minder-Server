@@ -65,12 +65,12 @@
             <div class="value"><%= calculations.subscribedDevices %> of <%= calculations.maxDevices %> devices</div>
         </div>
         <div>
-            <div>Days left</div>
-            <div class="value"><%= calculations.daysLeft %></div>
+            <div>Dxpiration date</div>
+            <div class="value"><%= moment(calculations.expirationDate).format('YYYY/MM/DD') %></div>
         </div>
         <div>
             <div>Total cost</div>
-            <div class="value"><%= calculations.costForThisMonth %>$</div>
+            <div class="value"><%= calculations.amount/100 %>$</div>
         </div>
         <div class="form-group">
             <select class="form-control" id="period">

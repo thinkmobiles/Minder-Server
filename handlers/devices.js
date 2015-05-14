@@ -686,14 +686,13 @@ var DeviceHandler = function (db) {
         var deviceIds = req.body.deviceIds;
         var period = req.body.period;
         var userId = req.session.userId;
-        var requiredParameters = ['token', 'deviceIds', 'period'];
 
         if (!deviceIds || deviceIds.length === 0) {
-            return next(badRequests.NotEnParams({reqParams: requiredParameters}));
+            return next(badRequests.NotEnParams({reqParams: ['deviceIds', 'period']}));
         }
 
         if (!period) {
-            return next(badRequests.NotEnParams({reqParams: requiredParameters}));
+            return next(badRequests.NotEnParams({reqParams: ['deviceIds', 'period']}));
         }
 
         async.parallel({
@@ -787,7 +786,7 @@ var DeviceHandler = function (db) {
                 }
 
                 if (!token && plan.amount !== 0) {
-                    return next(badRequests.NotEnParams({reqParams: requiredParameters}));
+                    return next(badRequests.NotEnParams({reqParams: ['deviceIds', 'period', 'token']}));
                 }
 
                 async.waterfall([

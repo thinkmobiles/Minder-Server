@@ -96,6 +96,9 @@ define(
             minLengthMsg: function (minLength) {
                 return "field should be at least " + minLength + " characters long"
             },
+            maxLengthMsg: function (maxLength) {
+                return "field should be at least " + maxLength + " characters long"
+            },
             invalidMoneyAmountMsg: "field should contain a number with max 2 digits after dot",
             invalidEmailMsg: "field should contain a valid email address",
             requiredMsg: "field can not be empty",
@@ -121,11 +124,31 @@ define(
                     errorArray.push([fieldName, errorMessages.minLengthMsg(MIN_LENGTH)].join(' '));
                     return;
                 }
+                if (fieldValue.length > 35) {
+                    errorArray.push([fieldName, errorMessages.maxLengthMsg(35)].join(' '));
+                    return;
+                }
+                if (fieldValue.length > 35) {
+                    errorArray.push([fieldName, errorMessages.maxLengthMsg(35)].join(' '));
+                    return;
+                }
+                if (fieldValue.length < 2) {
+                    errorArray.push([fieldName, errorMessages.minLengthMsg(2)].join(' '));
+                    return;
+                }
                 if (!validateName(fieldValue)) errorArray.push([fieldName, errorMessages.invalidNameMsg].join(' '));
             } else {
                 if (fieldValue) {
                     if (hasInvalidChars(fieldValue)) {
                         errorArray.push([fieldName, errorMessages.invalidCharsMsg].join(' '));
+                        return;
+                    }
+                    if (fieldValue.length > 35) {
+                        errorArray.push([fieldName, errorMessages.maxLengthMsg(35)].join(' '));
+                        return;
+                    }
+                    if (fieldValue.length < 2) {
+                        errorArray.push([fieldName, errorMessages.minLengthMsg(2)].join(' '));
                         return;
                     }
                     if (!validateName(fieldValue)) errorArray.push([fieldName, errorMessages.invalidNameMsg].join(' '));
@@ -155,50 +178,6 @@ define(
                         return;
                     }
                     if (!validateLoggedValue(fieldValue)) errorArray.push([fieldName, errorMessages.invalidNameMsg].join(' '));
-                }
-            }
-        };
-
-        var checkNumberField = function (errorArray, required, fieldValue, fieldName) {
-            if (required) {
-                if (hasInvalidChars(fieldValue)) {
-                    errorArray.push([fieldName, errorMessages.notNumberMsg].join(' '));
-                    return;
-                }
-                if (!validateNumber(fieldValue)) errorArray.push([fieldName, errorMessages.notNumberMsg].join(' '));
-            } else {
-                if (fieldValue) {
-                    if (hasInvalidChars(fieldValue)) {
-                        errorArray.push([fieldName, errorMessages.notNumberMsg].join(' '));
-                        return;
-                    }
-                    if (!validateNumber(fieldValue)) errorArray.push([fieldName, errorMessages.notNumberMsg].join(' '));
-                }
-            }
-        };
-
-        var checkGroupsNameField = function (errorArray, required, fieldValue, fieldName) {
-            if (required) {
-                if (!fieldValue) {
-                    errorArray.push([fieldName, errorMessages.requiredMsg].join(' '));
-                    return;
-                }
-                if (hasInvalidChars(fieldValue)) {
-                    errorArray.push([fieldName, errorMessages.invalidCharsMsg].join(' '));
-                    return;
-                }
-                if (fieldValue.length < MIN_LENGTH) {
-                    errorArray.push([fieldName, errorMessages.minLengthMsg(MIN_LENGTH)].join(' '));
-                    return;
-                }
-                if (!validateGroupsName(fieldValue)) errorArray.push([fieldName, errorMessages.invalidNameMsg].join(' '));
-            } else {
-                if (fieldValue) {
-                    if (hasInvalidChars(fieldValue)) {
-                        errorArray.push([fieldName, errorMessages.invalidCharsMsg].join(' '));
-                        return;
-                    }
-                    if (!validateGroupsName(fieldValue)) errorArray.push([fieldName, errorMessages.invalidNameMsg].join(' '));
                 }
             }
         };
@@ -233,164 +212,6 @@ define(
             }
         };
 
-        var checkSkypeField = function (errorArray, required, fieldValue, fieldName) {
-            if (required) {
-                if (!fieldValue) {
-                    errorArray.push([fieldName, errorMessages.requiredMsg].join(' '));
-                    return;
-                }
-                if (hasInvalidChars(fieldValue)) {
-                    errorArray.push([fieldName, errorMessages.invalidCharsMsg].join(' '));
-                    return;
-                }
-                if (fieldValue.length < 6) {
-                    errorArray.push([fieldName, errorMessages.minLengthMsg(6)].join(' '));
-                    return;
-                }
-                if (!validateWorkflowName(fieldValue)) errorArray.push([fieldName, errorMessages.invalidLoginMsg].join(' '));
-            } else {
-                if (fieldValue) {
-                    if (hasInvalidChars(fieldValue)) {
-                        errorArray.push([fieldName, errorMessages.invalidCharsMsg].join(' '));
-                        return;
-                    }
-                    if (fieldValue.length < 6) {
-                        errorArray.push([fieldName, errorMessages.minLengthMsg(6)].join(' '));
-                        return;
-                    }
-                    if (!validateSkype(fieldValue)) errorArray.push([fieldName, errorMessages.invalidLoginMsg].join(' '));
-                }
-            }
-
-        };
-
-
-        var checkWorkflowNameField = function (errorArray, required, fieldValue, fieldName) {
-            if (required) {
-                if (!fieldValue) {
-                    errorArray.push([fieldName, errorMessages.requiredMsg].join(' '));
-                    return;
-                }
-                if (hasInvalidChars(fieldValue)) {
-                    errorArray.push([fieldName, errorMessages.invalidCharsMsg].join(' '));
-                    return;
-                }
-                if (fieldValue.length < 3) {
-                    errorArray.push([fieldName, errorMessages.minLengthMsg(WORKFLOW_MIN_LENGTH)].join(' '));
-                    return;
-                }
-                if (!validateWorkflowName(fieldValue)) errorArray.push([fieldName, errorMessages.invalidLoginMsg].join(' '));
-            } else {
-                if (fieldValue) {
-                    if (hasInvalidChars(fieldValue)) {
-                        errorArray.push([fieldName, errorMessages.invalidCharsMsg].join(' '));
-                        return;
-                    }
-                    if (fieldValue.length < WORKFLOW_MIN_LENGTH) {
-                        errorArray.push([fieldName, errorMessages.minLengthMsg(3)].join(' '));
-                        return;
-                    }
-                    if (!validateName(fieldValue)) errorArray.push([fieldName, errorMessages.invalidLoginMsg].join(' '));
-                }
-            }
-        };
-
-        var checkPhoneField = function (errorArray, required, fieldValue, fieldName) {
-            if (required) {
-                if (!fieldValue) {
-                    errorArray.push([fieldName, errorMessages.requiredMsg].join(' '));
-                    return;
-                }
-                if (hasInvalidChars(fieldValue)) {
-                    errorArray.push([fieldName, errorMessages.invalidCharsMsg].join(' '));
-                    return;
-                }
-                if (fieldValue.length < 5) {
-                    errorArray.push([fieldName, errorMessages.minLengthMsg(5)].join(' '));
-                    return;
-                }
-                if (!validatePhone(fieldValue)) errorArray.push([fieldName, errorMessages.invalidPhoneMsg].join(' '));
-            } else {
-                if (fieldValue) {
-                    if (hasInvalidChars(fieldValue)) {
-                        errorArray.push([fieldName, errorMessages.invalidCharsMsg].join(' '));
-                        return;
-                    }
-                    if (fieldValue.length < 5) {
-                        errorArray.push([fieldName, errorMessages.minLengthMsg(5)].join(' '));
-                        return;
-                    }
-                    if (!validatePhone(fieldValue)) errorArray.push([fieldName, errorMessages.invalidPhoneMsg].join(' '));
-                }
-            }
-        };
-
-        var checkCountryCityStateField = function (errorArray, required, fieldValue, fieldName) {
-            if (required) {
-                if (!fieldValue) {
-                    errorArray.push([fieldName, errorMessages.requiredMsg].join(' '));
-                    return;
-                }
-                if (hasInvalidChars(fieldValue)) {
-                    errorArray.push([fieldName, errorMessages.invalidCharsMsg].join(' '));
-                    return;
-                }
-                if (!validateCountryName(fieldValue)) errorArray.push([fieldName, errorMessages.invalidCountryMsg].join(' '));
-            } else {
-                if (fieldValue) {
-                    if (hasInvalidChars(fieldValue)) {
-                        errorArray.push([fieldName, errorMessages.invalidCharsMsg].join(' '));
-                        return;
-                    }
-                    if (!validateCountryName(fieldValue)) errorArray.push([fieldName, errorMessages.invalidCountryMsg].join(' '));
-                }
-            }
-        };
-
-        var checkZipField = function (errorArray, required, fieldValue, fieldName) {
-            if (required) {
-                if (!fieldValue) {
-                    errorArray.push([fieldName, errorMessages.requiredMsg].join(' '));
-                    return;
-                }
-                if (hasInvalidChars(fieldValue)) {
-                    errorArray.push([fieldName, errorMessages.invalidCharsMsg].join(' '));
-                    return;
-                }
-                if (!validateZip(fieldValue)) errorArray.push([fieldName, errorMessages.invalidZipMsg].join(' '));
-            } else {
-                if (fieldValue) {
-                    if (hasInvalidChars(fieldValue)) {
-                        errorArray.push([fieldName, errorMessages.invalidCharsMsg].join(' '));
-                        return;
-                    }
-                    if (!validateZip(fieldValue)) errorArray.push([fieldName, errorMessages.invalidZipMsg].join(' '));
-                }
-            }
-        };
-
-        var checkStreetField = function (errorArray, required, fieldValue, fieldName) {
-            if (required) {
-                if (!fieldValue) {
-                    errorArray.push([fieldName, errorMessages.requiredMsg].join(' '));
-                    return;
-                }
-                if (hasInvalidChars(fieldValue)) {
-                    errorArray.push([fieldName, errorMessages.invalidCharsMsg].join(' '));
-                    return;
-                }
-                if (!validateStreet(fieldValue)) errorArray.push([fieldName, errorMessages.invalidStreetMsg].join(' '));
-            } else {
-                if (fieldValue) {
-                    if (hasInvalidChars(fieldValue)) {
-                        errorArray.push([fieldName, errorMessages.invalidCharsMsg].join(' '));
-                        return;
-                    }
-                    if (!validateStreet(fieldValue)) errorArray.push([fieldName, errorMessages.invalidStreetMsg].join(' '));
-                }
-            }
-        };
-
         var checkEmailField = function (errorArray, required, fieldValue, fieldName) {
             if (required) {
                 if (!fieldValue) {
@@ -413,50 +234,6 @@ define(
             }
         };
 
-        var checkNotesField = function (errorArray, required, fieldValue, fieldName) {
-            if (required) {
-                if (!fieldValue) {
-                    errorArray.push([fieldName, errorMessages.requiredMsg].join(' '));
-                    return;
-                }
-                if (hasInvalidChars(fieldValue)) {
-                    errorArray.push([fieldName, errorMessages.invalidCharsMsg].join(' '));
-                    return;
-                }
-            } else {
-                if (fieldValue) {
-                    if (hasInvalidChars(fieldValue)) {
-                        errorArray.push([fieldName, errorMessages.invalidCharsMsg].join(' '));
-                        return;
-                    }
-                }
-            }
-        };
-
-        var checkMoneyField = function (errorArray, required, fieldValue, fieldName) {
-            if (required) {
-                if (!fieldValue) {
-                    errorArray.push([fieldName, errorMessages.requiredMsg].join(' '));
-                    return;
-                }
-                if (hasInvalidChars(fieldValue)) {
-                    errorArray.push([fieldName, errorMessages.invalidCharsMsg].join(' '));
-                    return;
-                }
-                if (!validateMoneyAmount(fieldValue))
-                    errorArray.push([fieldName, errorMessages.invalidMoneyAmountMsg].join(' '));
-            } else {
-                if (fieldValue) {
-                    if (hasInvalidChars(fieldValue)) {
-                        errorArray.push([fieldName, errorMessages.invalidCharsMsg].join(' '));
-                        return;
-                    }
-                    if (!validateMoneyAmount(fieldValue))
-                        errorArray.push([fieldName, errorMessages.invalidMoneyAmountMsg].join(' '));
-                }
-            }
-        };
-
         var checkPasswordField = function (errorArray, required, fieldValue, fieldName) {
             if (required) {
                 if (!fieldValue) {
@@ -471,6 +248,10 @@ define(
                     errorArray.push([fieldName, errorMessages.minLengthMsg(6)].join(' '));
                     return;
                 }
+                if (fieldValue.length > 35) {
+                    errorArray.push([fieldName, errorMessages.maxLengthMsg(35)].join(' '));
+                    return;
+                }
                 if (!validatePass(fieldValue)) errorArray.push([fieldName, errorMessages.invalidLoginMsg].join(' '));
             } else {
                 if (fieldValue) {
@@ -480,6 +261,10 @@ define(
                     }
                     if (fieldValue.length < 6) {
                         errorArray.push([fieldName, errorMessages.minLengthMsg(6)].join(' '));
+                        return;
+                    }
+                    if (fieldValue.length > 35) {
+                        errorArray.push([fieldName, errorMessages.maxLengthMsg(35)].join(' '));
                         return;
                     }
                     if (!validatePass(fieldValue)) errorArray.push([fieldName, errorMessages.invalidLoginMsg].join(' '));
@@ -493,40 +278,21 @@ define(
                     errorArray.push(errorMessages.passwordsNotMatchMsg);
         };
 
-        var checkFirstDateIsGreater = function (errorArray, greaterDate, greaterDateName, smallerDate, smallerDateName) {
-            if ((new Date(greaterDate) < new Date(smallerDate))) {
-                errorArray.push(smallerDateName + " can not be greater than " + greaterDateName);
-                return;
-            }
-
-        };
         return {
             comparePasswords: comparePasswords,
             checkPasswordField: checkPasswordField,
             checkLoginField: checkLoginField,
-            checkMoneyField: checkMoneyField,
-            checkFirstDateIsGreater: checkFirstDateIsGreater,
-            checkNotesField: checkNotesField,
             checkEmailField: checkEmailField,
-            checkStreetField: checkStreetField,
-            checkZipField: checkZipField,
-            checkCountryCityStateField: checkCountryCityStateField,
-            checkPhoneField: checkPhoneField,
             checkNameField: checkNameField,
-            checkGroupsNameField: checkGroupsNameField,
             validEmail: validateEmail,
             withMinLength: requiredFieldLength,
             validLoggedValue: validateLoggedValue,
-            errorMessages: errorMessages,
-            checkNumberField: checkNumberField,
             validStreet: validateStreet,
             validDate: validDate,
             validPhone: validatePhone,
             validName: validateName,
             validGroupsName: validateGroupsName,
             validMoneyAmount: validateMoneyAmount,
-            checkLogedField: checkLogedField,
-            checkWorkflowNameField: checkWorkflowNameField,
-            checkSkypeField: checkSkypeField
+            checkLogedField: checkLogedField
         }
     });

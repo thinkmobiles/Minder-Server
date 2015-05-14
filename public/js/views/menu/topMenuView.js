@@ -60,8 +60,6 @@ define([
                 url: "/signOut",
                 type: "POST",
                 success: function () {
-                    App.router.navigate("login", {trigger: true});
-
                     // remove user data
                     // and trigger other views to clean up
                     // and block routs
@@ -70,6 +68,7 @@ define([
                         admin: false,
                         user: null
                     });
+                    App.router.navigate("login", {trigger: true});
                 },
                 error: function (err) {
                     App.error(err);
