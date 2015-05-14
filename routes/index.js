@@ -5,12 +5,13 @@ var fs = require("fs");
 var logWriter = require('../helpers/logWriter')();
 var SessionHandler = require('../handlers/sessions');
 var UserHandler = require('../handlers/users');
+var TariffPlanHandler = require('../handlers/tariffPlan');
 
 module.exports = function (app, db) {
     var session = new SessionHandler();
     var userHandler = new UserHandler(db);
+    var tariffPlan = new TariffPlanHandler(db);
     var devicesRouter;
-    var tariffPlansRouter;
 
     app.use(function (req, res, next) {
         if (process.env.NODE_ENV === 'development') {
@@ -38,12 +39,10 @@ module.exports = function (app, db) {
     app.put('/profile', userHandler.updateCurrentUserProfile);
     app.post('/forgotPassword', userHandler.forgotPassword);
     app.post('/resetPassword', userHandler.resetPassword);
+    app.get('/tariffPlans', session.authenticatedUser, tariffPlan.getTariffPans);
 
     devicesRouter = require('./devices')(db);
     app.use('/devices', devicesRouter);
-
-    tariffPlansRouter = require('./tariffPlan')(db);
-    app.use('/tariffPlans', tariffPlansRouter);
 
 
     // ----------------------------------------------------------
