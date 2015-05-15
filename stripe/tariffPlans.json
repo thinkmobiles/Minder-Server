@@ -20,7 +20,7 @@
     "interval": "month",
     "metadata": {
       "type": "month",
-      "minDevices": 1,
+      "minDevices": 2,
       "maxDevices": 5
     },
     "statement_descriptor": "Minder T2 Tear"

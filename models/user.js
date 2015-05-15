@@ -21,6 +21,7 @@ module.exports = (function () {
         //status: {type: Number, default: 0}, // 0 - inactive ??? CMS buttons Activate | Edit | Delete ???
         role: {type: Number, required: true, default: USER_ROLES.USER},
         currentPlan: {type: ObjectId, ref: 'TariffPlans', default: null},
+        planPeriod:{type: String, minlength: 4, maxlength: 5, default: 'month'},
         //currentPlan: {type: String, default: ''},
         billings: {
             //expirationDate: {type: Date, default: null},

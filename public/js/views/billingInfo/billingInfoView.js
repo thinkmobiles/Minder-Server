@@ -119,7 +119,7 @@ define([
             });
 
             this.stateModel.set({
-                checked: checked,
+                renewal: checked,
                 action: {
                     name: 'renewal'
                 }
@@ -135,8 +135,10 @@ define([
         renewalHandler: function () {
             var self = this;
             var data = {};
-            data.token = this.stateModel.get('token');
             data.renewal = this.stateModel.get('renewal');
+            if (data.renewal) {
+                data.token = this.stateModel.get('token');
+            }
             $.ajax({
                 url: '/renewal',
                 contentType: 'application/json',
@@ -147,6 +149,7 @@ define([
                         token: null,
                         action: null
                     });
+                    alert('Updated successful!');
                 },
                 error: function (err) {
                     App.error(err)
@@ -209,7 +212,7 @@ define([
             this.closeDevicesView();
             this.onModalHide(function () {
                 var action = self.stateModel.get('action');
-                if(!action.data.plan.amount){
+                if (!action.data.plan.amount) {
                     return self.subscribeHandler();
                 }
                 self.showStripe();
@@ -252,7 +255,7 @@ define([
                     self.stateModel.set({
                         token: null,
                         action: null,
-                        plan:null
+                        plan: null
                     });
 
                     alert('Success subscription');
@@ -282,7 +285,7 @@ define([
                         token: null,
                         action: null
                     });
-                   App.updateUser(); //:TODO OPTIMIZE
+                    App.updateUser(); //:TODO OPTIMIZE
                 },
                 error: function (err) {
                     App.error(err);
