@@ -707,7 +707,7 @@ var DeviceHandler = function (db) {
             calculateParams = {
                 date: new Date(),
                 plans: plans,
-                period: user.planPeriod,
+                period: options.period || user.planPeriod,
                 user: user,
                 selectedDevicesCount: quantity
             };
@@ -732,7 +732,8 @@ var DeviceHandler = function (db) {
             $inc: {
                 'billings.subscribedDevices': quantity
             },
-            currentPlan: plan.plan_id
+            currentPlan: plan.plan_id,
+            planPeriod: plan.period
         };
 
 
@@ -847,7 +848,8 @@ var DeviceHandler = function (db) {
             calculationOptions = {
                 user: user,
                 quantity: activeDeviceIds.length,
-                plans: plans
+                plans: plans,
+                period:period
             };
 
             // returns plan from calculator

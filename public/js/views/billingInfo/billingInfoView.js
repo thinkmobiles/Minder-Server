@@ -3,8 +3,9 @@ define([
     'collections/tariffPlansCollection',
     'config/config',
     'stripeCheckout',
-    'views/devices/devicesView'
-], function (template, TariffPlansCollection, config, StripeCheckout, DevicesView) {
+    'views/devices/devicesView',
+    'constants/statuses'
+], function (template, TariffPlansCollection, config, StripeCheckout, DevicesView, STATUSES) {
 
     var View;
     View = Backbone.View.extend({
@@ -196,8 +197,19 @@ define([
 
         confirmProceedSubscriptionModal: function () { // set action and data for it
             var self = this;
-            var deviceIds = this.devicesView.selectedDevicesCollection.pluck('_id');
+            var devicesToSubscribe = [];
+            var deviceIds = [];
+            //var deviceIds = this.devicesView.selectedDevicesCollection.pluck('_id');
             var period = this.devicesView.stateModel.get('period');
+
+            devicesToSubscribe = this.devicesView.selectedDevicesCollection.filter(function(device){
+                if(device.get('status') === STATUSES.ACTIVE){
+                    return true;
+                }
+            });
+
+            deviceIds = _.pluck(devicesToSubscribe, 'id');
+
             this.stateModel.set({
                 action: {
                     name: 'subscribe',
@@ -221,7 +233,15 @@ define([
 
         confirmUnSubscribeModal: function () { // set action and data for it
             var self = this;
-            var deviceIds = this.devicesView.selectedDevicesCollection.pluck('_id');
+            //var deviceIds = this.devicesView.selectedDevicesCollection.pluck('_id');
+            var deviceIds = [];
+            var devicesToUnSubscribe = this.devicesView.selectedDevicesCollection.filter(function(device){
+                if(device.get('status') === STATUSES.SUBSCRIBED){
+                    return true;
+                }
+            });
+
+            deviceIds = _.pluck(devicesToUnSubscribe, 'id');
 
             this.stateModel.set({
                 action: {

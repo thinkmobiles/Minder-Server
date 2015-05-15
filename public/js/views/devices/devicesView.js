@@ -25,6 +25,7 @@ define([
             var self = this;
             var modal = false; // modal window status property
             var paginationOptions; // pagination settings
+            var user = App.sessionData.get('user');
 
             if (options) {
                 // set modal status
@@ -39,7 +40,7 @@ define([
                 newPlan: null, // user new plan by calculator
                 costForThisMonth: 0, // render the cost
                 modal: modal, // the view mode (modal or not, bool)
-                period: 'month', // for subscription (for calculator),
+                period: user.planPeriod, // for subscription (for calculator),
                 search: ''
             });
 
