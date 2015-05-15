@@ -131,6 +131,9 @@ define([
 
         // set device deleted
         deviceDelete: function (event) {
+            if (!confirm('Are you sure you want to delete this device?')) {
+                return
+            }
             var self = this;
             this.devisesCollection.map(function (model) {
                 if (model.id === event.target.value) {

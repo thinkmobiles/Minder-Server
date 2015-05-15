@@ -254,7 +254,9 @@ define([
                         action: null,
                         plan:null
                     });
-                    alert()
+
+                    alert('Success subscription');
+
                     App.updateUser();
                 },
                 error: function (err) {

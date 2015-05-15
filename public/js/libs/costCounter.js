@@ -1,8 +1,4 @@
 (function () {
-    function daysInMonth(month, year) {
-        return new Date(year, month, 0).getDate();
-    }
-
     function costCounter(data, cb) {
         var subscribedDevices = data.user.billings.subscribedDevices;
         var selectedDevicesCount = data.selectedDevicesCount;
@@ -10,10 +6,15 @@
         var devicesToPay = 0;
         var plan;
         var date = data.date;
-        var daysInThisMonth = daysInMonth((date.getMonth() + 1), date.getFullYear());
-        var daysLeft = (daysInThisMonth - date.getDate() + 1);
         var period = data.period;
-        var MAX_DEVICES = 1;
+        var maxDevicesForUser = 0;
+
+        // get maximum of devices
+        plans.forEach(function (currentPan) {
+            if (currentPan.metadata.type === period && currentPan.metadata.maxDevices > maxDevicesForUser) {
+                maxDevicesForUser = currentPan.metadata.maxDevices;
+            }
+        });
 
         var result = {
             amount: 0,
@@ -21,15 +22,21 @@
             subscribedDevices: subscribedDevices,
             maxDevices: 0,
             selectedDevicesCount: selectedDevicesCount
-            //daysLeft: daysLeft
         };
 
         devicesToPay = selectedDevicesCount;
         subscribedDevices = subscribedDevices + selectedDevicesCount;
 
-        if (subscribedDevices > MAX_DEVICES) { // TODO
-            return cb(new Error('Out of maximum limit! Not allowed! Current is ' + subscribedDevices));
+        // check of maximum devices limit
+        if (subscribedDevices > maxDevicesForUser) {
+            cb(new Error('Out of maximum limit! Not allowed! Current is '
+            + subscribedDevices + ', maximum is ' + maxDevicesForUser));
         }
+
+        //if (subscribedDevices > MAX_DEVICES) { // TODO
+        //    return cb(new Error('Out of maximum limit! Not allowed! Current is ' + subscribedDevices));
+        //}
+
 
         for (var i = 0; i < plans.length; i++) {
             if (
@@ -54,9 +61,9 @@
             result.period = period;
             result.maxDevices = plan.metadata.maxDevices;
             result.subscribedDevices = subscribedDevices;
-            if(period === 'month'){
+            if (period === 'month') {
                 result.expirationDate = new Date(new Date(date).setMonth(date.getMonth() + 1));
-            }else{
+            } else {
                 result.expirationDate = new Date(new Date(date).setYear(date.getFullYear() + 1));
             }
         }

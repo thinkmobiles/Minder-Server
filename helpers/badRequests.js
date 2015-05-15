@@ -319,6 +319,28 @@ var BadRequestModule = function () {
         return new Errors(errOptions);
     }
 
+    function PaymentRequired(options) {
+        var errOptions;
+
+        if (options) {
+            errOptions = options;
+        } else {
+            errOptions = {};
+        }
+
+        if (!errOptions.name) {
+            errOptions.name = 'PaymentRequired';
+        }
+        if (!errOptions.status) {
+            errOptions.status = 402;
+        }
+        if (!errOptions.message) {
+            errOptions.message = 'Payment Required';
+        }
+
+        return new Errors(errOptions);
+    }
+
     return {
         NotEnParams: NotEnParams,
         InvalidEmail: InvalidEmail,
@@ -332,7 +354,8 @@ var BadRequestModule = function () {
         CaptchaError:CaptchaError,
         BlockedAccount: BlockedAccount,
         UnknownDeviceOS: UnknownDeviceOS,
-        NoActiveDevices: NoActiveDevices
+        NoActiveDevices: NoActiveDevices,
+        PaymentRequired: PaymentRequired,
     }
 };
 
