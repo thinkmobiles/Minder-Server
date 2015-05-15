@@ -116,6 +116,25 @@ var BadRequestModule = function () {
         return new Errors(errOptions);
     }
 
+    function DeviceAlreadySubscribed(options) {
+        var errOptions;
+
+        if (options) {
+            errOptions = options;
+        } else {
+            errOptions = {};
+        }
+
+        if (!errOptions.name) {
+            errOptions.name = 'DeviceAlreadySubscribed';
+        }
+        if (!errOptions.message) {
+            errOptions.message = 'Device already is subscribed.';
+        }
+
+        return new Errors(errOptions);
+    }
+
     function InvalidValue(options) {
         var errOptions;
         var errMessage;
@@ -345,6 +364,7 @@ var BadRequestModule = function () {
         NotEnParams: NotEnParams,
         InvalidEmail: InvalidEmail,
         EmailInUse: EmailInUse,
+        DeviceAlreadySubscribed: DeviceAlreadySubscribed,
         DeviceIdInUse: DeviceIdInUse,
         InvalidValue: InvalidValue,
         NotFound: NotFound,

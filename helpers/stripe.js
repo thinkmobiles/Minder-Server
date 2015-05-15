@@ -93,6 +93,65 @@ var StripeModule = function () {
         });
     };
 
+    this.updateCard = function (customerId, cardId, callback) {
+        var err;
+        var sourceData;
+
+        if (!customerId || !cardId) {
+            err = new Error();
+            err.message = 'Not enough incoming parameters. "customerId" or "cardId" is undefined!';
+
+            if (callback && (typeof callback === 'function')) {
+                callback(err);
+            }
+            return;
+        }
+
+        sourceData = {
+            source: cardId
+        };
+
+        stripe.customers.createSource(customerId, sourceData, function (err, card) {
+            if (err) {
+                if (callback && (typeof callback === 'function')) {
+                    callback(err);
+                }
+                return;
+            }
+
+            if (callback && (typeof callback === 'function')) {
+                callback(null, card);
+            }
+        });
+    };
+
+    this.listCards = function (customerId, callback) {
+        var err;
+
+        if (!customerId) {
+            err = new Error();
+            err.message = 'Not enough incoming parameters. "customerId" is undefined!';
+
+            if (callback && (typeof callback === 'function')) {
+                callback(err);
+            }
+            return;
+        }
+
+        stripe.customers.listCards(customerId, function (err, cards) {
+            if (err) {
+                if (callback && (typeof callback === 'function')) {
+                    callback(err);
+                }
+                return;
+            }
+
+            if (callback && (typeof callback === 'function')) {
+                callback(null, cards);
+            }
+        });
+    };
+
     this.createSubscription = function (params, callback) {
         var err;
         var customerId;
@@ -172,6 +231,8 @@ var StripeModule = function () {
             }
         });
     };
+
+    this.stripe = stripe;
 };
 
 module.exports = new StripeModule();
