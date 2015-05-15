@@ -21,6 +21,7 @@ module.exports = (function () {
             subscriptionId: {type: String, default: null},
             subscriptionDateTime: {type: Date, default: null},
             expirationDate: {type: Date, default: null}
+            //renweall //TODO: ???
         },
         createdAt: {type: Date, default: Date.now},
         updatedAt: {type: Date, default: Date.now}

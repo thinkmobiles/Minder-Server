@@ -733,7 +733,7 @@ var DeviceHandler = function (db) {
                     if (err) {
                         cb(err);
                     } else if (devices && devices.length) {
-                        cb(badRequests.DeviceIdInUse());
+                        cb(badRequests.DeviceAlreadySubscribed());
                     } else {
                         cb();
                     }
