@@ -25,6 +25,9 @@ module.exports = (function () {
         //currentPlan: {type: String, default: ''},
         billings: {
             //expirationDate: {type: Date, default: null},
+            currentPlan: {type: ObjectId, ref: 'TariffPlans', default: null},
+            planPeriod:{type: String, minlength: 4, maxlength: 5, default: 'month'},
+            
             stripeId: {type: String, default: null},
             renewEnabled: {type: Boolean, default: false},
             subscribedDevices: {type: Number, required: true, default: 0}

@@ -5,5 +5,6 @@ module.exports = {
     USERNAME_MAX_LENGTH: 35,
     PASS_MIN_LENGTH: 6,
     PASS_MAX_LENGTH: 35,
-    MINDER_ID_LENGTH: 8
+    MINDER_ID_LENGTH: 8,
+    DEFAULT_TARIFF_NAME: 'T1'
 };
