@@ -20,14 +20,14 @@ module.exports = (function () {
         lastName: {type: String, minlength: NAME_MIN_LENGTH, maxlength: NAME_MAX_LENGTH},
         //status: {type: Number, default: 0}, // 0 - inactive ??? CMS buttons Activate | Edit | Delete ???
         role: {type: Number, required: true, default: USER_ROLES.USER},
-        currentPlan: {type: ObjectId, ref: 'TariffPlans', default: null},
-        planPeriod:{type: String, minlength: 4, maxlength: 5, default: 'month'},
+        //currentPlan: {type: ObjectId, ref: 'TariffPlans', default: null},
+        //planPeriod:{type: String, minlength: 4, maxlength: 5, default: 'month'},
         //currentPlan: {type: String, default: ''},
         billings: {
             //expirationDate: {type: Date, default: null},
             currentPlan: {type: ObjectId, ref: 'TariffPlans', default: null},
             planPeriod:{type: String, minlength: 4, maxlength: 5, default: 'month'},
-            
+
             stripeId: {type: String, default: null},
             renewEnabled: {type: Boolean, default: false},
             subscribedDevices: {type: Number, required: true, default: 0}
