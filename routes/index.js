@@ -42,7 +42,7 @@ module.exports = function (app, db) {
     app.get('/tariffPlans', session.authenticatedUser, tariffPlan.getTariffPans);
 
     //Test:
-    app.put('/renewal', tariffPlan.renewal);
+    app.post('/renewal', tariffPlan.renewal); //TODO: use PUT
 
     devicesRouter = require('./devices')(db);
     app.use('/devices', devicesRouter);

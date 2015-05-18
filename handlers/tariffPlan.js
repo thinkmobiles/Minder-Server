@@ -30,10 +30,6 @@ var TariffPlanHandler = function (db) {
         //TODO: validation;
 
         async.waterfall([
-            //remove old cards:
-            function (cb) {
-                cb(); //TODO: ...
-            },
 
             //create new source:
             function (cb) {
@@ -103,42 +99,17 @@ var TariffPlanHandler = function (db) {
 
         async.waterfall([
 
-            //get the list of cards
             function (cb) {
-                stripeModule.listCards(stripeId, function (err, cardsObject) {
-                    var cards;
-                    var cardIds;
+                var update = {
+                    source: token.id
+                };
 
+                stripeModule.stripe.customers.update(stripeId, update, function (err, customer) {
                     if (err) {
                         return cb(err);
                     }
-
-                    cards = cardsObject.data;
-                    cardIds = _.pluck(cards, 'id');
-
-                    if (cardIds.indexOf(cardId) === -1) { //cardId from token
-                        cb(null, cards); //new credit card:
-                    } else {
-                        cb(null, null); //the card was not changed:
-                    }
-
-                });
-            },
-
-            function (oldCards, cb) {
-                if (oldCards && oldCards.length) {
-
-                    //create new card and remove if there oldCard parameter:
-                    updateCards(stripeId, oldCards, token, function (err) {
-                        if (err) {
-                            return cb(err);
-                        }
-                        cb();
-                    });
-
-                } else {
                     cb();
-                }
+                });
             }
 
         ], function (err) {
@@ -154,36 +125,34 @@ var TariffPlanHandler = function (db) {
         });
     }
 
-    function renewDisabled(userModel, token, callback) {
+    function renewDisabled(userModel, callback) {
         var stripeId = userModel.billings.stripeId;
-        var cardId = token.card.id;
 
-        async.series([
+        async.waterfall([
 
-            //TODO: check customers data after delete;
-
-            //remove the card-source:
             function (cb) {
-                stripeModule.stripe.customers.deleteCard(stripeId, cardId, function (err, confirmation) {
+                stripeModule.stripe.customers.retrieve(stripeId, function (err, customer) {
                     if (err) {
                         return cb(err);
                     }
-                    cb();
+                    cb(null, customer);
                 });
+
             },
 
-            //update the customers default_source to NULL:
-            function (cb) {
-                var updateData = {
-                    default_source: null
-                };
+            function (customer, cb) {
+                var cardId = customer.default_source;
 
-                stripeModule.stripe.customers.update(stripeId, updateData, function (err, customer) {
-                    if (err) {
-                        return cb(err);
-                    }
+                if (cardId) {
+                    stripeModule.stripe.customers.deleteCard(stripeId, cardId, function (err, confirmation) {
+                        if (err) {
+                            return cb(err);
+                        }
+                        cb();
+                    });
+                } else {
                     cb();
-                });
+                }
             }
 
         ], function (err) {
@@ -202,7 +171,7 @@ var TariffPlanHandler = function (db) {
     this.renewal = function (req, res, next) {
         var userId = req.session.userId;
         var options = req.body;
-        var type = options.renewEnabled;
+        var type = options.renewal;
         var token = options.token;
 
         if (type === undefined) {
@@ -239,7 +208,7 @@ var TariffPlanHandler = function (db) {
                         cb(null, userModel);
                     });
                 } else {
-                    renewDisabled(userModel, token, function (err) {
+                    renewDisabled(userModel, function (err) {
                         if (err) {
                             return cb(err);
                         }
@@ -248,22 +217,25 @@ var TariffPlanHandler = function (db) {
                 }
             },
 
-            //update UserModel:
+            //update DeviceModels:
             function (userModel, cb) {
-                var saveData;
+                var criteria = {
+                    user: userModel._id
+                };
+                var update = {
+                    $set: {
+                        "billings.renewEnabled": type,
+                        updatedAt: new Date()
+                    }
+                };
 
                 if (userModel.billings.renewEnabled !== type) {
 
-                    saveData = {
-                        "billings.renewEnabled": type,
-                        updatedAt: new Date()
-                    };
-
-                    userModel.save(saveData, function (err, updatedUserModel) {
+                    DeviceModel.update(criteria, update, {multi: true}, function (err) {
                         if (err) {
                             return cb(err);
                         }
-                        cb(null, updatedUserModel);
+                        cb(null, userModel);
                     });
 
                 } else {
@@ -271,14 +243,22 @@ var TariffPlanHandler = function (db) {
                 }
             },
 
-            //update DeviceModels:
+            //update UserModel:
             function (userModel, cb) {
-                /*var criteria;
-                var updateData;
+                if (userModel.billings.renewEnabled !== type) {
 
-                DeviceModel.update()*/
+                    userModel.billings.renewEnabled = type;
+                    userModel.updatedAt = new Date();
+                    userModel.save(function (err, updatedUserModel) {
+                        if (err) {
+                            return cb(err);
+                        }
+                        cb();
+                    });
 
-                cb(); //TODO ...
+                } else {
+                    cb();
+                }
             }
 
         ], function (err) {

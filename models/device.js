@@ -20,8 +20,8 @@ module.exports = (function () {
         billings: {
             subscriptionId: {type: String, default: null},
             subscriptionDateTime: {type: Date, default: null},
-            expirationDate: {type: Date, default: null}
-            //renweall //TODO: ???
+            expirationDate: {type: Date, default: null},
+            renewEnabled: {type: Boolean, default: false}
         },
         createdAt: {type: Date, default: Date.now},
         updatedAt: {type: Date, default: Date.now}
