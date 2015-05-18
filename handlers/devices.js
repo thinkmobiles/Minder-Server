@@ -455,7 +455,6 @@ var DeviceHandler = function (db) {
     this.countDevices = function (req, res, next) {
         var params = req.query;
 
-        console.log(params);
         var criteria = {
             user: req.session.userId
         };
