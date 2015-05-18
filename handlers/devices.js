@@ -706,7 +706,7 @@ var DeviceHandler = function (db) {
             calculateParams = {
                 date: new Date(),
                 plans: plans,
-                period: options.period || user.planPeriod,
+                period: options.period || user.billings.planPeriod,
                 user: user,
                 selectedDevicesCount: quantity
             };
@@ -728,11 +728,20 @@ var DeviceHandler = function (db) {
         };
 
         var update = {
+            $set: {
+                "billings.currentPlan" : plan.plan_id,
+                "billings.planPeriod" : plan.period
+            },
             $inc: {
                 'billings.subscribedDevices': quantity
-            },
-            currentPlan: plan.plan_id,
-            planPeriod: plan.period
+            }
+            //billings: {
+            //    currentPlan: plan.plan_id,
+            //    planPeriod: plan.period,
+            //    $inc: {
+            //        subscribedDevices: quantity
+            //    },
+            //}
         };
 
 
@@ -961,12 +970,12 @@ var DeviceHandler = function (db) {
 
     };
 
-        this.cron = function (req, res, next) {
+    this.cron = function (req, res, next) {
         async.waterfall([
             function (cb) {
                 // unSubscribe unPaid devices
                 var criteria = {};
-                var update ={};
+                var update = {};
 
                 criteria = {
                     status: DEVICE_STATUSES.SUBSCRIBED,
@@ -982,15 +991,15 @@ var DeviceHandler = function (db) {
                 update = {
                     $set: {
                         status: "active",
-                        billings:{
+                        billings: {
                             expirationDate: null,
                             subscriptionId: null
                         }
                     }
                 };
 
-                DeviceModel.find(criteria, function(err, count){
-                    if(err){
+                DeviceModel.find(criteria, function (err, count) {
+                    if (err) {
                         return cb(err);
                     }
                     cb(null, count);

@@ -66,7 +66,7 @@ define([
             this.collection.reset(plans);
 
             userPlan = this.collection.find(function (model) {
-                if (model.get('_id') === App.sessionData.get('user').currentPlan) {
+                if (model.get('_id') === App.sessionData.get('user').billings.currentPlan) {
                     return true;
                 }
             });

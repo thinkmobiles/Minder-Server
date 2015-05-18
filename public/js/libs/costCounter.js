@@ -9,6 +9,10 @@
         var period = data.period;
         var maxDevicesForUser = 0;
 
+        if(!period){
+            period = 'month';
+        }
+
         // get maximum of devices
         plans.forEach(function (currentPan) {
             if (currentPan.metadata.type === period && currentPan.metadata.maxDevices > maxDevicesForUser) {

@@ -40,7 +40,7 @@ define([
                 newPlan: null, // user new plan by calculator
                 costForThisMonth: 0, // render the cost
                 modal: modal, // the view mode (modal or not, bool)
-                period: user.planPeriod, // for subscription (for calculator),
+                period: user.billings.planPeriod || 'month', // for subscription (for calculator),
                 search: ''
             });
 
