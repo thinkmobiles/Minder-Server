@@ -60,6 +60,7 @@ define([
 
             this.stateModel.set(stateModelUpdate);
 
+            // validations
             validation.checkPasswordField(messages, true, stateModelUpdate.newPassword, 'New password');
             validation.checkPasswordField(messages, true, stateModelUpdate.confirmPassword, 'Confirm password');
 
@@ -75,6 +76,8 @@ define([
                     stateModelUpdate.messages = messages;
                 }
                 this.stateModel.set(stateModelUpdate);
+
+                // if errors prevent request
                 return this;
             }
             $.ajax({

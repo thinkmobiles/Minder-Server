@@ -68,8 +68,6 @@
             }
         }
 
-        console.log(result);
-
         cb(null, result);
     }
 

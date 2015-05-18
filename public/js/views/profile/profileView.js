@@ -28,7 +28,7 @@ define([
         setDefaultStateModel: function () {
             var user = App.sessionData.toJSON().user;
 
-            var defaulData = {
+            var defaultData = {
                 email: user.email || '',
                 password: '',
                 newPassword: '',
@@ -40,9 +40,9 @@ define([
             };
 
             if (this.stateModel) {
-                this.stateModel.set(defaulData);
+                this.stateModel.set(defaultData);
             } else {
-                this.stateModel = new Backbone.Model(defaulData);
+                this.stateModel = new Backbone.Model(defaultData);
             }
         },
 
@@ -71,12 +71,15 @@ define([
                 confirmPassword: this.$el.find("#confirmPassword").val().trim()
             };
 
+            // update state data
             this.stateModel.set(stateModelUpdate);
 
+            // validations
             validation.checkEmailField(messages, true, stateModelUpdate.email, 'Email');
             validation.checkNameField(messages, true, stateModelUpdate.firstName, 'First name');
             validation.checkNameField(messages, true, stateModelUpdate.lastName, 'Last name');
             if (stateModelUpdate.newPassword || stateModelUpdate.password) {
+                // if need validate passwords
                 validation.checkPasswordField(messages, true, stateModelUpdate.password, 'Password');
                 validation.checkPasswordField(messages, true, stateModelUpdate.newPassword, 'New password');
                 validation.checkPasswordField(messages, true, stateModelUpdate.confirmPassword, 'Confirm password');
@@ -93,6 +96,8 @@ define([
                     stateModelUpdate.messages = messages;
                 }
                 this.stateModel.set(stateModelUpdate);
+
+                // if errors prevent request
                 return this;
             }
 
@@ -119,12 +124,16 @@ define([
                         errors: false,
                         messages: false
                     });
+
                     alert('Profile updated successfully');
+
                     App.updateUser();
+
                     App.router.navigate("main", {trigger: true});
                 },
                 error: function (err) {
                     App.error(err);
+
                     self.stateModel.set({
                         errors: ["Error"],
                         password: '',

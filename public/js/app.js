@@ -4,6 +4,7 @@ define([
     'custom'
 ], function (Router, Communication, Custom) {
 
+    // start application
     var initialize = function () {
         var appRouter;
         App.sessionData = new Backbone.Model({
@@ -13,6 +14,8 @@ define([
             date: null,
             tariffPlans: null
         });
+
+        // get time from server
         function getDateTime() {
             $.ajax({
                 url: '/now',
@@ -29,6 +32,7 @@ define([
             });
         }
 
+        // get plans from server
         function getPlans() {
             if (App.sessionData.get('tariffPlans')) {
                 return
@@ -48,6 +52,7 @@ define([
             });
         }
 
+        // get date from server in intervals
         setInterval(getDateTime, 1000 * 60 * 50);
 
         App.sessionData.on('change:authorized', function () {
@@ -57,9 +62,16 @@ define([
             }
         });
 
+        // create router
         appRouter = new Router();
+
+        // append router to global scope
         App.router = appRouter;
+
+        // start tracking the history
         Backbone.history.start({silent: true});
+
+        // check login an then set first rout
         Communication.checkLogin(function(err, data){
             Custom.runApplication(err, data);
         });

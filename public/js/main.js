@@ -1,12 +1,12 @@
 var App = {
-    File: {
-        MAXSIZE: 10485760,  //size in kilobytes  = 3 MB
-        MaxFileSizeDisplay: "10 MB"
-    },
-    requestedURL: null,
-    Calendar: {
-        currentCalendarId: ""
-    }
+    //File: {
+    //    MAXSIZE: 10485760,  //size in kilobytes  = 3 MB
+    //    MaxFileSizeDisplay: "10 MB"
+    //},
+    //requestedURL: null,
+    //Calendar: {
+    //    currentCalendarId: ""
+    //}
 };
 
 require.config({
@@ -17,11 +17,11 @@ require.config({
         Bootstrap: './libs/bootstrap.min',
         Backbone: './libs/backbone-min.map.1.1.2',
         less: './libs/less.min',
-        templates: '../templates',
+        templates: '../templates', // templates dir not error
         text: './libs/text',
         common: 'common',
-        recaptcha: "//www.google.com/recaptcha/api/js/recaptcha_ajax",
-        stripeCheckout: '//checkout.stripe.com/checkout'
+        recaptcha: "//www.google.com/recaptcha/api/js/recaptcha_ajax", // google recaptcha v1
+        stripeCheckout: '//checkout.stripe.com/checkout' // stripe modal
     },
     shim: {
         'ajaxForm': ['jQuery'],
@@ -38,6 +38,8 @@ require.config({
 });
 
 require(['app'], function (app) {
+
+    // global error handler
     App.error = function (xhr) {
         if (xhr) {
             if (xhr.status === 401 || xhr.status === 403) {
@@ -77,7 +79,7 @@ require(['app'], function (app) {
                 App.error(data);
             }
         });
-    },
+    };
 
 
     app.initialize();

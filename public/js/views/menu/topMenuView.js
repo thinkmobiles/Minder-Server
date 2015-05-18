@@ -10,6 +10,7 @@ define([
             'click #logOut': 'logout'
         },
 
+        // if authorized items
         topMenuLeftItemsRaw: [
             {
                 name: "Home",
@@ -34,6 +35,7 @@ define([
             }
         ],
 
+        // if !authorized items
         topRightMenuItemsRaw: [
             {
                 name: "Sign in",
@@ -76,6 +78,7 @@ define([
             });
         },
 
+        // if the user name is to long cut it
         prettifyString: function (string, size) {
             if (!size) {
                 size = 20;
@@ -96,6 +99,7 @@ define([
                 authorized: authorized
             };
 
+            // if the user name is to long cut it
             if (user) {
                 data.username = this.prettifyString(user.firstName + ' ' + user.lastName, 20);
             }

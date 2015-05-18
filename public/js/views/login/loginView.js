@@ -61,6 +61,7 @@ define([
 
             this.stateModel.set(stateModelUpdate);
 
+            // validation
             validation.checkEmailField(messages, true, stateModelUpdate.email, 'Email');
             validation.checkPasswordField(messages, true, stateModelUpdate.password, 'Password');
 
@@ -72,6 +73,7 @@ define([
                     stateModelUpdate.messages = messages;
                 }
                 this.stateModel.set(stateModelUpdate);
+                // if errors prevent request
                 return this;
             }
             $.ajax({

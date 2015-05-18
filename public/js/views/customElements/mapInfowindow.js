@@ -13,18 +13,18 @@ define([
                 updatedAt: ''
             });
 
+            // keep data actual
             this.listenTo(this.stateModel, 'change', this.updateData);
 
             this.infowindow = new google.maps.InfoWindow({ // google maps infoWindow object
                 content: ''
             });
-            /** @namespace google.maps.event.addListener */
-            /** @namespace google.maps.InfoWindow */
             google.maps.event.addListener(App.map, 'click', function () { // close windows by clicking on map
                 self.infowindow.close();
             });
         },
 
+        // render window content
         updateData: function () { // render the infoWindow content
             this.infowindow.setContent(_.template(template, this.stateModel.toJSON()));
         },
@@ -41,6 +41,10 @@ define([
             // and set the marker position
             // and set the content
             // and use the cashed address
+
+            // if address exist show it
+            // if not get it
+            // and show window
             if (model.get('address')) {
                 self.stateModel.set({
                     address: model.get('address')
@@ -57,7 +61,9 @@ define([
             self.stateModel.set({
                 address: ''
             });
+
             this.updateData();
+
             this.infowindow.open(marker.get('map'), marker); // get the address by google geocode
             $.ajax({
                 url: 'http://maps.googleapis.com/maps/api/geocode/json?latlng=' + model.get('lastLocation').lat + ',' + model.get('lastLocation').long + '&sensor=false',
@@ -69,7 +75,6 @@ define([
                             modelId: model.id
                         });
                         model.set({
-                            /** @namespace result.results.formatted_address */
                             // catch the address on model for traffic economy
                             address: result.results[0].formatted_address
                         })

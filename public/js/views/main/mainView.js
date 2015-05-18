@@ -9,21 +9,29 @@ define([
 ], function (MainTemplate, MapView, markerView, DevisesCollection, deviceMainListView, PaginationView, STATUSES) {
 
     var View;
+
     View = Backbone.View.extend({
         className: "mainPage",
         isNew: true,
+
         events: {
-            'click #globalDevicesChecker': 'globalCheckTrigger',
-            'click #mapLocateButton': 'locate',
-            'submit #searchForm': 'search'
+            'click #globalDevicesChecker': 'globalCheckTrigger', // check unCheck all devices on page
+            'click #mapLocateButton': 'locate', // show markers on page
+            'submit #searchForm': 'search' // set search filter
         },
 
         initialize: function () {
             var self = this;
 
+            // checked devices collection
             this.selectedDevicesCollection = new DevisesCollection();
+
+            // array of marker views
             this.curnetMarkersOnMap = [];
+
+            // array of devices views
             this.views = [];
+
             this.stateModel = new Backbone.Model({
                 params: {} // for page param
             });
@@ -46,9 +54,9 @@ define([
             // set pagination to control devices collection
             this.paginationView = new PaginationView({
                 collection: this.devisesCollection,
-                onPage: 7,
-                padding: 2,
-                page: 1,
+                onPage: 7, // devices on page
+                padding: 2, // 2 after current pge 2 before
+                page: 1, // default page
                 ends: true,
                 steps: true,
                 data: {
@@ -62,12 +70,13 @@ define([
             this.$el.find('#pagination').append(this.paginationView.$el);
         },
 
+        // normalize map (if the size of page is changed)
         afterUpend: function () {
-            // create map if not exist
-            // if exist normalize it size....
+            var center;
 
+            // if map not exist create it
             if (App.map) {
-                var center = App.map.getCenter();
+                center = App.map.getCenter();
                 google.maps.event.trigger(App.map, "resize");
                 App.map.setCenter(center);
             } else {
@@ -95,19 +104,24 @@ define([
 
         // render devices views
         renderDevices: function () {
-            this.$el.find('#globalDevicesChecker').prop('checked', false);
             var self = this;
             var devicesList = this.$el.find('#devicesMainList');
 
+            // unCheck the global checker
+            this.$el.find('#globalDevicesChecker').prop('checked', false);
+
+            // remove the old views
             _.each(this.views, function (view) {
                 self.stopListening(view.stateModel);
                 view.remove();
             });
 
+            // set new views
             this.devisesCollection.map(function (device) {
                 var selectedDevice;
                 var view;
 
+                // check if this device is checked
                 selectedDevice = self.selectedDevicesCollection.find(function (model) {
                     if (model.id === device.id) return true;
                 });
@@ -116,13 +130,14 @@ define([
                     model: device
                 });
 
+                // set checked if need
                 if (selectedDevice) {
                     view.stateModel.set({
                         checked: true
                     });
                 }
 
-                // keep checked devices collection actual
+                // keep checked devices collection actual (check unCheck)
                 self.listenTo(view.stateModel, 'change', self.itemChecked);
 
                 self.views.push(view);
@@ -163,19 +178,22 @@ define([
             });
 
             if (deviceIds.length === 0) {
+                // if no devices to show - show all msp
                 this.devicesCoordinatesCollection.reset();
                 App.map.setZoom(1);
             } else {
-
+                // get devices coordinates
                 data = JSON.stringify({
                     deviceIds: deviceIds
                 });
+
                 $.ajax({
                     url: '/devices/getLocations',
                     type: "POST",
                     contentType: 'application/json',
                     data: data,
                     success: function (data) {
+                        // reset the collection and trigger marker views creation function
                         self.devicesCoordinatesCollection.reset(data);
                     },
                     error: function (err) {
@@ -203,12 +221,14 @@ define([
             });
             if (this.curnetMarkersOnMap.length < 2) {
                 if (this.curnetMarkersOnMap.length === 1) {
+                    // show current marker and set zoom ... center on it ...
                     App.map.setZoom(11);
                     App.map.setCenter(this.curnetMarkersOnMap[0].marker.position);
                 } else {
                     App.map.setZoom(1);
                 }
             } else {
+                // show all markers and set auto zoom and auto center
                 var bounds = new google.maps.LatLngBounds();
                 _.each(self.curnetMarkersOnMap, function (view) {
                     bounds.extend(view.marker.position);

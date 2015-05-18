@@ -9,12 +9,15 @@ define([
 
         initialize: function () {
             var self = this;
+
+            // create the map
             self.initializeMap();
         },
 
         initializeMap: function () {
             var self = this;
 
+            // set default params
             var mapOptions = {
                 center: new google.maps.LatLng(0, 0),
                 zoom: 2,
@@ -23,10 +26,12 @@ define([
                 streetViewControl:false
             };
 
+            // append the map
             this.map = new google.maps.Map(document.getElementById("map"), mapOptions);
 
             App.map = this.map;
 
+            // keep map pretty
             google.maps.event.addDomListener(window, "resize", function () {
                 var center = self.map.getCenter();
                 google.maps.event.trigger(self.map, "resize");

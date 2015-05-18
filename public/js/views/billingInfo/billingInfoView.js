@@ -49,11 +49,11 @@ define([
         },
 
         events: {
-            'click #saveRenewal': "renewal",
-            'click #showProceedSubscription': "showProceedSubscriptionModal",
-            'click .cancelSubscription': "cancelProceedSubscriptionModal",
-            'click #confirmSubscription': "confirmProceedSubscriptionModal",
-            'click #confirmUnSubscribe': "confirmUnSubscribeModal"
+            'click #saveRenewal': "renewal", // start renewal actions chain
+            'click #showProceedSubscription': "showProceedSubscriptionModal", // show ProceedSubscription modal
+            'click .cancelSubscription': "cancelProceedSubscriptionModal", // hide modal and destroy devices view
+            'click #confirmSubscription': "confirmProceedSubscriptionModal",// start ProceedSubscription chain
+            'click #confirmUnSubscribe': "confirmUnSubscribeModal"// start UnSubscribe chain
         },
 
         setUserPlans: function () { // find and set user plan
@@ -127,17 +127,21 @@ define([
             });
 
             if (checked) {
+                // if checked showStripe and get token
                 this.showStripe();
             } else {
+                // send request
                 this.renewalHandler();
             }
         },
 
+        // send renewal request and update user data
         renewalHandler: function () {
             var self = this;
             var data = {};
             data.renewal = this.stateModel.get('renewal');
             if (data.renewal) {
+                // if checked send token
                 data.token = this.stateModel.get('token');
             }
             $.ajax({
@@ -146,10 +150,12 @@ define([
                 data: JSON.stringify(data),
                 method: 'POST',
                 success: function () {
+                    // clean data
                     self.stateModel.set({
                         token: null,
                         action: null
                     });
+                    App.updateUser();
                     alert('Updated successful!');
                 },
                 error: function (err) {
@@ -162,6 +168,7 @@ define([
 
         //start////// SUBSCRIPTION MODAL //////// SUBSCRIPTION MODAL //////// SUBSCRIPTION MODAL
 
+        // cb when modal is hidden closed to prevent css errors
         onModalHide: function (cb) {
             this.$el.find('#proceedSubscriptionModal').on('hidden.bs.modal', function () {
                 cb();
@@ -169,47 +176,58 @@ define([
         },
 
         closeDevicesView: function () {
+            // hide modal
             this.$el.find('#proceedSubscriptionModal').modal('hide');
+            // remove devices view
             if (this.devicesView) {
                 this.devicesView.undelegateEvents();
                 this.devicesView.remove();
             }
         },
 
+        // open the modal
         showProceedSubscriptionModal: function () {
+            // prevent errors on slow computers
             this.closeDevicesView();
 
+            // remove cb events from modal (onModalHide())
             this.$el.find('#proceedSubscriptionModal').off('hidden.bs.modal');
 
             this.$el.find('#proceedSubscriptionModal').modal({
                 show: true,
-                backdrop: 'static'
+                backdrop: 'static' // not close the modal when click on background
             });
 
             this.devicesView = new DevicesView({modal: true});
+
+            // append devicesView to modal
             this.$el.find('#modalContent').append(this.devicesView.el);
 
         },
 
+        // close the modal
         cancelProceedSubscriptionModal: function () {
             this.closeDevicesView();
         },
 
+        // ProceedSubscription chain start
         confirmProceedSubscriptionModal: function () { // set action and data for it
             var self = this;
             var devicesToSubscribe = [];
             var deviceIds = [];
-            //var deviceIds = this.devicesView.selectedDevicesCollection.pluck('_id');
-            var period = this.devicesView.stateModel.get('period');
+            var period = this.devicesView.stateModel.get('period'); // get payments period
 
+            // filters the selected devices
             devicesToSubscribe = this.devicesView.selectedDevicesCollection.filter(function(device){
                 if(device.get('status') === STATUSES.ACTIVE){
                     return true;
                 }
             });
 
+            // get ids
             deviceIds = _.pluck(devicesToSubscribe, 'id');
 
+            // set the actual action status to continue the chain
             this.stateModel.set({
                 action: {
                     name: 'subscribe',
@@ -221,28 +239,37 @@ define([
                 }
             });
 
+            // close the modal
             this.closeDevicesView();
+
+            // when modal closed continue the chain
             this.onModalHide(function () {
                 var action = self.stateModel.get('action');
+                // if free do not show stripe
                 if (!action.data.plan.amount) {
+                    // send request to server
                     return self.subscribeHandler();
                 }
+                // get token
                 self.showStripe();
             });
         },
 
         confirmUnSubscribeModal: function () { // set action and data for it
             var self = this;
-            //var deviceIds = this.devicesView.selectedDevicesCollection.pluck('_id');
             var deviceIds = [];
+
+            // filter selected devices
             var devicesToUnSubscribe = this.devicesView.selectedDevicesCollection.filter(function(device){
                 if(device.get('status') === STATUSES.SUBSCRIBED){
                     return true;
                 }
             });
 
+            // get ids
             deviceIds = _.pluck(devicesToUnSubscribe, 'id');
 
+            // set the actual action status to continue the chain
             this.stateModel.set({
                 action: {
                     name: 'unSubscribe',
@@ -251,12 +278,16 @@ define([
                     }
                 }
             });
+            // close modal
             this.closeDevicesView();
+
+            //when modal hide (to prevent css errors) send request
             this.onModalHide(function () {
                 self.unSubscribeHandler();
             });
         },
 
+        // send request to server
         subscribeHandler: function () { // handel action
             var self = this;
             var stateModel = this.stateModel.toJSON();
@@ -272,6 +303,8 @@ define([
                 contentType: 'application/json',
                 data: JSON.stringify(data),
                 success: function () {
+
+                    // clean data from memory
                     self.stateModel.set({
                         token: null,
                         action: null,
@@ -280,6 +313,7 @@ define([
 
                     alert('Success subscription');
 
+                    // update user data to keep actual
                     App.updateUser();
                 },
                 error: function (err) {
@@ -305,6 +339,9 @@ define([
                         token: null,
                         action: null
                     });
+                    alert('Success unsubscribe');
+
+                    // update user data to keep actual
                     App.updateUser(); //:TODO OPTIMIZE
                 },
                 error: function (err) {
@@ -321,24 +358,28 @@ define([
             var tearsYear;
             var tearsMonth;
 
+            // filter month plans
             tearsMonth = new TariffPlansCollection(self.collection.filter(function (tier) {
                 if (tier.get('metadata').type === 'month') {
                     return true
                 }
             }));
 
+            // filter year plans
             tearsYear = new TariffPlansCollection(self.collection.filter(function (tier) {
                 if (tier.get('metadata').type === 'year') {
                     return true
                 }
             }));
 
+            // concat data
             data = _.extend(data, {
                 tearsMonth: tearsMonth.toJSON(),
                 tearsYear: tearsYear.toJSON(),
                 user: App.sessionData.get('user')
             });
 
+            // sort plans
             data.tearsMonth = _.sortBy(data.tearsMonth, function (elem) {
                 return elem.amount;
             });

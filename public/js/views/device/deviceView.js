@@ -20,6 +20,7 @@ define([
             'click .save': 'update'
         },
 
+        // remove the old model of this view ... and remove event listeners from it
         cleanPageData:function(){
             if (this.model) {
                 this.stopListening(this.model);
@@ -28,11 +29,13 @@ define([
             this.setThisStateModel();
         },
 
+        // clean this view StateModel
         setThisStateModel:function(){
             var defaultData = {
                 errors:null,
                 messages:null
             };
+
             if(this.stateModel){
                 this.stateModel.set(defaultData);
             }else{
@@ -41,7 +44,7 @@ define([
 
         },
 
-        // remove old model
+        // remove old model on router hook
         afterUpend: function () {
             this.cleanPageData();
         },
@@ -52,11 +55,12 @@ define([
             this.getDevice()
         },
 
-        // get device from serer or from catch collection
+        // get device from serer or from devices view collection collection
         getDevice: function () {
             var device = null;
             var self = this;
 
+            // get already exist  model
             if (App.router.devicesView) {
                 device = App.router.devicesView.devisesCollection.find(function (model) {
                     if (model.id === self.stateModel.get('id')) {
@@ -65,6 +69,7 @@ define([
                 })
             }
 
+            // get it from the server if is a new tab
             if (!device) {
                 device = new DeviceModel({
                     _id: this.stateModel.get('id')
@@ -75,32 +80,23 @@ define([
 
             this.model = device;
 
+            // set events on it
             this.listenTo(this.model, 'change', function () {
                 self.render();
             });
 
-            //// return to devices view after update
-            //this.listenTo(this.model, 'sync', function () {
-            //    if (this.model.changed.success) {
-            //        self.afterUpend();
-            //        if (window.history) {
-            //            if (window.history.back) {
-            //                window.history.back();
-            //            }
-            //        }
-            //    }
-            //});
-
             this.render();
         },
 
+        // save changes
         update: function (event) {
-            event.preventDefault();
             var self = this;
             var errors = [];
             var messages = [];
+            var stateModelUpdate;
+            event.preventDefault();
 
-            var stateModelUpdate = {
+            stateModelUpdate = {
                 errors: false,
                 messages: false,
                 name: this.$el.find("#name").val().trim()
@@ -108,6 +104,8 @@ define([
 
             this.stateModel.set(stateModelUpdate);
 
+
+            // validate user input
             validation.checkNameField(messages, true, stateModelUpdate.name, 'name');
 
             if (errors.length > 0 || messages.length > 0) {
@@ -118,6 +116,7 @@ define([
                     stateModelUpdate.messages = messages;
                 }
                 this.stateModel.set(stateModelUpdate);
+                // if have errors or messages show it and prevent query to server
                 return this;
             }
 

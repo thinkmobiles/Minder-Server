@@ -1,4 +1,6 @@
 define(function () {
+
+    // check authorization
     var checkLogin = function (callback) {
         $.ajax({
             url: "/currentUser",

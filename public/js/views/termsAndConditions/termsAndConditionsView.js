@@ -6,6 +6,8 @@ define([
     View = Backbone.View.extend({
 
         initialize: function () {
+
+            // nothing to comment =)
             this.render();
         },
 
