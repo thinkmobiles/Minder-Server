@@ -19,13 +19,13 @@
                 <% if (devices[i].selected) { %>
                     <tr class="active">
                 <% } else { %>
-                    <% if (devices[i].device.status === "deleted") { %>
+                    <% if (devices[i].device.status === DEVICE_STATUSES.DELETED) { %>
                         <tr class="deleted">
                     <% } %>
-                    <% if (devices[i].device.status === "subscribed") { %>
+                    <% if (devices[i].device.status === DEVICE_STATUSES.SUBSCRIBED) { %>
                         <tr class="subscribed">
                     <% } %>
-                    <% if (devices[i].device.status === "active") { %>
+                    <% if (devices[i].device.status === DEVICE_STATUSES.ACTIVE) { %>
                         <tr class="activate">
                     <% } %>
                 <% } %>
@@ -44,12 +44,12 @@
                     <% } %>
                 </td>
                 <td>
-                    <% if (devices[i].device.status === "deleted") { %>
+                    <% if (devices[i].device.status === DEVICE_STATUSES.DELETED) { %>
                         <button class="btn btn-default setActive" value="<%= devices[i].device._id %>">activate</button>
-                    <% } else if (devices[i].device.status === "active") { %>
+                    <% } else if (devices[i].device.status === DEVICE_STATUSES.ACTIVE) { %>
                         <a class="btn btn-default" href="#device/<%= devices[i].device._id %>">edit</a>
                     <button class="btn btn-default setDelete" value="<%= devices[i].device._id %>">delete</button>
-                    <% } else if (devices[i].device.status === "subscribed") { %>
+                    <% } else if (devices[i].device.status === DEVICE_STATUSES.SUBSCRIBED) { %>
                     <a class="btn btn-default" href="#device/<%= devices[i].device._id %>">edit</a>
                     <button class="btn btn-default setDelete" value="<%= devices[i].device._id %>">delete</button>
                     <% } %>

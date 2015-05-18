@@ -1,8 +1,8 @@
 // Filename: app.js
 define(function () {
     return {
-        ACTIVE: 'active',
-        DELETED: 'deleted',
-        SUBSCRIBED:'subscribed'
+        DELETED: 0, //'deleted',
+        ACTIVE: 1, //'active',
+        SUBSCRIBED: 2 //'subscribed'
     }
 });

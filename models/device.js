@@ -10,7 +10,7 @@ module.exports = (function () {
         deviceId: {type: String, required: true, unique: true},
         deviceType: {type: String, required: true},
         name: {type: String, default: 'Device name'},
-        status: {type: String, required: true, default: DEVICE_STATUSES.ACTIVE}, // active | deleted | subscribed
+        status: {type: Number, required: true, default: DEVICE_STATUSES.ACTIVE}, // active | deleted | subscribed
         lastLocation: {
             long: {type: Number, default: null},
             lat: {type: Number, default: null},

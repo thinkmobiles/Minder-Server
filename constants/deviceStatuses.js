@@ -1,5 +1,5 @@
 module.exports = {
-    ACTIVE: 'active',
-    DELETED: 'deleted',
-    SUBSCRIBED:'subscribed'
+    ACTIVE: 1, //'active',
+    DELETED: 0, //'deleted',
+    SUBSCRIBED: 2 //'subscribed'
 };

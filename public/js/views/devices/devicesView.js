@@ -322,6 +322,8 @@ define([
             var now = App.sessionData.get('date');
             var self = this;
 
+            data.DEVICE_STATUSES = STATUSES;
+
             // set template
             if (data.modal) {
                 this.$el.html(_.template(ModalTemplate, data));

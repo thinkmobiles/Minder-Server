@@ -596,7 +596,7 @@ var DeviceHandler = function (db) {
         var deviceStatus = options.status;
         var criteria;
 
-        if (!deviceStatus) {
+        if (deviceStatus === undefined) {
             return next(badRequests.NotEnParams({reqParams: 'status'}));
         }
 
@@ -973,11 +973,9 @@ var DeviceHandler = function (db) {
     this.cron = function (req, res, next) {
         async.waterfall([
             function (cb) {
-                // unSubscribe unPaid devices
-                var criteria = {};
-                var update = {};
 
-                criteria = {
+                // unSubscribe unPaid devices
+                var criteria = {
                     status: DEVICE_STATUSES.SUBSCRIBED,
                     renewEnabled: false,
                     $ne: {
@@ -988,9 +986,9 @@ var DeviceHandler = function (db) {
                     }
                 };
 
-                update = {
+                var update = {
                     $set: {
-                        status: "active",
+                        status: DEVICE_STATUSES.ACTIVE,
                         billings: {
                             expirationDate: null,
                             subscriptionId: null

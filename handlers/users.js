@@ -27,6 +27,8 @@ var UserHandler = function (db) {
     var UserModel = db.model('User', userSchema);
     var deviceSchema = mongoose.Schemas['Device'];
     var DeviceModel = db.model('Device', deviceSchema);
+    var tariffPlanSchema = mongoose.Schemas['TariffPlan'];
+    var TariffPlan = db.model('TariffPlan', tariffPlanSchema);
     var self = this;
 
     function validateSignUp(userData, callback) { //used for signUpMobile, signUpWeb;
@@ -124,29 +126,61 @@ var UserHandler = function (db) {
     };
 
     function createUser(userData, callback) {
-        var encryptedPass;
-        var minderId;
-        var confirmToken;
-        var newUser;
 
-        encryptedPass = getEncryptedPass(userData.pass);
-        minderId = tokenGenerator.generate(CONSTANTS.MINDER_ID_LENGTH);
-        confirmToken = tokenGenerator.generate();
+        async.waterfall([
 
-        userData.minderId = minderId;
-        userData.confirmToken = confirmToken;
-        userData.pass = encryptedPass;
+            //get base plan:
+            function (cb) {
+                var criteria = {
+                    name: CONSTANTS.DEFAULT_TARIFF_NAME
+                };
+                var fields = '_id';
 
-        newUser = new UserModel(userData);
+                TariffPlan.findOne(criteria, fields, function (err, plan) {
+                    if (err) {
+                        cb(err);
+                    } else if (!plan) {
+                        cb(badRequests.NotFound());
+                    } else {
+                        cb(null, plan);
+                    }
+                });
+            },
 
-        newUser.save(function (err, result) {
+            //create user:
+            function (basePlanModel, cb) {
+                var encryptedPass;
+                var minderId;
+                var confirmToken;
+                var newUser;
+
+                encryptedPass = getEncryptedPass(userData.pass);
+                minderId = tokenGenerator.generate(CONSTANTS.MINDER_ID_LENGTH);
+                confirmToken = tokenGenerator.generate();
+
+                userData.minderId = minderId;
+                userData.confirmToken = confirmToken;
+                userData.pass = encryptedPass;
+
+                newUser = new UserModel(userData);
+                newUser.billings.currentPlan = basePlanModel._id;
+
+                newUser.save(function (err, result) {
+                    if (err) {
+                        return cb(err);
+                    }
+                    cb(null, result);
+                });
+            }
+
+        ], function (err, userModel) {
             if (err) {
                 if (callback && (typeof callback === 'function')) {
                     callback(err);
                 }
             } else {
                 if (callback && (typeof callback === 'function')) {
-                    callback(null, result);
+                    callback(null, userModel);
                 }
             }
         });

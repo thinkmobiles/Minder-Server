@@ -26,48 +26,6 @@ var TariffPlanHandler = function (db) {
 
     var calculateTariff = require('../public/js/libs/costCounter');
 
-    function updateCards(stripeId, cards, token, callback) {
-        //TODO: validation;
-
-        async.waterfall([
-
-            //create new source:
-            function (cb) {
-                stripeModule.createCard(stripeId, token.id, function (err, card) {
-                    if (err) {
-                        return cb(err);
-                    }
-                    cb(null, card);
-                });
-            },
-
-            //set default source:
-            function (card, cb) {
-                var updateData = {
-                    default_source: card.id
-                };
-
-                stripeModule.stripe.customers.update(stripeId, updateData, function (err, customer) {
-                    if (err) {
-                        return cb(err);
-                    }
-                    cb();
-                });
-            }
-
-        ], function (err) {
-            if (err) {
-                if (callback && (typeof callback === 'function')) {
-                    callback(err);
-                }
-            } else {
-                if (callback && (typeof callback === 'function')) {
-                    callback();
-                }
-            }
-        });
-    };
-
     function renewEnabled(userModel, token, callback) {
         var stripeId = '';
         var cardId = '';
