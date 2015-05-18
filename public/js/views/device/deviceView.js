@@ -131,7 +131,10 @@ define([
                     }
                 },
                 error:function(err){
-                    App.error(err);
+                    self.stateModel.set({
+                        errors: [err.responseJSON.error]
+                    });
+                    //App.error(err);
                 }
             });
         },

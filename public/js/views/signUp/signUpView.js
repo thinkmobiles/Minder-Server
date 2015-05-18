@@ -131,12 +131,13 @@ define([
                     App.router.navigate("confirm", {trigger: true});
                 },
                 error: function (err) {
-                    App.error(err);
+                    //App.error(err);
                     self.stateModel.set({
-                        errors: ["Error"],
+                        errors: [err.responseJSON.error],
                         password: null,
                         confirmPassword: null
                     });
+
                 }
             });
             return this;

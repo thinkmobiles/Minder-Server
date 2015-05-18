@@ -132,10 +132,10 @@ define([
                     App.router.navigate("main", {trigger: true});
                 },
                 error: function (err) {
-                    App.error(err);
+                    //App.error(err);
 
                     self.stateModel.set({
-                        errors: ["Error"],
+                        errors: [err.responseJSON.error],
                         password: '',
                         confirmPassword: '',
                         newPassword: ''

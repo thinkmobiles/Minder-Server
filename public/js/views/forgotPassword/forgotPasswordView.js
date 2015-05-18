@@ -84,7 +84,11 @@ define([
                         errors: false,
                         messages: false
                     });
-                    App.error(err);
+                    //App.error(err);
+                    self.stateModel.set({
+                        errors: [err.responseJSON.error],
+                        email: ''
+                    });
                 }
             });
 
