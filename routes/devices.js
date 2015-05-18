@@ -9,6 +9,7 @@ module.exports = function (db) {
     var session = new SessionHandler();
     var deviceHandler = new DeviceHandler(db);
 
+    router.get('/cron', session.authenticatedUser, deviceHandler.cron);
     router.put('/locate', session.authenticatedUser, deviceHandler.setLocation);
     router.get('/', session.authenticatedUser, deviceHandler.getDevices);
     router.get('/count', session.authenticatedUser, deviceHandler.countDevices);
