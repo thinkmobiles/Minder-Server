@@ -399,14 +399,17 @@ var UserHandler = function (db) {
 
         UserModel.findOneAndUpdate(condition, update, function (err, userModel) {
             if (err) {
-                return self.renderError(err, req, res);
+                //return self.renderError(err, req, res);
+                return next(err);
             }
 
             if (!userModel) {
-                return self.renderError(badRequests.NotFound(), req, res);
+                //return self.renderError(badRequests.NotFound(), req, res);
+                return next(badRequests.NotFound());
             }
 
-            res.render('successConfirm');
+            //res.render('successConfirm');
+            res.status(200).send({success: 'success confirmed'});
 
         });
 
