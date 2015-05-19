@@ -147,32 +147,20 @@ var DeviceHandler = function (db) {
 
             //make subscription:
             function (user, cb) {
-                //cb(null, user); //TODO: ...
-                /*var subscriptionParams = {
-                 customerId: user.billings.stripeId,
-                 planId: 'sub_2',
-                 quantity: 2,
-                 source: token.id
-                 };
-                 stripeModule.createSubscription(subscriptionParams, function (err, result) {
-                 if (err) {
-                 return cb(err);
-                 }
-                 cb(null, user, result);
-                 });*/
+                var chargeParams;
 
                 if (freeDevice) { // do nothing if free account
                     return cb(null, user, null);
                 }
 
-                var chargeParams = {
+                chargeParams = {
                     amount: plan.amount,  //price
                     source: token.id,
                     description: 'Minder charge for ' + user.email + ' plan ' + plan.plan,
                     metadata: {
                         planId: plan._id,
                         quantity: plan.devicesToPay,
-                        expired: ''
+                        expired: '' //TODO: ???
                     }
                 };
                 stripeModule.createCharge(chargeParams, function (err, charge) {
@@ -207,7 +195,7 @@ var DeviceHandler = function (db) {
             function (cb) {
                 var period = plan.period;
                 var update;
-                var dateNow = new Date();
+                var now = new Date();
                 var criteria = {
                     user: userId,
                     status: DEVICE_STATUSES.ACTIVE,
@@ -218,24 +206,23 @@ var DeviceHandler = function (db) {
 
                 if (freeAccount) {
                     update = {
-                        status: DEVICE_STATUSES.SUBSCRIBED,
-                        billings: {
-                            subscriptionId: null,
-                            subscriptionDateTime: dateNow,
-                            expirationDate: null
+                        $set: {
+                            status: DEVICE_STATUSES.SUBSCRIBED,
+                            "billings.subscriptionId": null,
+                            "billings.subscriptionDateTime": now,
+                            "billings.expirationDate": null
                         }
                     };
                 } else {
                     update = {
-                        status: DEVICE_STATUSES.SUBSCRIBED,
-                        billings: {
-                            subscriptionId: subscriptionId,
-                            subscriptionDateTime: dateNow,
-                            expirationDate: plan.expirationDate
+                        $set: {
+                            status: DEVICE_STATUSES.SUBSCRIBED,
+                            "billings.subscriptionId": subscriptionId,
+                            "billings.subscriptionDateTime": now,
+                            "billings.expirationDate": plan.expirationDate
                         }
                     };
                 }
-
 
                 DeviceModel.update(criteria, update, {multi: true}, function (err, quantity) {
                     if (err) {
@@ -439,7 +426,6 @@ var DeviceHandler = function (db) {
             }
         }
 
-
         DeviceModel.find(criteria, 'billings.expirationDate name status _id')
             .sort('name')
             .limit(count)
@@ -604,7 +590,6 @@ var DeviceHandler = function (db) {
             return next(badRequests.InvalidValue({param: 'status'}));
         }
 
-
         if (session.isAdmin(req)) {
             criteria = {
                 _id: deviceId
@@ -729,8 +714,8 @@ var DeviceHandler = function (db) {
 
         var update = {
             $set: {
-                "billings.currentPlan" : plan.plan_id,
-                "billings.planPeriod" : plan.period
+                "billings.currentPlan": plan.plan_id,
+                "billings.planPeriod": plan.period
             },
             $inc: {
                 'billings.subscribedDevices': quantity
@@ -743,7 +728,6 @@ var DeviceHandler = function (db) {
             //    },
             //}
         };
-
 
         UserModel.findOneAndUpdate(criteria, update, function (err, userModel) {
             if (err) {
@@ -885,7 +869,9 @@ var DeviceHandler = function (db) {
                     //update Devices.status to "subscribed" and User.billings.subscribedDevices
                     // subscriptionResult is chargeId
                     function (subscriptionResult, cb) {
-                        updateStatusToSubscribed(userId, activeDeviceIds, plan, subscriptionResult, function (err, user) {
+                        var subscrId = subscriptionResult.id;
+
+                        updateStatusToSubscribed(userId, activeDeviceIds, plan, subscrId, function (err, user) {
                             if (err) {
                                 return cb(err);
                             }
@@ -924,9 +910,9 @@ var DeviceHandler = function (db) {
                     }
                 };
                 var update = {
-                    status: DEVICE_STATUSES.ACTIVE,
-                    billings: {
-                        expirationDate: null
+                    $set: {
+                        status: DEVICE_STATUSES.ACTIVE,
+                        "billings.expirationDate": null
                     }
                 };
 
@@ -970,49 +956,123 @@ var DeviceHandler = function (db) {
 
     };
 
-    this.cron = function (req, res, next) {
-        async.waterfall([
-            function (cb) {
+    function updateSubscribedDevicesCount(options, callback) {
+        var criteria = {
+            _id: options._id
+        };
+        var update = {
+            "billings.subscribedDevices": options.count,
+            updatedAt: new Date()
+        };
 
-                // unSubscribe unPaid devices
+        UserModel.findOneAndUpdate(criteria, update, function (err, userModel) {
+            if (err) {
+                if (callback && (typeof callback === 'function')) {
+                    callback(err);
+                }
+            } else {
+                if (callback && (typeof callback === 'function')) {
+                    callback(null, userModel);
+                }
+            }
+        });
+
+    };
+
+    this.startCronJob = function (callback) {
+
+        async.waterfall([
+
+            //update devices with status "subscribed" and expired subscr.date and renewEnabled === false;
+            function (cb) {
+                var now = new Date();
                 var criteria = {
                     status: DEVICE_STATUSES.SUBSCRIBED,
-                    renewEnabled: false,
-                    $ne: {
-                        "billings.expirationDate": null
-                    },
-                    $lte: {
-                        "billings.expirationDate": new Date()
+                    "billings.renewEnabled": false,
+                    "billings.expirationDate": {
+                        $ne: null,
+                        $lte: now
                     }
                 };
 
                 var update = {
                     $set: {
                         status: DEVICE_STATUSES.ACTIVE,
-                        billings: {
-                            expirationDate: null,
-                            subscriptionId: null
-                        }
+                        "billings.expirationDate": null,
+                        "billings.subscriptionId": null,
+                        updatedAt: now
                     }
                 };
 
-                DeviceModel.find(criteria, function (err, count) {
+                DeviceModel.update(criteria, update, {multi: true}, function (err, devices) {
                     if (err) {
                         return cb(err);
                     }
-                    cb(null, count);
+                    cb();
                 });
-                //DeviceModel.update(criteria, update, {
-                //    multi: true
-                //}, function(err, count){
-                //    if(err){
-                //        return cb(err);
-                //    }
-                //    cb(null, count);
-                //});
+            },
+
+            ////update devices with status "subscribed" and expired subscr.date and renewEnabled === true;
+            function (cb) {
+                cb(); //TODO: ...
+            },
+
+            //update the users.billings.subscribedDevices counter;
+            function (cb) {
+
+                var query = DeviceModel.aggregate([{
+                    $match: {
+                        status: DEVICE_STATUSES.SUBSCRIBED
+                    }
+                }, {
+                    $group: {
+                        _id: "$user",
+                        count: {
+                            $sum: 1
+                        },
+                        devices: {
+                            $push: {
+                                _id: "$_id",
+                                deviceId: "$deviceId"
+                            }
+                        }
+                    }
+                }]);
+
+                query.exec(function (err, rows) {
+                    if (err) {
+                        return cb(err);
+                    }
+
+                    async.each(rows, updateSubscribedDevicesCount, function (err) {
+                        if (err) {
+                            return cb(err);
+                        }
+                        cb();
+                    });
+
+                });
             }
+
         ], function (err, result) {
-            res.send(result);
+            if (err) {
+                if (callback && (typeof callback === 'function')) {
+                    callback(err);
+                }
+            } else {
+                if (callback && (typeof callback === 'function')) {
+                    callback();
+                }
+            }
+        });
+    };
+
+    this.cron = function (req, res, next) {
+        self.startCronJob(function (err) {
+            if (err) {
+                return next(err);
+            }
+            res.status(200).send({success: 'success job'});
         });
     }
 

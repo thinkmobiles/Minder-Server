@@ -186,8 +186,8 @@ var TariffPlanHandler = function (db) {
                         updatedAt: new Date()
                     }
                 };
-
-                if (userModel.billings.renewEnabled !== type) {
+                //TODO: use if for optimisation;
+                //if (userModel.billings.renewEnabled !== type) {
 
                     DeviceModel.update(criteria, update, {multi: true}, function (err) {
                         if (err) {
@@ -196,9 +196,9 @@ var TariffPlanHandler = function (db) {
                         cb(null, userModel);
                     });
 
-                } else {
-                    cb(null, userModel);
-                }
+                //} else {
+                //    cb(null, userModel);
+                //}
             },
 
             //update UserModel:
