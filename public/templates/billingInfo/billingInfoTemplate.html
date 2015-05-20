@@ -1,19 +1,47 @@
 <div class="panel panel-default">
-    <div class="panel-heading">Billing Info</div>
+    <!--<div class="panel-heading">Billing Info</div>-->
+    <div>
+        <% if (userPlan) { %>
+
+        <!--<p>-->
+            <span>Current plan: </span><%= userPlan.name %><br>
+            <span>Number of devices: </span><%= userPlan.metadata.minDevices %> of <%= userPlan.metadata.maxDevices %><br>
+            <!--<span> Plan cost per device: </span><%= userPlan.amount/100 %>$<br>-->
+
+        <!--</p>-->
+
+        <!--<p>-->
+            <span>Type of subscription: </span><%= user.billings.planPeriod %><br>
+            <span># of current subscribed devices: </span><%= user.billings.subscribedDevices %><br>
+        <!--</p>-->
+
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" id="renewal" <% if(renewal) {%>checked<% } %> > Renewal
+                        <button class="btn btn-default" id="saveRenewal">Save</button>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <% } %>
+    </div>
     <div class="panel-body">
 
 
         <table class="table">
             <tbody>
             <tr>
-                <td>
+                <!--<td>
                     <div class="tariffPlan">
                         Tier
                     </div>
                     <div class="tariffPlanInfo">
                         MINDER Unit Base Cost by Volume RRP per month
                     </div>
-                </td>
+                </td>-->
                 <% _.each(tearsMonth, function(item){%>
                 <% if (userPlan) { %>
                     <% if (userPlan.id === item.id) { %>
@@ -26,11 +54,14 @@
                 <% } %>
 
                     <div class="tariffPlan">
-                        <%= item.name %> - <%= item.amount/100 %>$
+                        <%= item.name %> <!-- - <%= item.amount/100 %>$-->
                     </div>
                     <div class="tariffPlanInfo">
-                        <%= item.statement_descriptor %><br>
-                        <%= item.metadata.minDevices %> - <%= item.metadata.maxDevices %> devices
+                        <!--<%= item.statement_descriptor %><br>-->
+                        MINDER Unit Base<br>
+                        Cost by Volume RRP per month<br>
+                        $<%= (item.amount/100).toFixed(2) %> Cost<br>
+                        for <%= item.metadata.minDevices %> - <%= item.metadata.maxDevices %> devices
                     </div>
                 </td>
                 <% }) %>
@@ -41,14 +72,14 @@
         <table class="table">
             <tbody>
             <tr>
-                <td>
+                <!--<td>
                     <div class="tariffPlan">
                         Tier
                     </div>
                     <div class="tariffPlanInfo">
                         MINDER Unit Base Cost by Volume RRP per year
                     </div>
-                </td>
+                </td>-->
                 <% _.each(tearsYear, function(item){%>
                 <% if (userPlan) { %>
                 <% if (userPlan.id === item.id) { %>
@@ -61,45 +92,19 @@
                     <% } %>
 
                     <div class="tariffPlan">
-                        <%= item.name %> - <%= item.amount/100 %>$
+                        <%= item.name %> <!-- - <%= item.amount/100 %>$-->
                     </div>
                     <div class="tariffPlanInfo">
-                        <%= item.statement_descriptor %><br>
-                        <%= item.metadata.minDevices %> - <%= item.metadata.maxDevices %> devicess
+                        <!--<%= item.statement_descriptor %><br>-->
+                        COST PER YEAR<br>
+                        $<%= (item.amount/100).toFixed(2) %> Cost<br>
+                        for <%= item.metadata.minDevices %> - <%= item.metadata.maxDevices %> devices
                     </div>
                 </td>
                 <% }) %>
             </tr>
             </tbody>
         </table>
-
-
-        <% if (userPlan) { %>
-
-            <p>
-                <span>Current plan: </span><%= userPlan.name %><br>
-                <span>Number of devices: </span><%= userPlan.metadata.minDevices %> - <%= userPlan.metadata.maxDevices %><br>
-                <span> Plan cost per device: </span><%= userPlan.amount/100 %>$<br>
-
-            </p>
-
-            <p>
-                <span># of subscribed devices in this month: </span><%= user.billings.monthSubscribedDevices %><br>
-                <span># of current subscribed devices: </span><%= user.billings.subscribedDevices %><br>
-            </p>
-
-            <div class="panel panel-default">
-                <div class="panel-body">
-                    <div class="checkbox">
-                        <label>
-                            <input type="checkbox" id="renewal" <% if(renewal) {%>checked<% } %> > Renewal
-                            <button class="btn btn-default" id="saveRenewal">Save</button>
-                        </label>
-                    </div>
-                </div>
-            </div>
-
-        <% } %>
 
     </div>
 </div>
@@ -126,4 +131,5 @@
 
 </div>
 
-<button type="button" class="btn btn-success" id="showProceedSubscription">Proceed subscription</button>
+<span>For subscribing/unsubscribing devices press button below:<br> </span>
+<button type="button" class="btn btn-success" id="showProceedSubscription">subscribe/unsubscribe</button>

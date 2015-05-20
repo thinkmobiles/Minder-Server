@@ -54,7 +54,7 @@ define([
             // set pagination to control devices collection
             this.paginationView = new PaginationView({
                 collection: this.devisesCollection,
-                onPage: 7, // devices on page
+                onPage: 8, // devices on page
                 padding: 2, // 2 after current pge 2 before
                 page: 1, // default page
                 ends: true,

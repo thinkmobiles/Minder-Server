@@ -24,6 +24,7 @@ define([
             "devices(/page/:page)": "devices",
             "profile": "profile",
             "confirm":"confirm",
+            "confirmEmail/:token":"confirmEmail",
             "*any": "any"
         },
 
@@ -153,6 +154,9 @@ define([
         },
         confirm:function(){
             this.loadWrapperView('confirm');
+        },
+        confirmEmail:function(token){
+            this.loadWrapperView('confirmEmail', {token: token});
         }
 
     });

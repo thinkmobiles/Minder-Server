@@ -31,17 +31,20 @@
                 <% } %>
                 <td><%= devices[i].device.name %></td>
                 <td>
-                    <% if(devices[i].expirationDate.months) { %>
-                        <%= devices[i].expirationDate.months %> months
+                    <% if (devices[i].device.status === DEVICE_STATUSES.SUBSCRIBED) { %>
+                        <% if(devices[i].expirationDate.months) { %>
+                            <%= devices[i].expirationDate.months %> months
+                        <% } %>
+
+                        <% if(devices[i].expirationDate.weeks) { %>
+                        <%= devices[i].expirationDate.weeks %> weeks
+                        <% } %>
+
+                        <% if(devices[i].expirationDate.days) { %>
+                        <%= devices[i].expirationDate.days %> days
+                        <% } %>
                     <% } %>
 
-                    <% if(devices[i].expirationDate.weeks) { %>
-                    <%= devices[i].expirationDate.weeks %> weeks
-                    <% } %>
-
-                    <% if(devices[i].expirationDate.days) { %>
-                    <%= devices[i].expirationDate.days %> days
-                    <% } %>
                 </td>
                 <td>
                     <% if (devices[i].device.status === DEVICE_STATUSES.DELETED) { %>
