@@ -193,8 +193,6 @@ var DeviceHandler = function (db) {
 
             //update devices status = "subscribed":
             function (cb) {
-                var period = plan.period;
-                var update;
                 var now = new Date();
                 var criteria = {
                     user: userId,
@@ -203,6 +201,7 @@ var DeviceHandler = function (db) {
                         $in: deviceIds
                     }
                 };
+                var update;
 
                 if (freeAccount) {
                     update = {
@@ -210,7 +209,8 @@ var DeviceHandler = function (db) {
                             status: DEVICE_STATUSES.SUBSCRIBED,
                             "billings.subscriptionId": null,
                             "billings.subscriptionDateTime": now,
-                            "billings.expirationDate": null
+                            "billings.expirationDate": null,
+                            updatedAt: now
                         }
                     };
                 } else {
@@ -219,7 +219,8 @@ var DeviceHandler = function (db) {
                             status: DEVICE_STATUSES.SUBSCRIBED,
                             "billings.subscriptionId": subscriptionId,
                             "billings.subscriptionDateTime": now,
-                            "billings.expirationDate": plan.expirationDate
+                            "billings.expirationDate": plan.expirationDate,
+                            updatedAt: now
                         }
                     };
                 }
@@ -412,14 +413,17 @@ var DeviceHandler = function (db) {
             criteria.name = new RegExp(params.name.trim(), "i");
         }
 
-        if (params) {
+        if (params.status) {
             if (typeof params.status === 'string') {
+                params.status = parseInt(params.status);
+
                 if ((params.status === DEVICE_STATUSES.ACTIVE) ||
                     (params.status === DEVICE_STATUSES.SUBSCRIBED) ||
                     (params.status === DEVICE_STATUSES.DELETED)) {
+
                     criteria.status = params.status;
                 }
-            } else if (util.isArray(params.status)) {
+            } else if (Array.isArray(params.status)) {
                 criteria.status = {
                     $in: params.status
                 };
@@ -459,13 +463,16 @@ var DeviceHandler = function (db) {
 
         if (params.status) {
             if (typeof params.status === 'string') {
+                params.status = parseInt(params.status);
+
                 if ((params.status === DEVICE_STATUSES.ACTIVE) ||
                     (params.status === DEVICE_STATUSES.SUBSCRIBED) ||
                     (params.status === DEVICE_STATUSES.DELETED)) {
+
                     criteria.status = params.status;
                 }
-            } else if (util.isArray(params.status)) {
-                params.status = {
+            } else if (Array.isArray(params.status)) {
+                criteria.status = {
                     $in: params.status
                 };
             }
@@ -518,7 +525,9 @@ var DeviceHandler = function (db) {
         var criteria = {
             _id: id
         };
-        var update = {};
+        var update = {
+            updatedAt: new Date()
+        };
 
         if (options.name) {
             update.name = options.name;
@@ -715,7 +724,8 @@ var DeviceHandler = function (db) {
         var update = {
             $set: {
                 "billings.currentPlan": plan.plan_id,
-                "billings.planPeriod": plan.period
+                "billings.planPeriod": plan.period,
+                updatedAt: new Date()
             },
             $inc: {
                 'billings.subscribedDevices': quantity
@@ -912,7 +922,8 @@ var DeviceHandler = function (db) {
                 var update = {
                     $set: {
                         status: DEVICE_STATUSES.ACTIVE,
-                        "billings.expirationDate": null
+                        "billings.expirationDate": null,
+                        updatedAt: new Date()
                     }
                 };
 
@@ -979,6 +990,77 @@ var DeviceHandler = function (db) {
 
     };
 
+    function renewTheSubscriptionByUser(userData, callback) {
+        var userId = options._id;
+        var devices = options.devices;
+
+        callback();
+        /*//get the userModel:
+         function (plans, cb) {
+         var criteria = {
+         _id: userId
+         };
+
+         UserModel.findOne(criteria, function (err, userModel) {
+         if (err) {
+         return cb(err);
+         }
+         cb(null, userModel, plans);
+         });
+         },*/
+
+
+        /*
+        * //calculator:
+         function (userModel, plans, cb) {
+         var period = userModel.billings.planPeriod;
+         var calculationOptions = {
+         user: userModel,
+         quantity: devices.length,
+         plans: plans,
+         period: period
+         };
+
+         cb();
+         }
+        * */
+    };
+
+    function renewTheSubscription(options, callback) {
+
+        async.waterfall([
+
+            //get the current active tariff plans:
+            function (cb) {
+                var criteria = {};
+
+                TariffPlan.find(criteria, function (err, plans) {
+                    if (err) {
+                        return cb(err);
+                    }
+                    cb(null, plans)
+                });
+            },
+
+            //try to renew the subscription:
+            function (cb) {
+                async.each();
+            }
+
+        ], function (err, results) {
+            if (err) {
+                if (callback && (typeof callback === 'function')) {
+                    callback(err);
+                }
+            } else {
+                if (callback && (typeof callback === 'function')) {
+                    callback();
+                }
+            }
+        });
+
+    };
+
     this.startCronJob = function (callback) {
 
         async.waterfall([
@@ -1014,10 +1096,99 @@ var DeviceHandler = function (db) {
 
             ////update devices with status "subscribed" and expired subscr.date and renewEnabled === true;
             function (cb) {
-                cb(); //TODO: ...
+                var now = new Date();
+                var query = DeviceModel.aggregate([{
+                    $match: {
+                        status: DEVICE_STATUSES.SUBSCRIBED,
+                        "billings.renewEnabled": true,
+                        "billings.expirationDate": {
+                            $ne: null,
+                            $lte: now
+                        }
+                    }
+                }, {
+                    $group: {
+                        _id: "$user",
+                        count: {
+                            $sum: 1
+                        },
+                        devices: {
+                            $push: {
+                                _id: "$_id",
+                                deviceId: "$deviceId" //TODO: remove from select
+                            }
+                        }
+                    }
+                }]);
+
+                query.exec(function (err, results) {
+                    if (err) {
+                        return cb(err);
+                    }
+
+                    if (!results.length) {
+                        return cb();
+                    }
+
+                    renewTheSubscription(results, function (err) {
+                        if (err) {
+                            return cb(err);
+                        }
+                        cb();
+                    });
+                });
             },
 
-            //update the users.billings.subscribedDevices counter;
+            //get unsubscribed users:
+            function (cb) {
+                var query = DeviceModel.aggregate([{
+                    $match: {
+                        status: {
+                            $ne: DEVICE_STATUSES.SUBSCRIBED
+                        }
+                    }
+                }, {
+                    $group: {
+                        _id: "$user"
+                    }
+                }]);
+
+                query.exec(function (err, rows) {
+                    var userIds;
+
+                    if (err) {
+                        return cb(err);
+                    }
+
+                    userIds = _.pluck(rows, '_id');
+                    cb(null, userIds);
+                });
+            },
+
+            //set User.billings.subscribedDevices = 0 for users in userIds:
+            function (userIds, cb) {
+                var criteria = {
+                    _id: {
+                        $in: userIds
+                    }
+                };
+                var update = {
+                    $set: {
+                        'billings.subscribedDevices': 0,
+                        updatedAt: new Date()
+                    }
+                };
+
+                UserModel.update(criteria, update, {multi: true}, function (err, result) {
+                    if (err) {
+                        return cb(err);
+                    }
+                    cb();
+                });
+
+            },
+
+            //update the users.billings.subscribedDevices counter for subscribed users;
             function (cb) {
 
                 var query = DeviceModel.aggregate([{
@@ -1032,8 +1203,7 @@ var DeviceHandler = function (db) {
                         },
                         devices: {
                             $push: {
-                                _id: "$_id",
-                                deviceId: "$deviceId"
+                                _id: "$_id"
                             }
                         }
                     }
@@ -1074,7 +1244,7 @@ var DeviceHandler = function (db) {
             }
             res.status(200).send({success: 'success job'});
         });
-    }
+    };
 
 };
 
