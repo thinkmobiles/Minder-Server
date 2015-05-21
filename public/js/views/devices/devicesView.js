@@ -4,20 +4,25 @@ define([
     'collections/devicesCollection',
     'views/device/deviceMainListView',
     'views/customElements/paginationView',
-    'constants/statuses'
-], function (Template, ModalTemplate, DevisesCollection, deviceMainListView, PaginationView, STATUSES) {
+    'constants/statuses',
+    'views/device/deviceView',
+], function (Template, ModalTemplate, DevisesCollection, deviceMainListView, PaginationView, STATUSES, deviceView) {
 
     var View;
     View = Backbone.View.extend({
+
+
         isNew: true, // prevent query duplication
 
         events: {
             'click #globalDevicesChecker': 'globalCheckTrigger', // check all devices
-            'submit #searchForm': 'search',
+            //'submit #searchForm': 'search',
+            'keydown': 'keydownHandler',
             'click .clearSearch': 'clearSearch',
             'click .deviceCheckbox': 'deviceCheck', // check separate devices
             'click .setDelete': 'deviceDelete',
             'click .setActive': 'deviceActivate',
+            //'click .setEdit': 'deviceEdit',
             'change #period': 'periodObserver' // period observer
         },
 
@@ -92,6 +97,17 @@ define([
             // create pagination to control devices collection
             this.paginationView = new PaginationView(paginationOptions);
         },
+
+        keydownHandler: function (e) {
+            switch (e.which) {
+                case 13:
+                    this.search(e);
+                    break;
+                default:
+                    break;
+            }
+        },
+
 
         // update period, keep actual
         periodObserver: function () {
@@ -195,6 +211,39 @@ define([
                 selectedDevicesCount: selectedDevicesCount,
                 devices: devices
             });
+        },
+
+        deviceEdit: function (e) {
+            //self =this;
+            //new deviceView();
+            e.preventDefault();
+            var id = $(e.target).attr('value');
+            //self.model = new deviceModel();
+            new deviceView({ id: id });
+
+            /*$.ajax({
+                url: "devices/"+id,
+                type: "GET",
+                success: function (data) {
+                    new deviceView(data);
+                    /!*App.sessionData.set({
+                        user: data
+                    })*!/
+                },
+                error: function (data) {
+                    App.error(data);
+                }
+            });*/
+
+            /*model.urlRoot = '/'+id;
+            model.fetch({
+                data: { id: id },
+                success: function (model) {
+                    new deviceView({ model: model });
+                    alert('ololololol');
+                },
+                error: function () { alert('Please refresh browser'); }
+            });*/
         },
 
         // calculate plan for user to preview
@@ -317,6 +366,7 @@ define([
         },
 
         render: function () {
+
             this.updateDevicesData();
             var data = this.stateModel.toJSON();
             var now = App.sessionData.get('date');

@@ -17,7 +17,8 @@ define([
         events: {
             'click #globalDevicesChecker': 'globalCheckTrigger', // check unCheck all devices on page
             'click #mapLocateButton': 'locate', // show markers on page
-            'submit #searchForm': 'search' // set search filter
+            //'submit #searchForm': 'search', // set search filter
+            'keydown': 'keydownHandler'
         },
 
         initialize: function () {
@@ -54,7 +55,7 @@ define([
             // set pagination to control devices collection
             this.paginationView = new PaginationView({
                 collection: this.devisesCollection,
-                onPage: 8, // devices on page
+                onPage: 7, // devices on page
                 padding: 2, // 2 after current pge 2 before
                 page: 1, // default page
                 ends: true,
@@ -68,6 +69,17 @@ define([
 
             // append pagination to page
             this.$el.find('#pagination').append(this.paginationView.$el);
+        },
+
+
+        keydownHandler: function (e) {
+            switch (e.which) {
+                case 13:
+                    this.search(e);
+                    break;
+                default:
+                    break;
+            }
         },
 
         // normalize map (if the size of page is changed)

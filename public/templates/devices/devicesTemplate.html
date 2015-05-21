@@ -8,7 +8,7 @@
                 <i class="clearSearch glyphicon glyphicon-remove"></i>
             </div>
 
-            <button type="submit" class="btn btn-default" id="searchButton">search</button>
+            <!--<button type="submit" class="btn btn-default" id="searchButton">search</button>-->
         </form>
     </div>
     <div class="row" id="devicesList">
@@ -51,9 +51,11 @@
                         <button class="btn btn-default setActive" value="<%= devices[i].device._id %>">activate</button>
                     <% } else if (devices[i].device.status === DEVICE_STATUSES.ACTIVE) { %>
                         <a class="btn btn-default" href="#device/<%= devices[i].device._id %>">edit</a>
+                        <!--<button class="btn btn-default setEdit" value="<%= devices[i].device._id %>">edit</button>-->
                     <button class="btn btn-default setDelete" value="<%= devices[i].device._id %>">delete</button>
                     <% } else if (devices[i].device.status === DEVICE_STATUSES.SUBSCRIBED) { %>
                     <a class="btn btn-default" href="#device/<%= devices[i].device._id %>">edit</a>
+                    <!--<button class="btn btn-default setEdit" value="<%= devices[i].device._id %>">edit</button>-->
                     <button class="btn btn-default setDelete" value="<%= devices[i].device._id %>">delete</button>
                     <% } %>
                 </td>
