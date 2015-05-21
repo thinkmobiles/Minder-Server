@@ -194,9 +194,9 @@ var StripeModule = function () {
         var amount;
         var chargeParams;
 
-        if (!params || !params.amount || !params.source) {
+        if (!params || !params.amount) {
             err = new Error();
-            err.message = 'Not enough incoming parameters. "params.amount" or "params.source" is undefined!';
+            err.message = 'Not enough incoming parameters. "params.amount" is undefined!';
 
             if (callback && (typeof callback === 'function')) {
                 callback(err);
@@ -206,9 +206,16 @@ var StripeModule = function () {
 
         chargeParams = {
             amount: params.amount,
-            currency: params.currency || self.currency,
-            source: params.source
+            currency: params.currency || self.currency
         };
+
+        if (params.customer) {
+            chargeParams.customer = params.customer;
+        }
+
+        if (params.source) {
+            chargeParams.source = params.source;
+        }
 
         if (params.description) {
             chargeParams.description = params.description;
