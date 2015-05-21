@@ -6,16 +6,12 @@
         var devicesToPay = 0;
         var plan;
         var date = data.date;
-        var period = data.period;
+        var period = data.period || 'month';
         var maxDevicesForUser = 0;
-
-        if(!period){
-            period = 'month';
-        }
 
         // get maximum of devices
         plans.forEach(function (currentPan) {
-            if (currentPan.metadata.type === period && currentPan.metadata.maxDevices > maxDevicesForUser) {
+            if ((currentPan.metadata.type === period) && (currentPan.metadata.maxDevices > maxDevicesForUser)) {
                 maxDevicesForUser = currentPan.metadata.maxDevices;
             }
         });
