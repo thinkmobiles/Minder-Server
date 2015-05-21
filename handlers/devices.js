@@ -11,6 +11,7 @@ var logWriter = require('../helpers/logWriter')();
 var SessionHandler = require('../handlers/sessions');
 var stripeModule = require('../helpers/stripe');
 var calculateTariff = require('../public/js/libs/costCounter');
+var moment = require('moment');
 
 var DeviceHandler = function (db) {
     var session = new SessionHandler(db);
@@ -368,6 +369,7 @@ var DeviceHandler = function (db) {
         var page = parseInt(params.page) || 1;
         var count = parseInt(params.count) || 10;
         var skip = 0;
+        var sort = params.sort || 'name';
 
         if (!session.isAdmin(req)) {
             criteria.user = userId;
@@ -399,7 +401,7 @@ var DeviceHandler = function (db) {
         }
 
         DeviceModel.find(criteria, 'billings.expirationDate name status _id')
-            .sort('name')
+            .sort(sort)
             .limit(count)
             .skip(skip)
             .exec(function (err, devices) {
@@ -1345,8 +1347,47 @@ var DeviceHandler = function (db) {
         });
     };
 
+    this.startCronJobForNotifications = function (callback) {
+        async.waterfall([
+
+            // get devices:
+            function (cb) {
+                var now = new Date();
+                var from = moment(now).add(9, 'd')._d;
+                var to = moment(now).add(10, 'd')._d;
+                var criteria = {
+                    status: DEVICE_STATUSES.SUBSCRIBED,
+                    "billings.renewEnabled": true,
+                    "billings.expirationDate": {
+                        $gte: from,
+                        $lt: to
+                    }
+                };
+
+                DeviceModel.find(criteria, function (err, devices) {
+                    if (err) {
+                        return cb(err);
+                    }
+                    cb(null, devices);
+                });
+            }
+
+        ], function (err, result) {
+            if (err) {
+                if (callback && (typeof callback === 'function')) {
+                    callback(err);
+                }
+            } else {
+                if (callback && (typeof callback === 'function')) {
+                    callback(null, result);
+                }
+            }
+        });
+    };
+
     this.cron = function (req, res, next) {
-        self.startCronJob(function (err) {
+        //self.startCronJob(function (err) {
+        self.startCronJobForNotifications(function (err) {
             if (err) {
                 return next(err);
             }
