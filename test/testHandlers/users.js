@@ -425,7 +425,7 @@ describe('Users', function() {
                     if (err) {
                         done(err);
                     } else {
-                        expect(res.status).to.equals(200);
+                        expect(res.status).to.equals(400);
                         done();
                     }
                 });

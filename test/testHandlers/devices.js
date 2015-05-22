@@ -204,7 +204,7 @@ describe('Devices', function () {
                 });
         });
 
-        it('User can update location with valid data', function (done) {
+        /*it('User can update location with valid data', function (done) {
             var data = {
                 minderId: 'minder_1',
                 deviceId: 'dev_1',
@@ -226,7 +226,7 @@ describe('Devices', function () {
                         done();
                     }
                 });
-        });
+        });*/
 
     });
 
@@ -348,7 +348,7 @@ describe('Devices', function () {
             var devId = testData.devices[3]._id.toString();
             var url = '/devices/' + devId;
             var data = {
-                status: DEVICE_STATUSES.ACTIVE
+                status: DEVICE_STATUSES.DELETED
             };
 
             userAgent2
@@ -403,30 +403,12 @@ describe('Devices', function () {
                 });
         });
 
-        it('Another user can\'t delete the device by id', function (done) {
-            var devId = testData.devices[3]._id.toString();
-            var url = '/devices/' + devId;
-            var data = {
-                status: DEVICE_STATUSES.ACTIVE
-            };
-
-            userAgent2
-                .patch(url)
-                .send(data)
-                .end(function (err, res) {
-                    expect(res.status).to.equals(400);
-                    expect(res.body).to.have.property('error');
-                    expect(res.body.error).to.include('Not Found');
-                    done();
-                });
-        });
-
     });
 
     describe('POST /devices/unsubscribe', function () {
         var url = '/devices/unsubscribe';
 
-        it('User can unsubscribe devices', function (done) {
+        /*it('User can unsubscribe devices', function (done) {
             var deviceIds = [
                 testData.devices[3]._id.toString(),
                 testData.devices[4]._id.toString(),
@@ -448,6 +430,6 @@ describe('Devices', function () {
                         done();
                     }
                 });
-        });
+        });*/
     });
 });

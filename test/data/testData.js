@@ -3,6 +3,11 @@
 var DEVICE_OS = require('../../constants/deviceOs');
 var USER_ROLES = require('../../constants/userRoles');
 var DEVICE_STATUSES = require('../../constants/deviceStatuses');
+var mongoose = require('mongoose');
+var ObjectId = mongoose.Schema.Types.ObjectId;
+
+var _id_T1 = "555ecce84d29ee5c16000001";
+var _id_T2 = "555ecce84d29ee5c16000002";
 
 var TestDataModule = function () {
     var self = this;
@@ -22,7 +27,12 @@ var TestDataModule = function () {
         email: 'test@test.com',
         pass: '1',
         firstName: 'existsFirstName',
-        lastName: 'existsLastName'
+        lastName: 'existsLastName',
+        billings: {
+            //currentPlan: ObjectId(_id_T2),
+            currentPlan: _id_T2,
+            subscribedDevices: 4
+        }
     }, {
         _id: '55312b475bcd9d3016000002',
         minderId: 'minder_2',
@@ -63,7 +73,8 @@ var TestDataModule = function () {
         deviceId: 'dev_3',
         deviceName: 'Will be deleted by owner',
         deviceType: DEVICE_OS.WINDOWS_PHONE,
-        user: self.users[0]._id
+        user: self.users[0]._id,
+        status: DEVICE_STATUSES.SUBSCRIBED
     }, {
         deviceId: 'dev_4',
         deviceName: 'Another device. But it will not removed via another user',
