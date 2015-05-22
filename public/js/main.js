@@ -12,6 +12,7 @@ var App = {
 require.config({
     paths: {
         jQuery: './libs/jquery-2.1.0.min.map',
+        jqueryui: './libs/jquery-ui.min',
         costCounter: './libs/costCounter',
         Underscore: './libs/underscore-min.map.1.6.0',
         Bootstrap: './libs/bootstrap.min',
@@ -25,9 +26,10 @@ require.config({
     },
     shim: {
         'ajaxForm': ['jQuery'],
+        'jqueryui': ['jQuery'],
         'Bootstrap': ['jQuery'],
         'Backbone': ['Underscore', 'jQuery'],
-        'app': ['Backbone', 'less', 'Bootstrap', 'costCounter'],
+        'app': ['Backbone', 'less', 'jqueryui', 'Bootstrap', 'costCounter'],
         "recaptcha": {
             exports: 'Recaptcha'
         },

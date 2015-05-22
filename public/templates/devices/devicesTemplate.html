@@ -50,12 +50,12 @@
                     <% if (devices[i].device.status === DEVICE_STATUSES.DELETED) { %>
                         <button class="btn btn-default setActive" value="<%= devices[i].device._id %>">activate</button>
                     <% } else if (devices[i].device.status === DEVICE_STATUSES.ACTIVE) { %>
-                        <a class="btn btn-default" href="#device/<%= devices[i].device._id %>">edit</a>
-                        <!--<button class="btn btn-default setEdit" value="<%= devices[i].device._id %>">edit</button>-->
+                        <!--<a class="btn btn-default" href="#device/<%= devices[i].device._id %>">edit</a>-->
+                        <button class="btn btn-default setEdit" value="<%= devices[i].device._id %>">edit</button>
                     <button class="btn btn-default setDelete" value="<%= devices[i].device._id %>">delete</button>
                     <% } else if (devices[i].device.status === DEVICE_STATUSES.SUBSCRIBED) { %>
-                    <a class="btn btn-default" href="#device/<%= devices[i].device._id %>">edit</a>
-                    <!--<button class="btn btn-default setEdit" value="<%= devices[i].device._id %>">edit</button>-->
+                    <!--<a class="btn btn-default" href="#device/<%= devices[i].device._id %>">edit</a>-->
+                    <button class="btn btn-default setEdit" value="<%= devices[i].device._id %>">edit</button>
                     <button class="btn btn-default setDelete" value="<%= devices[i].device._id %>">delete</button>
                     <% } %>
                 </td>

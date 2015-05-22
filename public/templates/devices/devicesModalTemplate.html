@@ -46,6 +46,7 @@
                     <% } %>
                 </td>
                 <td><%= devices[i].device.name %></td>
+                <td><%= (devices[i].device.billings.expirationDate) ? (moment(devices[i].device.billings.expirationDate).fromNow()) : ''%></td>
 
             </tr>
             <% } %>
@@ -73,11 +74,11 @@
             <div>NUMBER OF DEVICES</div>
             <div class="value"><%= calculations.subscribedDevices %> of <%= calculations.maxDevices %> devices</div>
         </div>
-        <div>
-            <!--<div>Dxpiration date</div>-->
+        <!--<div>
+            &lt;!&ndash;<div>Dxpiration date</div>&ndash;&gt;
             <div>DAYS LEFT</div>
             <div class="value"><%= moment(calculations.expirationDate).format('YYYY/MM/DD') %></div>
-        </div>
+        </div>-->
         <div>
             <div>TOTAL COST</div>
             <div class="value"><%= calculations.amount/100 %>$</div>
