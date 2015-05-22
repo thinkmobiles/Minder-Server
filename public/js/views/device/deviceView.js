@@ -1,9 +1,10 @@
 define([
     'text!templates/device/deviceTemplate.html',
     'models/deviceModel',
-    'validation'
+    'validation',
+    'constants/statuses'
 
-], function (template, DeviceModel, validation) {
+], function (template, DeviceModel, validation, STATUSES) {
 
     var View;
     View = Backbone.View.extend({
@@ -15,14 +16,16 @@ define([
             this.getDevice();
 
             // keep actual
-            this.listenTo(this.stateModel, 'change', this.render);
+            //this.listenTo(this.stateModel, 'change', this.render);
 
             this.render();
         },
 
         events: {
-            'submit #editDevice': 'update',
-            'click .save': 'update'
+            'click #editButton': 'update',
+            //'click .save': 'update',
+            'click #deleteButton': 'deviceDelete'
+            //'click .delete': 'deviceDelete'
         },
 
         // remove the old model of this view ... and remove event listeners from it
@@ -60,6 +63,10 @@ define([
             this.getDevice()
         },
 
+        hideDialog: function () {
+            $('.edit-device-dialog').remove();
+        },
+
         // get device from serer or from devices view collection collection
         getDevice: function () {
             var device = null;
@@ -93,6 +100,38 @@ define([
             this.render();
         },
 
+        deviceDelete: function (event) {
+            if (!confirm('Are you sure you want to delete this device?')) {
+                return
+            }
+            var self = this;
+            event.preventDefault();
+
+            this.model.save({
+                status: STATUSES.DELETED
+            }, {
+                patch: true,
+                success: function () {
+                    self.cleanPageData();
+                    self.hideDialog();
+                }
+            });
+
+
+            //this.devisesCollection.map(function (model) {
+            //    if (model.id === event.target.value) {
+            //        model.save({
+            //            status: STATUSES.DELETED
+            //        }, {
+            //            patch: true,
+            //            success: function () {
+            //                self.updateUserData();
+            //            }
+            //        });
+            //    }
+            //});
+        },
+
         // save changes
         update: function (event) {
             var self = this;
@@ -111,7 +150,8 @@ define([
 
 
             // validate user input
-            validation.checkNameField(messages, true, stateModelUpdate.name, 'name');
+
+            //validation.checkNameField(messages, true, stateModelUpdate.name, 'name');
 
             if (errors.length > 0 || messages.length > 0) {
                 if (errors.length > 0) {
@@ -122,6 +162,7 @@ define([
                 }
                 this.stateModel.set(stateModelUpdate);
                 // if have errors or messages show it and prevent query to server
+                this.render();  //-----------------
                 return this;
             }
 
@@ -129,8 +170,9 @@ define([
                 name: stateModelUpdate.name
                 },{
                 success:function(){
-                    alert('Updated successfully');
+                    //alert('Updated successfully');
                     self.cleanPageData();
+                    self.hideDialog();
                     //if(window.history){
                     //    window.history.back();
                     //}
@@ -145,7 +187,7 @@ define([
         },
 
         render: function () {
-
+            var self =this;
             var data = this.stateModel.toJSON();
 
             if (this.model) {
@@ -155,7 +197,16 @@ define([
 
             //this.$el.html(_.template(template, data));
 
-            this.$el.html(_.template(template, data)).dialog();
+            this.$el.html(_.template(template, data))
+                .dialog({
+                    modal : true,
+                    closeOnEscape: true,
+                    width: "600",
+                    dialogClass: "edit-device-dialog",
+                    close: function(){
+                        self.cleanPageData();
+                    }
+                });
 
             //$(this.$el).modal({
             //    show: true,

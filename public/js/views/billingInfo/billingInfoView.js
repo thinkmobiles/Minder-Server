@@ -214,8 +214,10 @@ define([
         confirmProceedSubscriptionModal: function () { // set action and data for it
             var self = this;
             var devicesToSubscribe = [];
+            var invalidToSubscribe = [];
             var deviceIds = [];
             var period = this.devicesView.stateModel.get('period'); // get payments period
+
 
             // filters the selected devices
             devicesToSubscribe = this.devicesView.selectedDevicesCollection.filter(function(device){
@@ -223,6 +225,19 @@ define([
                     return true;
                 }
             });
+
+            invalidToSubscribe = this.devicesView.selectedDevicesCollection.filter(function(device){
+                if(device.get('status') === STATUSES.SUBSCRIBED){
+                    return true;
+                }
+            });if (invalidToSubscribe.length>0) {
+                alert('You checked ' + invalidToSubscribe.length + ' device(s), which already has been subscribed !');
+            };
+
+            //VVVVVVVVVVVVV
+            //    (_.where(this.devicesView.selectedDevicesCollection,null));
+            //AAAAAAAAAAAAA
+
 
             // get ids
             deviceIds = _.pluck(devicesToSubscribe, 'id');
