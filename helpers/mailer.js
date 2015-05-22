@@ -12,7 +12,7 @@ var MailerModule = function () {
             name: options.firstName + ' ' + options.lastName,
             email: options.email,
             minderId: (options.minderId) ? options.minderId : null,
-            url: process.env.HOST + '/confirmEmail/' + options.confirmToken
+            url: process.env.HOST + '/#confirmEmail/' + options.confirmToken
         };
 
 
