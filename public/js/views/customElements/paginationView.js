@@ -124,19 +124,19 @@ define([
             } else {
                 if (ends) {
                     pages.push({
-                        html: '<<',
+                        html: "first",
                         data: 1
                     });
                 }
                 if (steps) {
                     if (page < 2) {
                         pages.push({
-                            html: '<',
+                            html: "prev",
                             data: 1
                         });
                     } else {
                         pages.push({
-                            html: '<',
+                            html: "prev",
                             data: page - 1
                         });
                     }
@@ -154,12 +154,12 @@ define([
                 if (steps) {
                     if (page < allPages) {
                         pages.push({
-                            html: '>',
+                            html: 'next>>',
                             data: page + 1
                         });
                     } else {
                         pages.push({
-                            html: '>',
+                            html: 'next>>',
                             data: allPages
                         });
                     }
@@ -168,7 +168,7 @@ define([
 
                 if (ends) {
                     pages.push({
-                        html: '>>',
+                        html: 'last>>',
                         data: allPages
                     });
                 }

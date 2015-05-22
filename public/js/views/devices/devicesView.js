@@ -22,7 +22,7 @@ define([
             'click .deviceCheckbox': 'deviceCheck', // check separate devices
             'click .setDelete': 'deviceDelete',
             'click .setActive': 'deviceActivate',
-            //'click .setEdit': 'deviceEdit',
+            'click .setEdit': 'deviceEdit',
             'change #period': 'periodObserver' // period observer
         },
 
@@ -85,7 +85,9 @@ define([
                     status: [
                         STATUSES.ACTIVE,
                         STATUSES.SUBSCRIBED
-                    ]
+                    ],
+                    sort: '-status billings.expirationDate name'
+
                 };
                 this.listenTo(this.stateModel, 'change:period', function () {
                     this.calculatePlan();
@@ -122,7 +124,7 @@ define([
             var self = this;
             this.devisesCollection.map(function (model) {
                 if (model.id === event.target.value) {
-                    if (event.toElement.checked) {
+                    if (event.currentTarget.checked) {
                         self.selectedDevicesCollection.add(model);
                     } else {
                         self.selectedDevicesCollection.remove(model);
@@ -219,21 +221,21 @@ define([
             e.preventDefault();
             var id = $(e.target).attr('value');
             //self.model = new deviceModel();
-            new deviceView({ id: id });
+            //new deviceView({ id: id });
 
-            /*$.ajax({
+            $.ajax({
                 url: "devices/"+id,
                 type: "GET",
                 success: function (data) {
-                    new deviceView(data);
-                    /!*App.sessionData.set({
+                    new deviceView({model : data});
+                    /*App.sessionData.set({
                         user: data
-                    })*!/
+                    })*/
                 },
                 error: function (data) {
                     App.error(data);
                 }
-            });*/
+            });
 
             /*model.urlRoot = '/'+id;
             model.fetch({
