@@ -61,9 +61,21 @@ var DeviceHandler = function (db) {
         }
     };
 
-    function subscribe(userModel, plan, token, callback) {
-        var userId = userModel._id.toString();
+    function subscribe(options, callback) {
+        var userModel = options.userModel;
+        var plan = options.plan;
+        var token = options.token;
+        var deviceIds = options.deviceIds;
+        var deviceStringsIds = '';
         var isFree = (plan && (plan.amount === 0)) ? true : false;
+
+        if (!isFree && !token) {
+            return callback(badRequests.NotEnParams({reqParams: 'token'}));
+        }
+
+        deviceIds.forEach(function (deviceId) {
+            deviceStringsIds += deviceId.toString() + ' ';
+        });
 
         async.waterfall([
 
@@ -116,21 +128,32 @@ var DeviceHandler = function (db) {
 
             //make subscription:
             function (user, cb) {
+                var planId;
+                var quantity;
+                var expirationDate;
+                var description;
                 var chargeParams;
 
                 if (isFree) { // do nothing if free account
                     return cb(null, null);
                 }
 
+                planId = plan.plan_id.toString();
+                quantity = plan.devicesToPay;
+                expirationDate = plan.expirationDate;
+                description = 'Minder charge for ' + userModel.email + '. Renew subscription for ' + quantity + ' devices. Plan: ' + plan.name + ', expirationDate: ' + expirationDate.toISOString();
+
                 chargeParams = {
                     amount: plan.amount,  //price
                     source: token.id,
-                    description: 'Minder charge for ' + user.email + ' plan ' + plan.plan,
+                    description: description,
                     metadata: {
-                        planId: plan._id,
-                        quantity: plan.devicesToPay,
-                        expired: '' //TODO: ???
+                        planId: planId,
+                        quantity: quantity,
+                        expirationDate: expirationDate,
+                        deviceIds: deviceStringsIds
                     }
+
                 };
                 stripeModule.createCharge(chargeParams, function (err, charge) {
                     if (err) {
@@ -138,7 +161,7 @@ var DeviceHandler = function (db) {
                     }
                     cb(null, charge);
                 });
-            },
+            }
 
         ], function (err, charge) {
             if (err) {
@@ -155,6 +178,7 @@ var DeviceHandler = function (db) {
 
     function updateStatusToSubscribed(userId, deviceIds, plan, subscriptionId, callback) {
         var freeAccount = false;
+
         if (!plan.amount) {
             freeAccount = true;
         }
@@ -554,12 +578,125 @@ var DeviceHandler = function (db) {
         res.status(500).send('Not implemented');
     };
 
-    this.updateStatus = function (req, res, next) { // active / deleted
+    function updateTheCurrentPlan(params, callback) {
+
+        if (!params || (!params.userId && !params.userModel)) {
+            if (callback && (typeof callback === 'function')) {
+                callback(badRequests.NotEnParams({reqParams: 'params.userId | params.userModel'}));
+            }
+            return;
+        }
+
+        async.parallel({
+            plans: function (cb) {
+
+                if (params.plans) {
+                    return cb(null, params.plans);
+                }
+
+                TariffPlan.find({}, function (err, plans) {
+                    if (err) {
+                        return cb(err);
+                    }
+                    cb(null, plans);
+                })
+            },
+            userModel: function (cb) {
+
+                if (params.userModel) {
+                    return cb(null, params.userModel);
+                }
+
+                UserModel.findOne({
+                    _id: params.userId
+                }, function (err, user) {
+                    if (err) {
+                        cb(err);
+                    } else if (!user) {
+                        cb(badRequests.NotFound());
+                    } else {
+                        cb(null, user);
+                    }
+                });
+
+            }
+        }, function (err, results) {
+            var userModel = results.userModel;
+            var planModels = results.plans;
+            var quantity = params.quantity || 0;
+
+            if (err) {
+                if (callback && (typeof callback === 'function')) {
+                    callback(err);
+                }
+                return;
+            }
+
+            async.waterfall([
+
+                //recalculate the tariffPlan:
+                function (cb) {
+                    var calculateParams;
+
+                    if (!quantity) {
+                        return cb(null);
+                    }
+
+                    calculateParams = {
+                        date: new Date(),
+                        plans: planModels,
+                        period: params.period || userModel.billings.planPeriod,
+                        user: userModel,
+                        selectedDevicesCount: quantity
+                    };
+
+                    calculateTariff(calculateParams, function (err, plan) {
+                        if (err) {
+                            return cb(err);
+                        }
+                        cb(null, plan);
+                    });
+
+                },
+
+                // update the User.billings.currentPlan:
+                function (plan, cb) {
+
+                    if (!plan || !plan.plan_id) {
+                        return cb(badRequests.NotFound({message: "Can't find the users plan"}));
+                    }
+
+                    userModel.billings.currentPlan = plan.plan_id;
+                    userModel.billings.subscribedDevices += quantity;
+
+                    userModel.save(function (err, updatedUser) {
+                        if (err) {
+                            return cb(err);
+                        }
+                        cb(null, updatedUser);
+                    });
+
+                }
+
+            ], function (err, result) {
+                if (err) {
+                    if (callback && (typeof callback === 'function')) {
+                        callback(err);
+                    }
+                } else {
+                    if (callback && (typeof callback === 'function')) {
+                        callback(null, result);
+                    }
+                }
+            });
+        });
+    };
+
+    this.updateStatus = function (req, res, next) { // active - 1 / deleted - 0
         var userId = req.session.userId;
         var deviceId = req.params.id;
         var options = req.body;
         var deviceStatus = options.status;
-        var criteria;
 
         if (deviceStatus === undefined) {
             return next(badRequests.NotEnParams({reqParams: 'status'}));
@@ -569,63 +706,73 @@ var DeviceHandler = function (db) {
             return next(badRequests.InvalidValue({param: 'status'}));
         }
 
-        if (session.isAdmin(req)) {
-            criteria = {
-                _id: deviceId
-            };
-        } else {
-            criteria = {
-                _id: deviceId,
-                user: userId
-            };
-        }
+        async.waterfall([
 
-        DeviceModel.findOne(criteria, function (err, device) {
-            var oldStatus = device.status;
+            //find the device:
+            function (cb) {
+                var criteria = {
+                    _id: deviceId
+                };
 
-            if (err) {
-                return callback(err);
-            } else if (!device) {
-                return callback(badRequests.NotFound());
-            }
-
-            device.status = deviceStatus;
-            device.billings.expirationDate = null;
-            device.save(function (err, updatedDevice) {
-                var ownerId;
-                var calculationOptions = {};
-
-                if (err) {
-                    return next(err);
-                }
-                if (!updatedDevice) {
-                    return next(badRequests.NotFound());
+                if (!session.isAdmin(req)) {
+                    criteria.user =  userId;
                 }
 
-                if (oldStatus === DEVICE_STATUSES.SUBSCRIBED) {
-                    ownerId = device.user.toString();
+                DeviceModel.findOne(criteria, function (err, device) {
 
-                    calculationOptions = {
-                        userId: userId,
-                        quantity: -1
+                    if (err) {
+                        return cb(err);
+                    } else if (!device) {
+                        return cb(badRequests.NotFound());
+                    }
+
+                    cb(null, device);
+                });
+            },
+
+            //update the device:
+            function (deviceModel, cb) {
+                var oldDeviceStatus = deviceModel.status;
+
+                deviceModel.status = deviceStatus;
+                deviceModel.save(function (err, updatedDevice) {
+                    if (err) {
+                        return cb(err);
+                    }
+                    return cb(null, oldDeviceStatus, updatedDevice);
+                });
+            },
+
+            //check is device was subscribed:
+            function (oldDeviceStatus, updatedDeviceModel, cb) {
+                var updateParams;
+
+                if (oldDeviceStatus === DEVICE_STATUSES.SUBSCRIBED) {
+
+                    updateParams = {
+                        userId: updatedDeviceModel.user.toString(),
+                        quantity: -1 //decrement the subscribed devices counter;
                     };
 
-                    // returns plan from calculator
-                    self.getUserTariffPlan(calculationOptions, function (err, plan) {
-                        self.incrementSubscribedDevicesCount(ownerId, -1, plan, function (err) {
-                            if (err) {
-                                if (process.env.NODE_ENV !== 'production') {
-                                    console.error(err);
-                                    logWriter.log('handlers.js setStatusDeleted() -> userHandler.incrementSubscribedDevicesCount', err.stack);
-                                }
-                            }
-                        })
+                    updateTheCurrentPlan(updateParams, function (err, user) {
+                        if (err) {
+                            return cb(err);
+                        }
+                        cb(null, updatedDeviceModel);
                     });
-                }
 
-                res.status(200).send(updatedDevice);
-            });
+                } else {
+                    cb(null, updatedDeviceModel);
+                }
+            }
+
+        ], function (err, updatedDevice) {
+            if (err) {
+                return next(err);
+            }
+            res.status(200).send(updatedDevice);
         });
+
     };
 
     this.getUserTariffPlan = function (options, callback) {
@@ -686,11 +833,9 @@ var DeviceHandler = function (db) {
     };
 
     this.incrementSubscribedDevicesCount = function (userId, quantity, plan, callback) {
-
         var criteria = {
             _id: userId
         };
-
         var update = {
             $set: {
                 "billings.currentPlan": plan.plan_id,
@@ -700,13 +845,6 @@ var DeviceHandler = function (db) {
             $inc: {
                 'billings.subscribedDevices': quantity
             }
-            //billings: {
-            //    currentPlan: plan.plan_id,
-            //    planPeriod: plan.period,
-            //    $inc: {
-            //        subscribedDevices: quantity
-            //    },
-            //}
         };
 
         UserModel.findOneAndUpdate(criteria, update, function (err, userModel) {
@@ -808,24 +946,73 @@ var DeviceHandler = function (db) {
             }
 
         }, function (err, results) {
-            var user = results.user;
-            var plans = results.plans;
+            var userModel = results.user;
+            var planModels = results.plans;
             var activeDeviceIds = results.checkActiveDevices;
-            var calculationOptions;
 
             if (err) {
                 return next(err);
             }
 
-            calculationOptions = {
-                user: user,
-                quantity: activeDeviceIds.length,
-                plans: plans,
-                period: period
-            };
+            async.waterfall([
+
+                //recalculate the users plan:
+                function (cb) {
+                    var calculationOptions = {
+                        user: userModel,
+                        quantity: activeDeviceIds.length,
+                        plans: planModels,
+                        period: period
+                    };
+
+                    self.getUserTariffPlan(calculationOptions, function (err, plan) {
+                        if (err) {
+                            return cb(err);
+                        }
+                        cb(null, plan);
+                    });
+                },
+
+                //subscription:
+                function (plan, cb) {
+                    var subscriptionOptions = {
+                        userModel: userModel,
+                        plan: plan,
+                        token: token,
+                        deviceIds: activeDeviceIds
+                    };
+
+                    subscribe(subscriptionOptions, function (err, subscriptionResult) {
+                        if (err) {
+                            return cb(err);
+                        }
+                        cb(null, subscriptionResult, plan);
+                    });
+                },
+
+                //update Devices.status to "subscribed" and User.billings.subscribedDevices
+                // subscriptionResult is chargeId
+                function (subscriptionResult, plan, cb) {
+                    var subscrId = (subscriptionResult && subscriptionResult.is) ? subscriptionResult.id : null;
+
+                    updateStatusToSubscribed(userId, activeDeviceIds, plan, subscrId, function (err, user) {
+                        if (err) {
+                            return cb(err);
+                        }
+                        cb(null, user);
+                    });
+                }
+
+            ], function (err, result) {
+                if (err) {
+                    return next(err);
+                }
+                res.status(200).send({success: 'subscribed'});
+            });
+
 
             // returns plan from calculator
-            self.getUserTariffPlan(calculationOptions, function (err, plan) {
+            /*self.getUserTariffPlan(calculationOptions, function (err, plan) {
                 if (err) {
                     return next(err);
                 }
@@ -865,7 +1052,7 @@ var DeviceHandler = function (db) {
                     }
                     res.status(200).send({success: 'subscribed'});
                 });
-            });
+            });*/
         });
     };
 
@@ -908,22 +1095,22 @@ var DeviceHandler = function (db) {
 
             //update Users.billings.subscribedDevices:
             function (updatedDevicesCount, cb) {
-                var quantity = ( -1 ) * updatedDevicesCount;
-                var calculationOptions = {
-                    quantity: quantity,
-                    userId: userId
+                var updateParams;
+
+                if (!updatedDevicesCount) {
+                    return cb(null, null);
+                }
+
+                updateParams = {
+                    userId: userId,
+                    quantity: ( -1 ) * updatedDevicesCount
                 };
 
-                self.getUserTariffPlan(calculationOptions, function (err, plan) {
+                updateTheCurrentPlan(updateParams, function (err, userModel) {
                     if (err) {
                         return cb(err);
                     }
-                    self.incrementSubscribedDevicesCount(userId, quantity, plan, function (err, userModel) {
-                        if (err) {
-                            return cb(err);
-                        }
-                        cb(null, userModel);
-                    });
+                    cb(null, userModel);
                 });
             }
 
@@ -1040,10 +1227,9 @@ var DeviceHandler = function (db) {
                 var date = new Date();
                 var err;
 
-
                 //calculate the expirationDate:
                 if (plan.metadata.type === PLAN_TYPES.MONTH) {
-                    expirationDate = new Date(date.setMonth( date.getMonth() + 1 ));
+                    expirationDate = new Date(date.setMonth(date.getMonth() + 1));
                 } else if (plan.metadata.type === PLAN_TYPES.YEAR) {
                     expirationDate = new Date(date.setFullYear(date.getFullYear() + 1));
                 } else {
@@ -1072,7 +1258,7 @@ var DeviceHandler = function (db) {
                  Metadata - "A set of key/value pairs that you can attach to a charge object.
                  It can be useful for storing additional information about the customer in a structured format.
                  It's often a good idea to store an email address in metadata for tracking later."
-                */
+                 */
 
                 stripeModule.createCharge(chargeParams, function (err, charge) {
                     if (err) {
@@ -1100,7 +1286,7 @@ var DeviceHandler = function (db) {
 
                 DeviceModel.update(criteria, update, {multi: true}, function (err, devices) {
                     if (err) {
-                       return cb(err);
+                        return cb(err);
                     }
                     cb(null, charge);
                 });
@@ -1224,8 +1410,7 @@ var DeviceHandler = function (db) {
                         },
                         devices: {
                             $push: {
-                                _id: "$_id",
-                                deviceId: "$deviceId" //TODO: remove from select
+                                _id: "$_id"
                             }
                         }
                     }
@@ -1347,28 +1532,65 @@ var DeviceHandler = function (db) {
         });
     };
 
-    this.startCronJobForNotifications = function (callback) {
+    function checkExpirationDateForNotifications(daysBefore, callback) {
+
         async.waterfall([
 
             // get devices:
             function (cb) {
                 var now = new Date();
-                var from = moment(now).add(9, 'd')._d;
-                var to = moment(now).add(10, 'd')._d;
-                var criteria = {
-                    status: DEVICE_STATUSES.SUBSCRIBED,
-                    "billings.renewEnabled": true,
-                    "billings.expirationDate": {
-                        $gte: from,
-                        $lt: to
-                    }
-                };
+                var from = new Date();
+                var to = new Date();
 
-                DeviceModel.find(criteria, function (err, devices) {
+                /*var fromMoment = moment(now).add(10, 'd').hours(0).minutes(0);
+                 var toMoment = moment(now).add(11, 'd').hours(0).minutes(0);
+                 var from = fromMoment._d;
+                 var to = toMoment._d;*/
+
+                from.setDate(now.getDate() + daysBefore - 1);
+                from.setHours(0);
+                from.setMinutes(0);
+
+                to.setDate(now.getDate() + daysBefore);
+                to.setHours(0);
+                to.setMinutes(0);
+
+                DeviceModel.aggregate([{
+                    $match: {
+                        status: DEVICE_STATUSES.SUBSCRIBED,
+                        "billings.renewEnabled": true,
+                        "billings.expirationDate": {
+                            $gte: from,
+                            $lt: to
+                        }
+                    }
+                }, {
+                    $group: {
+                        _id: "$user",
+                        devices: {
+                            $push: {
+                                _id: "$_id",
+                                expirationDate: "$billings.expirationDate"
+                            }
+                        }
+                    }
+                }], function (err, result) {
                     if (err) {
                         return cb(err);
                     }
-                    cb(null, devices);
+                    cb(null, result);
+                });
+            },
+
+            //send email notification:
+            function (users, cb) {
+                async.each(users, function (userData, eachCb) {
+                    eachCb();
+                }, function (err) {
+                    if (err) {
+                        return cb(err);
+                    }
+                    cb(null, users);
                 });
             }
 
@@ -1385,13 +1607,20 @@ var DeviceHandler = function (db) {
         });
     };
 
+    this.startCronJobForNotifications = function (days, callback) {
+        //TODO: ...
+    };
+
     this.cron = function (req, res, next) {
         //self.startCronJob(function (err) {
-        self.startCronJobForNotifications(function (err) {
+
+        var days = req.query.days || 10;
+
+        checkExpirationDateForNotifications(days, function (err, result) {
             if (err) {
                 return next(err);
             }
-            res.status(200).send({success: 'success job'});
+            res.status(200).send({success: 'success job', result: result});
         });
     };
 
