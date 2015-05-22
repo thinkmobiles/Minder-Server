@@ -355,7 +355,7 @@ var UserHandler = function (db) {
                     } else if (device) {
 
                         if (device.user.toString() === user._id.toString()) {
-                            session.register(req, res, user, {rememberMe: true}); //TODO:
+                            session.register(req, res, user, {rememberMe: true});
                         } else {
                             next(badRequests.AccessError());
                         }

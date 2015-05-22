@@ -60,46 +60,46 @@ var TestDataModule = function () {
     }];
 
     this.devices = [{
-        deviceId: 'dev_1',
+        deviceId: 'dev_1', // 0
         deviceName: 'Test Device 1',
         deviceType: DEVICE_OS.WINDOWS_PHONE,
         user: self.users[0]._id
     }, {
-        deviceId: 'dev_2',
+        deviceId: 'dev_2', // 1
         deviceName: 'Will be deleted by Admin',
         deviceType: DEVICE_OS.WINDOWS_PHONE,
         user: self.users[0]._id
     }, {
-        deviceId: 'dev_3',
+        deviceId: 'dev_3', // 2
         deviceName: 'Will be deleted by owner',
         deviceType: DEVICE_OS.WINDOWS_PHONE,
         user: self.users[0]._id,
         status: DEVICE_STATUSES.SUBSCRIBED
     }, {
-        deviceId: 'dev_4',
+        deviceId: 'dev_4',  // 3
         deviceName: 'Another device. But it will not removed via another user',
         deviceType: DEVICE_OS.WINDOWS_PHONE,
         user: self.users[0]._id
     }, {
-        deviceId: 'dev_5',
+        deviceId: 'dev_5', // 4
         deviceName: 'Subscribed device 1',
         deviceType: DEVICE_OS.WINDOWS_PHONE,
         user: self.users[0]._id,
         status: DEVICE_STATUSES.SUBSCRIBED
     }, {
-        deviceId: 'dev_6',
+        deviceId: 'dev_6', // 5
         deviceName: 'Subscribed device 2',
         deviceType: DEVICE_OS.WINDOWS_PHONE,
         user: self.users[0]._id,
         status: DEVICE_STATUSES.SUBSCRIBED
     }, {
-        deviceId: 'dev_7',
+        deviceId: 'dev_7', // 6
         deviceName: 'Subscribed device 3',
         deviceType: DEVICE_OS.WINDOWS_PHONE,
         user: self.users[0]._id,
         status: DEVICE_STATUSES.SUBSCRIBED
     }, {
-        deviceId: 'dev_8',
+        deviceId: 'dev_8', // 7
         deviceName: 'Subscribed device 4',
         deviceType: DEVICE_OS.WINDOWS_PHONE,
         user: self.users[1]._id,

@@ -1,9 +1,10 @@
+var DEVICE_STATUSES = require('../../constants/deviceStatuses');
 var request = require('supertest');
 var expect = require("chai").expect;
 var async = require('async');
 var Config = require('./../config');
 var testData = require('./../data/testData');
-var DEVICE_STATUSES = require('../../constants/deviceStatuses');
+var mongoose = require('mongoose');
 
 describe('Devices', function () {
     var conf = new Config();
@@ -14,6 +15,12 @@ describe('Devices', function () {
     var userAgent1 = request.agent(baseUrl);
     var userAgent2 = request.agent(baseUrl);
     var CreateTestData = require('./../data/index');
+    var deviceSchema = mongoose.Schemas['Device'];
+    var userSchema = mongoose.Schemas['User'];
+    var UserModel = db.model('User', userSchema);
+    var DeviceModel = db.model('Device', deviceSchema);
+    var tariffPlanSchema = mongoose.Schemas['TariffPlan'];
+    var TariffPlan = db.model('TariffPlan', tariffPlanSchema);
 
     before(function (done) {
         var createTestData;
@@ -205,28 +212,28 @@ describe('Devices', function () {
         });
 
         /*it('User can update location with valid data', function (done) {
-            var data = {
-                minderId: 'minder_1',
-                deviceId: 'dev_1',
-                location: {
-                    long: 60.321,
-                    lat: 29.987
-                }
-            };
+         var data = {
+         minderId: 'minder_1',
+         deviceId: 'dev_1',
+         location: {
+         long: 60.321,
+         lat: 29.987
+         }
+         };
 
-            userAgent1
-                .put(url)
-                .send(data)
-                .end(function (err, res) {
-                    if (err) {
-                        done(err);
-                    } else {
-                        expect(res.status).to.equals(200);
-                        expect(res.body).to.have.property('success');
-                        done();
-                    }
-                });
-        });*/
+         userAgent1
+         .put(url)
+         .send(data)
+         .end(function (err, res) {
+         if (err) {
+         done(err);
+         } else {
+         expect(res.status).to.equals(200);
+         expect(res.body).to.have.property('success');
+         done();
+         }
+         });
+         });*/
 
     });
 
@@ -408,9 +415,8 @@ describe('Devices', function () {
     describe('POST /devices/unsubscribe', function () {
         var url = '/devices/unsubscribe';
 
-        /*it('User can unsubscribe devices', function (done) {
+        it('User can unsubscribe devices', function (done) {
             var deviceIds = [
-                testData.devices[3]._id.toString(),
                 testData.devices[4]._id.toString(),
                 testData.devices[5]._id.toString(),
                 testData.devices[6]._id.toString()
@@ -423,13 +429,48 @@ describe('Devices', function () {
                 .post(url)
                 .send(data)
                 .end(function (err, res) {
+                    var userId = testData.users[0]._id;
+
                     if (err) {
                         done(err);
                     } else {
                         expect(res.status).to.equals(200);
-                        done();
+
+                        async.parallel([
+
+                            //check the user:
+                            function (cb) {
+                                UserModel.findOne({_id: userId}, function (err, userModel) {
+                                    if (err) {
+                                        return cb(err);
+                                    }
+                                    expect(userModel.billings.subscribedDevices).to.equals(0);
+                                    cb();
+                                });
+                            },
+
+                            //check devices:
+                            function (cb) {
+
+                                DeviceModel.find({_id: {$in: deviceIds}, status: DEVICE_STATUSES.SUBSCRIBED}, function (err, devices) {
+                                    if (err) {
+                                        return cb(err);
+                                    }
+                                    expect(devices.length).to.equals(0);
+                                    cb();
+                                });
+                            }
+
+                        ], function (err) {
+                            if (err) {
+                                return done(err);
+                            }
+                            done();
+                        });
+
+
                     }
                 });
-        });*/
+        });
     });
 });
