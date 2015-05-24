@@ -234,10 +234,6 @@ define([
                 alert('You checked ' + invalidToSubscribe.length + ' device(s), which already has been subscribed !');
             };
 
-            //VVVVVVVVVVVVV
-            //    (_.where(this.devicesView.selectedDevicesCollection,null));
-            //AAAAAAAAAAAAA
-
 
             // get ids
             deviceIds = _.pluck(devicesToSubscribe, 'id');

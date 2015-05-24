@@ -11,7 +11,7 @@ define([
 
         initialize: function (myMod) {
             this.setThisStateModel();
-            this.stateModel.set({id : myMod.model._id});
+            this.stateModel.set({id : myMod.id});
 
             this.getDevice();
 
@@ -23,9 +23,7 @@ define([
 
         events: {
             'click #editButton': 'update',
-            //'click .save': 'update',
             'click #deleteButton': 'deviceDelete'
-            //'click .delete': 'deviceDelete'
         },
 
         // remove the old model of this view ... and remove event listeners from it
@@ -64,7 +62,8 @@ define([
         },
 
         hideDialog: function () {
-            $('.edit-device-dialog').remove();
+            $('#editDeviceModal').modal('hide');
+            $('.modal-backdrop').remove();
         },
 
         // get device from serer or from devices view collection collection
@@ -173,6 +172,7 @@ define([
                     //alert('Updated successfully');
                     self.cleanPageData();
                     self.hideDialog();
+
                     //if(window.history){
                     //    window.history.back();
                     //}
@@ -195,23 +195,8 @@ define([
                 data = _.extend(this.model.toJSON(), data);
             }
 
-            //this.$el.html(_.template(template, data));
+            this.$el.html(_.template(template, data));
 
-            this.$el.html(_.template(template, data))
-                .dialog({
-                    modal : true,
-                    closeOnEscape: true,
-                    width: "600",
-                    dialogClass: "edit-device-dialog",
-                    close: function(){
-                        self.cleanPageData();
-                    }
-                });
-
-            //$(this.$el).modal({
-            //    show: true,
-            //    backdrop: 'static' // not close the modal when click on background
-            //});
             return this;
         }
     });
