@@ -226,6 +226,10 @@ define([
                 }
             });
 
+            if (devicesToSubscribe.length <1) {
+                return alert('Check some devices !!')
+            };
+
             /*invalidToSubscribe = this.devicesView.selectedDevicesCollection.filter(function(device){
                 if(device.get('status') === STATUSES.SUBSCRIBED){
                     return true;
@@ -276,6 +280,10 @@ define([
                     return true;
                 }
             });
+
+            if (devicesToUnSubscribe.length <1) {
+                return alert('Check some subscribed device(s) !!')
+            };
 
             // get ids
             deviceIds = _.pluck(devicesToUnSubscribe, 'id');
