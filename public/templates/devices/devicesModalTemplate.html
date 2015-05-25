@@ -2,23 +2,24 @@
     <div class="col-md-8">
 
         <form class="form-inline" id="searchForm">
-            <div class="checkbox">
-                <label>
-                    <input id="globalDevicesChecker" type="checkbox" <% if (checked) { %>checked<% } %>>
-                </label>
-            </div>
 
             <div class="form-group">
                 <label class="sr-only" for="search">Email address</label>
+                <span class="goSearch glyphicon glyphicon-search"></span>
                 <input type="text" class="form-control" id="search" placeholder="Search..." value="<%= search %>">
-                <i class="clearSearch glyphicon glyphicon-remove"></i>
+                <span class="clearSearch glyphicon glyphicon-remove"></span>
             </div>
 
             <!--<button type="submit" class="btn btn-default" id="searchButton">search</button>-->
         </form>
 
 
-
+        <div class="checkbox">
+            <label>
+                <input id="globalDevicesChecker" type="checkbox" <% if (checked) { %> checked <% } %> >
+                <label for="globalDevicesChecker">select all/clear all</label>
+            </label>
+        </div>
         <table class="table">
             <tbody>
             <% for (i in devices) { %>
@@ -60,9 +61,9 @@
         <div class="form-group">
             <select class="form-control" id="period">
                 <option value="month"
-                <% if(period === 'month') { %>selected<% } %> >Month</option>
+                <% if(period === 'month') { %>selected<% } %> >Monthly</option>
                 <option value="year"
-                <% if(period === 'year') { %>selected<% } %> >Year</option>
+                <% if(period === 'year') { %>selected<% } %> >Yearly</option>
             </select>
         </div>
         <div>

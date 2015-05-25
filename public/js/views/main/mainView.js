@@ -17,7 +17,8 @@ define([
         events: {
             'click #globalDevicesChecker': 'globalCheckTrigger', // check unCheck all devices on page
             'click #mapLocateButton': 'locate', // show markers on page
-            //'submit #searchForm': 'search', // set search filter
+            'click .goSearch': 'search', // set search filter
+            'click .clearSearch': 'cancelSearch',
             'keydown': 'keydownHandler'
         },
 
@@ -55,7 +56,7 @@ define([
             // set pagination to control devices collection
             this.paginationView = new PaginationView({
                 collection: this.devisesCollection,
-                onPage: 7, // devices on page
+                onPage: 10, // devices on page
                 padding: 2, // 2 after current pge 2 before
                 page: 1, // default page
                 ends: true,
@@ -112,6 +113,18 @@ define([
                 status: STATUSES.SUBSCRIBED,
                 name: this.$el.find('#search').val().trim()
             });
+        },
+
+        cancelSearch: function(event){
+            event.preventDefault();
+            event.stopImmediatePropagation();
+
+
+            this.paginationView.setData({
+                status: STATUSES.SUBSCRIBED,
+                name: ''
+            });
+
         },
 
         // render devices views

@@ -5,7 +5,7 @@ define([
     'views/device/deviceMainListView',
     'views/customElements/paginationView',
     'constants/statuses',
-    'views/device/deviceView',
+    'views/device/deviceView'
 ], function (Template, ModalTemplate, DevisesCollection, deviceMainListView, PaginationView, STATUSES, deviceView) {
 
     var View;
@@ -16,7 +16,7 @@ define([
 
         events: {
             'click #globalDevicesChecker': 'globalCheckTrigger', // check all devices
-            //'submit #searchForm': 'search',
+            'click .goSearch': 'search',
             'keydown': 'keydownHandler',
             'click .clearSearch': 'clearSearch',
             'click .deviceCheckbox': 'deviceCheck', // check separate devices
@@ -74,6 +74,7 @@ define([
 
 
             if (modal) {
+
                 this.listenTo(this.selectedDevicesCollection, 'add remove', function () {
                     self.calculatePlan();
                     self.render();
@@ -216,14 +217,14 @@ define([
             });
         },
 
-        deviceEdit: function (e) {
+        /*deviceEdit: function (e) {
 
             e.preventDefault();
             var id = $(e.target).attr('value');
 
             new deviceView({id : id});
         },
-
+*/
 
         //==========================================VVVV
 
@@ -231,25 +232,15 @@ define([
         showEditDeviceModal: function (e) {
 
             var id = $(e.target).attr('value');
-            //this.closeDevicesView();
-
-            // remove cb events from modal (onModalHide())
 
             this.$el.find('#editDeviceModal').modal({
                 show: true,
-                backdrop: 'static' // not close the modal when click on background
+                backdrop: 'static'
             });
-
-            //this.$el.find('#editDeviceModal').on('hidden.bs.modal',this.closeDevicesView);
 
             this.devicesView = new deviceView({id : id});
 
-            // append devicesView to modal
             this.$el.find('#modalEditContent').append(this.devicesView.el);
-
-            //this.$el.find('#editDeviceModal').on('hidden',function(){
-            //    self.closeDevicesView();
-            //})
 
         },
 
@@ -301,23 +292,33 @@ define([
         search: function (event) {
             event.preventDefault();
             var search = this.$el.find('#search').val().trim();
-            this.stateModel.set({
-                search: search
-            });
-            this.paginationView.setData({
-                name: search
-            });
+
+            if (this.stateModel.get('modal')) {
+                this.stateModel.set({
+                    search: search
+                });
+                this.paginationView.setData({
+                    name: search,
+                    status: [
+                        STATUSES.ACTIVE,
+                        STATUSES.SUBSCRIBED
+                    ],
+                    sort: '-status billings.expirationDate name'
+                });
+            } else {
+
+                this.stateModel.set({
+                    search: search
+                });
+                this.paginationView.setData({
+                    name: search
+                });
+            }
         },
 
-        clearSearch: function () {
-            event.preventDefault();
+        clearSearch: function (event) {
             this.$el.find('#search').val('');
-            this.stateModel.set({
-                search: ''
-            });
-            this.paginationView.setData({
-                name: null
-            });
+            this.search(event);
         },
 
         // if not new view update devices (keep data actual)
