@@ -47,7 +47,7 @@
                     <% } %>
                 </td>
                 <td><%= devices[i].device.name %></td>
-                <td><%= (devices[i].device.billings.expirationDate) ? (moment(devices[i].device.billings.expirationDate).fromNow()) : ''%></td>
+                <td><%= (devices[i].device.billings.expirationDate && devices[i].device.status === DEVICE_STATUSES.SUBSCRIBED) ? (moment(devices[i].device.billings.expirationDate).fromNow()) : ''%></td>
 
             </tr>
             <% } %>
