@@ -30,7 +30,7 @@ module.exports = (function () {
 
             stripeId: {type: String, default: null},
             renewEnabled: {type: Boolean, default: false},
-            subscribedDevices: {type: Number, required: true, default: 0}
+            subscribedDevices: {type: Number, required: true, default: 0}//10 + 95
             //monthSubscribedDevices: {type: Number, required: true, default: 0}, //TODO remove
             //active: {type: Boolean, required: true, default: false}, //is need this field
         },

@@ -337,7 +337,7 @@ var UserHandler = function (db) {
             }
 
             if (!user) {
-                return next(badRequests.SignInError({message: 'Incorrect minderId'}));
+                return next(badRequests.SignInError({message: 'Incorrect Minder ID'}));
             }
 
             if (user && user.confirmToken) {
@@ -561,22 +561,21 @@ var UserHandler = function (db) {
 
     this.forgotPassword = function (req, res, next) {
         var email = req.body.email;
+        var criteria = {
+            email: email
+        };
 
         if (!email) {
             return next(badRequests.NotEnParams({reqParams: ['email']}));
         }
 
-        UserModel.findOne({ // find a user to compare passwords
-            email: email
-        }, function (err, user) {
+        UserModel.findOne(criteria, function (err, user) {
             if (err) {
                 return next(err);
             } else if (!user) {
-                return next(badRequests.NotFound());
+                return res.status(200).send({success: 'updated'});
             } else {
-
                 user.forgotToken = tokenGenerator.generate();
-
                 user.save(function (err, userModel) { // save changes and send email
                     if (err) {
                         return next(err);
