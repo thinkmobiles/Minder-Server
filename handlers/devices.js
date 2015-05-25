@@ -14,6 +14,7 @@ var calculateTariff = require('../public/js/libs/costCounter');
 var moment = require('moment');
 
 var DeviceHandler = function (db) {
+    var ObjectId = mongoose.Schema.Types.ObjectId;
     var session = new SessionHandler(db);
     var deviceSchema = mongoose.Schemas['Device'];
     var userSchema = mongoose.Schemas['User'];
@@ -21,7 +22,6 @@ var DeviceHandler = function (db) {
     var DeviceModel = db.model('Device', deviceSchema);
     var tariffPlanSchema = mongoose.Schemas['TariffPlan'];
     var TariffPlan = db.model('TariffPlan', tariffPlanSchema);
-
     var self = this;
 
     function prepareDeviceData(data) {
@@ -153,8 +153,8 @@ var DeviceHandler = function (db) {
                         expirationDate: expirationDate,
                         deviceIds: deviceStringsIds
                     }
-
                 };
+
                 stripeModule.createCharge(chargeParams, function (err, charge) {
                     if (err) {
                         return cb(err);
@@ -176,77 +176,111 @@ var DeviceHandler = function (db) {
         });
     };
 
-    function updateStatusToSubscribed(userId, deviceIds, plan, subscriptionId, callback) {
-        var freeAccount = false;
+    function recalcTheSubscribedDevicesCount(options, callback) {
+        var userId;
+        var plan;
 
-        if (!plan.amount) {
-            freeAccount = true;
+        if (!options || !options.userId) {
+            return badRequests.NotEnParams({reqParams: ['options.userId']});
         }
+
+        userId = options.userId;
+        plan = options.plan;
+
         async.waterfall([
 
-            //update devices status = "subscribed":
+            //group the subscribed devices:
             function (cb) {
-                var now = new Date();
                 var criteria = {
                     user: userId,
-                    status: DEVICE_STATUSES.ACTIVE,
-                    _id: {
-                        $in: deviceIds
-                    }
+                    status: DEVICE_STATUSES.SUBSCRIBED
                 };
-                var update;
 
-                if (freeAccount) {
-                    update = {
-                        $set: {
-                            status: DEVICE_STATUSES.SUBSCRIBED,
-                            "billings.subscriptionId": null,
-                            "billings.subscriptionDateTime": now,
-                            "billings.expirationDate": null,
-                            updatedAt: now
-                        }
-                    };
-                } else {
-                    update = {
-                        $set: {
-                            status: DEVICE_STATUSES.SUBSCRIBED,
-                            "billings.subscriptionId": subscriptionId,
-                            "billings.subscriptionDateTime": now,
-                            "billings.expirationDate": plan.expirationDate,
-                            updatedAt: now
-                        }
-                    };
-                }
+                DeviceModel.find(criteria).count(function (err, count) {
+                    var userData;
 
-                DeviceModel.update(criteria, update, {multi: true}, function (err, quantity) {
                     if (err) {
                         return cb(err);
                     }
-                    cb(null, quantity);
+
+                    userData = {
+                        _id: userId,
+                        count: count
+                    };
+
+                    cb(null, userData);
                 });
 
+                /*DeviceModel
+                    .aggregate([{
+                        $match: {
+                            user: userId, //userId
+                            status: DEVICE_STATUSES.SUBSCRIBED
+                        }
+                    }, {
+                        $group: {
+                            _id: "$user",
+                            count: {
+                                $sum: 1
+                            }
+                        }
+                    }])
+                    .exec(function (err, results) {
+                        if (err) {
+                            return cb(err);
+                        }
+                        cb(null, results);
+                    });*/
             },
 
-            //update user.billings.subscribedDevices:
-            function (quantity, cb) {
-                self.incrementSubscribedDevicesCount(userId, quantity, plan, function (err, updatedUser) {
+            //update the User.billings data:
+            function (userData, cb) {
+                var criteria;
+                var update;
+                var updateData;
+
+                if (!userData || !userData._id || (userData.count === undefined)) {
+                    return badRequests.NotEnParams({reqParams: ['userData', 'userData._id', 'userData.count']});
+                }
+
+                updateData = {
+                    "billings.subscribedDevices": userData.count,
+                    updatedAt: new Date()
+                };
+
+                if (plan && plan.plan_id) {
+                    updateData["billings.currentPlan"] = plan.plan_id;
+                }
+
+                if (plan && plan.period) {
+                    updateData["billings.period"] = plan.period;
+                }
+
+                criteria = {
+                    _id: userData._id
+                };
+
+                update = {
+                    $set: updateData
+                };
+
+                UserModel.findOneAndUpdate(criteria, update, function (err, userModel) {
                     if (err) {
                         return cb(err);
                     }
-                    cb(null, updatedUser);
+                    cb(null, userModel);
                 });
             }
 
-        ], function (err, updatedUser) {
+        ], function (err, userModel) {
             if (err) {
                 if (callback && (typeof callback === 'function')) {
                     callback(err);
                 }
-                return;
-            }
-
-            if (callback && (typeof callback === 'function')) {
-                callback(null, updatedUser);
+            } else {
+                if (callback && (typeof callback === 'function')) {
+                    callback(null, userModel);
+                }
             }
         });
     };
@@ -715,7 +749,7 @@ var DeviceHandler = function (db) {
                 };
 
                 if (!session.isAdmin(req)) {
-                    criteria.user =  userId;
+                    criteria.user = userId;
                 }
 
                 DeviceModel.findOne(criteria, function (err, device) {
@@ -826,37 +860,8 @@ var DeviceHandler = function (db) {
                 if (err) {
                     return callback(err);
                 }
-                return callback(null, plan);
+                callback(null, plan);
             });
-
-        });
-    };
-
-    this.incrementSubscribedDevicesCount = function (userId, quantity, plan, callback) {
-        var criteria = {
-            _id: userId
-        };
-        var update = {
-            $set: {
-                "billings.currentPlan": plan.plan_id,
-                "billings.planPeriod": plan.period,
-                updatedAt: new Date()
-            },
-            $inc: {
-                'billings.subscribedDevices': quantity
-            }
-        };
-
-        UserModel.findOneAndUpdate(criteria, update, function (err, userModel) {
-            if (err) {
-                if (callback && (typeof callback === 'function')) {
-                    callback(err);
-                }
-            } else {
-                if (callback && (typeof callback === 'function')) {
-                    callback(null, userModel);
-                }
-            }
         });
     };
 
@@ -895,40 +900,18 @@ var DeviceHandler = function (db) {
                 });
             },
 
-            // prevent wrong subscriptions
-            checkSubscribedDevices: function (cb) {
-                var criteria = {
-                    user: userId,
-                    status: DEVICE_STATUSES.SUBSCRIBED,
-                    _id: {
-                        $in: deviceIds
-                    }
-                };
-                var fields = '_id';
-
-                // check id devices already subscribed
-                DeviceModel.find(criteria, fields, function (err, devices) {
-                    if (err) {
-                        cb(err);
-                    } else if (devices && devices.length) {
-                        cb(badRequests.DeviceAlreadySubscribed());
-                    } else {
-                        cb();
-                    }
-                });
-            },
-
-            // prevent wrong subscriptions
             checkActiveDevices: function (cb) {
                 var criteria = {
                     user: userId,
-                    status: DEVICE_STATUSES.ACTIVE,
+                    status: {
+                        $ne: DEVICE_STATUSES.DELETED
+                    },
                     _id: {
                         $in: deviceIds
                     }
                 };
                 var fields = '_id';
-                // filter active devices
+
                 DeviceModel.find(criteria, fields, function (err, devices) {
                     var activeIds;
 
@@ -990,16 +973,65 @@ var DeviceHandler = function (db) {
                     });
                 },
 
-                //update Devices.status to "subscribed" and User.billings.subscribedDevices
-                // subscriptionResult is chargeId
+                //update Devices.billings: (status, subscriptionId, expirationDate, ...)
                 function (subscriptionResult, plan, cb) {
-                    var subscrId = (subscriptionResult && subscriptionResult.is) ? subscriptionResult.id : null;
+                    var subscriptionId = (subscriptionResult && subscriptionResult.id) ? subscriptionResult.id : null;
+                    var now = new Date();
+                    var criteria = {
+                        user: userId,
+                        _id: {
+                            $in: activeDeviceIds
+                        }
+                    };
+                    var update = {};
+                    var freeAccount = false;
 
-                    updateStatusToSubscribed(userId, activeDeviceIds, plan, subscrId, function (err, user) {
+                    if (!plan.amount) {
+                        freeAccount = true;
+                    }
+
+                    if (freeAccount) {
+                        update = {
+                            $set: {
+                                status: DEVICE_STATUSES.SUBSCRIBED,
+                                "billings.subscriptionId": null,
+                                "billings.subscriptionDateTime": now,
+                                "billings.expirationDate": null,
+                                updatedAt: now
+                            }
+                        };
+                    } else {
+                        update = {
+                            $set: {
+                                status: DEVICE_STATUSES.SUBSCRIBED,
+                                "billings.subscriptionId": subscriptionId,
+                                "billings.subscriptionDateTime": now,
+                                "billings.expirationDate": plan.expirationDate,
+                                updatedAt: now
+                            }
+                        };
+                    }
+
+                    DeviceModel.update(criteria, update, {multi: true}, function (err, quantity) {
                         if (err) {
                             return cb(err);
                         }
-                        cb(null, user);
+                        cb(null, plan);
+                    });
+                },
+
+                //update User.billings data:
+                function (plan, cb) {
+                    var params = {
+                        userId: userId,
+                        plan: plan
+                    };
+
+                    recalcTheSubscribedDevicesCount(params, function (err, userModel) {
+                        if (err) {
+                            return cb(err);
+                        }
+                        cb();
                     });
                 }
 
@@ -1009,50 +1041,6 @@ var DeviceHandler = function (db) {
                 }
                 res.status(200).send({success: 'subscribed'});
             });
-
-
-            // returns plan from calculator
-            /*self.getUserTariffPlan(calculationOptions, function (err, plan) {
-                if (err) {
-                    return next(err);
-                }
-
-                if (!token && plan.amount !== 0) {
-                    return next(badRequests.NotEnParams({reqParams: ['deviceIds', 'period', 'token']}));
-                }
-
-                async.waterfall([
-
-                    //subscription:
-                    function (cb) {
-                        subscribe(user, plan, token, function (err, subscriptionResult) {
-                            if (err) {
-                                return cb(err);
-                            }
-                            cb(null, subscriptionResult);
-                        });
-                    },
-
-                    //update Devices.status to "subscribed" and User.billings.subscribedDevices
-                    // subscriptionResult is chargeId
-                    function (subscriptionResult, cb) {
-                        var subscrId = subscriptionResult.id;
-
-                        updateStatusToSubscribed(userId, activeDeviceIds, plan, subscrId, function (err, user) {
-                            if (err) {
-                                return cb(err);
-                            }
-                            cb(null, user);
-                        });
-                    }
-
-                ], function (err, result) {
-                    if (err) {
-                        return next(err);
-                    }
-                    res.status(200).send({success: 'subscribed'});
-                });
-            });*/
         });
     };
 
@@ -1144,7 +1132,6 @@ var DeviceHandler = function (db) {
                 }
             }
         });
-
     };
 
     function renewTheSubscriptionByUser(userData, planModels, callback) {
@@ -1546,7 +1533,7 @@ var DeviceHandler = function (db) {
                  var toMoment = moment(now).add(11, 'd').hours(0).minutes(0);
                  var from = fromMoment._d;
                  var to = toMoment._d;*/
-
+                //05-06-2015 :
                 from.setDate(now.getDate() + daysBefore - 1);
                 from.setHours(0);
                 from.setMinutes(0);
@@ -1561,7 +1548,7 @@ var DeviceHandler = function (db) {
                         "billings.renewEnabled": true,
                         "billings.expirationDate": {
                             $gte: from,
-                            $lt: to
+                            $lte: to
                         }
                     }
                 }, {
