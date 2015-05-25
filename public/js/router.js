@@ -146,9 +146,9 @@ define([
             if (page) page = parseInt(page);
             this.loadWrapperView('devices', {page: page});
         },
-        device: function (id) {
+        /*device: function (id) {
             this.loadWrapperView('device', {id: id});
-        },
+        },*/
         resetPassword: function (token) {
             this.loadWrapperView('resetPassword', {token: token});
         },

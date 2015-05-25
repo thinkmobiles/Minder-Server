@@ -22,7 +22,8 @@ define([
             'click .deviceCheckbox': 'deviceCheck', // check separate devices
             'click .setDelete': 'deviceDelete',
             'click .setActive': 'deviceActivate',
-            'click .setEdit': 'deviceEdit',
+            'click .setEdit': 'showEditDeviceModal',
+            'click .cancelEditDevice' : 'closeDevicesView',
             'change #period': 'periodObserver' // period observer
         },
 
@@ -216,37 +217,55 @@ define([
         },
 
         deviceEdit: function (e) {
-            //self =this;
-            //new deviceView();
+
             e.preventDefault();
             var id = $(e.target).attr('value');
-            //self.model = new deviceModel();
-            //new deviceView({ id: id });
 
-            $.ajax({
-                url: "devices/"+id,
-                type: "GET",
-                success: function (data) {
-                    new deviceView({model : data});
-                    /*App.sessionData.set({
-                        user: data
-                    })*/
-                },
-                error: function (data) {
-                    App.error(data);
-                }
+            new deviceView({id : id});
+        },
+
+
+        //==========================================VVVV
+
+        // open the modal
+        showEditDeviceModal: function (e) {
+
+            var id = $(e.target).attr('value');
+            //this.closeDevicesView();
+
+            // remove cb events from modal (onModalHide())
+
+            this.$el.find('#editDeviceModal').modal({
+                show: true,
+                backdrop: 'static' // not close the modal when click on background
             });
 
-            /*model.urlRoot = '/'+id;
-            model.fetch({
-                data: { id: id },
-                success: function (model) {
-                    new deviceView({ model: model });
-                    alert('ololololol');
-                },
-                error: function () { alert('Please refresh browser'); }
-            });*/
+            //this.$el.find('#editDeviceModal').on('hidden.bs.modal',this.closeDevicesView);
+
+            this.devicesView = new deviceView({id : id});
+
+            // append devicesView to modal
+            this.$el.find('#modalEditContent').append(this.devicesView.el);
+
+            //this.$el.find('#editDeviceModal').on('hidden',function(){
+            //    self.closeDevicesView();
+            //})
+
         },
+
+        closeDevicesView: function () {
+            // hide modal
+            this.$el.find('#editDeviceModal').modal('hide');
+            // remove devices view
+            if (this.devicesView) {
+                this.devicesView.undelegateEvents();
+                this.devicesView.remove();
+            }
+        },
+
+
+        //===========================================
+
 
         // calculate plan for user to preview
         calculatePlan: function () {
