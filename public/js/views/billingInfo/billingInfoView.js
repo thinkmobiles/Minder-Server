@@ -221,18 +221,18 @@ define([
 
             // filters the selected devices
             devicesToSubscribe = this.devicesView.selectedDevicesCollection.filter(function(device){
-                if(device.get('status') === STATUSES.ACTIVE || device.get('status') === STATUSES.SUBSCRIBED){
+                if(device.get('status') !== STATUSES.DELETED){
                     return true;
                 }
             });
 
-            invalidToSubscribe = this.devicesView.selectedDevicesCollection.filter(function(device){
+            /*invalidToSubscribe = this.devicesView.selectedDevicesCollection.filter(function(device){
                 if(device.get('status') === STATUSES.SUBSCRIBED){
                     return true;
                 }
             });if (invalidToSubscribe.length>0) {
                 alert('You checked ' +devicesToSubscribe.length+'  '+ invalidToSubscribe.length + ' device(s), which already has been subscribed !');
-            };
+            };*/
 
 
             // get ids

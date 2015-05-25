@@ -253,7 +253,7 @@ var DeviceHandler = function (db) {
                 }
 
                 if (plan && plan.period) {
-                    updateData["billings.period"] = plan.period;
+                    updateData["billings.planPeriod"] = plan.period;
                 }
 
                 criteria = {
@@ -1594,8 +1594,52 @@ var DeviceHandler = function (db) {
         });
     };
 
-    this.startCronJobForNotifications = function (days, callback) {
-        //TODO: ...
+    this.startCronJobForNotifications = function (callback) {
+        async.parallel([
+
+            function (cb) {
+                checkExpirationDateForNotifications(10, function (err, devices) {
+                    if (err) {
+                        return cb(err);
+                    }
+                    cb(null, devices);
+                });
+            },
+
+            function (cb) {
+                checkExpirationDateForNotifications(3, function (err, devices) {
+                    if (err) {
+                        return cb(err);
+                    }
+                    cb(null, devices);
+                });
+            },
+
+            function (cb) {
+                checkExpirationDateForNotifications(1, function (err, devices) {
+                    if (err) {
+                        return cb(err);
+                    }
+                    cb(null, devices);
+                });
+            }
+
+        ], function (err, results) {
+            var devices;
+
+            if (err) {
+                if (callback && (typeof callback === 'function')) {
+                    callback(err);
+                }
+            } else {
+
+                devices = _.groupBy(_.union(results), '_id');
+
+                if (callback && (typeof callback === 'function')) {
+                    callback(null, devices);
+                }
+            }
+        });
     };
 
     this.cron = function (req, res, next) {
@@ -1603,7 +1647,15 @@ var DeviceHandler = function (db) {
 
         var days = req.query.days || 10;
 
-        checkExpirationDateForNotifications(days, function (err, result) {
+        /*checkExpirationDateForNotifications(days, function (err, result) {
+            if (err) {
+                return next(err);
+            }
+            res.status(200).send({success: 'success job', result: result});
+        });*/
+
+
+        self.startCronJobForNotifications(function (err, result) {
             if (err) {
                 return next(err);
             }

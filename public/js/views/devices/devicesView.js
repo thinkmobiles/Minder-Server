@@ -268,9 +268,8 @@ define([
             var user = sessionData.user;
             var period = this.stateModel.get('period');
             var selectedDevices = this.selectedDevicesCollection.filter(function (device) {
-                if (device.get('status') === STATUSES.ACTIVE) return true
+                if (device.get('status') !== STATUSES.DELETED) return true
             });
-
 
             window.costCounter({
                 date: date,
