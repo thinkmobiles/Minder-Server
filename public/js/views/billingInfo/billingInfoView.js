@@ -221,7 +221,7 @@ define([
 
             // filters the selected devices
             devicesToSubscribe = this.devicesView.selectedDevicesCollection.filter(function(device){
-                if(device.get('status') === STATUSES.ACTIVE){
+                if(device.get('status') === STATUSES.ACTIVE || device.get('status') === STATUSES.SUBSCRIBED){
                     return true;
                 }
             });
@@ -231,7 +231,7 @@ define([
                     return true;
                 }
             });if (invalidToSubscribe.length>0) {
-                alert('You checked ' + invalidToSubscribe.length + ' device(s), which already has been subscribed !');
+                alert('You checked ' +devicesToSubscribe.length+'  '+ invalidToSubscribe.length + ' device(s), which already has been subscribed !');
             };
 
 
