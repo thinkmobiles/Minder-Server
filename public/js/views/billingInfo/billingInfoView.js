@@ -35,7 +35,7 @@ define([
             //////// create stripe handler
 
             this.Stripe = StripeCheckout.configure({
-                key: config.strypePublicKay,
+                key: config.stripePublicKey,
                 image: '/images/logoForPaiments.jpg',
                 token: function (token) {
                     self.stripeTokenHandler(token); ////// singe!!! coll when token is generated ... for all actions!

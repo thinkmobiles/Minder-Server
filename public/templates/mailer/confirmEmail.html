@@ -9,12 +9,17 @@
         <p>Hi Dear  <b><%=name %></b>!
 
         <% if (minderId) {%>
-            <br>
-            Your <span class="il">Minder</span> ID is: <%=minderId %>
-            <br><br><br>
+        <br>Your Minder ID is: <b><%=minderId %></b>
         <% } %>
 
-        <br>To verify you MinderWeb account please click on link below <br><a href="<%=url%>" target="_blank"><%=url%></a> <br> <br> <br>If you have received this in error, please delete this email</p>
+        <br><br>To verify you MinderWeb account please click on link below <br><a href="<%=url%>" target="_blank"><%=url%></a>
+
+        <br>
+        <br>You can manage your devices through our web application <a href="<%=process.env.HOST%>" target="_blank"><%=process.env.HOST%></a>
+
+        <br>
+        <br>
+        <br>If you have received this in error, please delete this email</p>
 
     </div>
 </body>
