@@ -4,6 +4,7 @@ define(
         var phoneRegExp = /^[0-9\+]?([0-9-\s()])+[0-9()]$/,
             intNumberRegExp = /[0-9]+/,
             nameRegExp = /^[a-zA-Z]+[a-zA-Z-_\s]+$/,
+            nameRegExp = /^[a-zA-Z-_\s]+$/,
             groupsNameRegExp = /[a-zA-Z0-9]+[a-zA-Z0-9-,#@&*-_\s()\.\/\s]+$/,
             loginRegExp = /[\w\.@]{6,100}$/,
             passRegExp = /^[\w\.@]{3,100}$/,
@@ -116,14 +117,14 @@ define(
                     errorArray.push([fieldName, errorMessages.requiredMsg].join(' '));
                     return;
                 }
-                if (hasInvalidChars(fieldValue)) {
-                    errorArray.push([fieldName, errorMessages.invalidCharsMsg].join(' '));
-                    return;
-                }
-                if (fieldValue.length < MIN_LENGTH) {
-                    errorArray.push([fieldName, errorMessages.minLengthMsg(MIN_LENGTH)].join(' '));
-                    return;
-                }
+                //if (hasInvalidChars(fieldValue)) {
+                //    errorArray.push([fieldName, errorMessages.invalidCharsMsg].join(' '));
+                //    return;
+                //}
+                //if (fieldValue.length < MIN_LENGTH) {
+                //    errorArray.push([fieldName, errorMessages.minLengthMsg(MIN_LENGTH)].join(' '));
+                //    return;
+                //}
                 if (fieldValue.length > 35) {
                     errorArray.push([fieldName, errorMessages.maxLengthMsg(35)].join(' '));
                     return;
@@ -132,26 +133,26 @@ define(
                     errorArray.push([fieldName, errorMessages.maxLengthMsg(35)].join(' '));
                     return;
                 }
-                if (fieldValue.length < 2) {
-                    errorArray.push([fieldName, errorMessages.minLengthMsg(2)].join(' '));
-                    return;
-                }
-                if (!validateName(fieldValue)) errorArray.push([fieldName, errorMessages.invalidNameMsg].join(' '));
+                //if (fieldValue.length < 2) {
+                //    errorArray.push([fieldName, errorMessages.minLengthMsg(2)].join(' '));
+                //    return;
+                //}
+                //if (!validateName(fieldValue)) errorArray.push([fieldName, errorMessages.invalidNameMsg].join(' '));
             } else {
                 if (fieldValue) {
-                    if (hasInvalidChars(fieldValue)) {
-                        errorArray.push([fieldName, errorMessages.invalidCharsMsg].join(' '));
-                        return;
-                    }
+                    //if (hasInvalidChars(fieldValue)) {
+                    //    errorArray.push([fieldName, errorMessages.invalidCharsMsg].join(' '));
+                    //    return;
+                    //}
                     if (fieldValue.length > 35) {
                         errorArray.push([fieldName, errorMessages.maxLengthMsg(35)].join(' '));
                         return;
                     }
-                    if (fieldValue.length < 2) {
-                        errorArray.push([fieldName, errorMessages.minLengthMsg(2)].join(' '));
+                    /*if (fieldValue.length < 1) {
+                        errorArray.push([fieldName, errorMessages.minLengthMsg(1)].join(' '));
                         return;
-                    }
-                    if (!validateName(fieldValue)) errorArray.push([fieldName, errorMessages.invalidNameMsg].join(' '));
+                    }*/
+                    //if (!validateName(fieldValue)) errorArray.push([fieldName, errorMessages.invalidNameMsg].join(' '));
                 }
             }
         };

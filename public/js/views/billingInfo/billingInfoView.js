@@ -306,6 +306,8 @@ define([
             });
         },
 
+
+
         // send request to server
         subscribeHandler: function () { // handel action
             var self = this;
@@ -316,11 +318,13 @@ define([
                 period: stateModel.action.data.period
             };
 
+            //startAnimation();
             $.ajax({
                 url: '/devices/subscribe',
                 method: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify(data),
+                beforeSend: self.showWaiting(),
                 success: function () {
 
                     // clean data from memory
@@ -330,6 +334,7 @@ define([
                         plan: null
                     });
 
+                    self.hideWaiting();
                     alert('Success subscription');
 
                     // update user data to keep actual
@@ -340,6 +345,18 @@ define([
                 }
             });
         },
+
+        showWaiting: function(){
+            this.$el.find('#waitingModal').modal({
+                show: true,
+                backdrop: 'static'
+            });
+;       },
+
+        hideWaiting: function(){
+            this.$el.find('#waitingModal').modal('hide');
+            },
+
 
         unSubscribeHandler: function () { // handel action
             var self = this;
