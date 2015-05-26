@@ -325,6 +325,7 @@ define([
                 contentType: 'application/json',
                 data: JSON.stringify(data),
                 beforeSend: self.showWaiting(),
+                //complete: self.hideWaiting(),
                 success: function () {
 
                     // clean data from memory
@@ -341,6 +342,7 @@ define([
                     App.updateUser();
                 },
                 error: function (err) {
+                    self.hideWaiting();
                     App.error(err);
                 }
             });
