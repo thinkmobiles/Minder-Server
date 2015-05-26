@@ -15,29 +15,19 @@ module.exports = (function () {
         pass: {type: String},
         confirmToken: {type: String},
         forgotToken: {type: String},
-        //firstName: {type: String, default: ''},
         firstName: {type: String, minlength: NAME_MIN_LENGTH, maxlength: NAME_MAX_LENGTH},
         lastName: {type: String, minlength: NAME_MIN_LENGTH, maxlength: NAME_MAX_LENGTH},
-        //status: {type: Number, default: 0}, // 0 - inactive ??? CMS buttons Activate | Edit | Delete ???
         role: {type: Number, required: true, default: USER_ROLES.USER},
-        //currentPlan: {type: ObjectId, ref: 'TariffPlans', default: null},
-        //planPeriod:{type: String, minlength: 4, maxlength: 5, default: 'month'},
-        //currentPlan: {type: String, default: ''},
         billings: {
-            //expirationDate: {type: Date, default: null},
             currentPlan: {type: ObjectId, ref: 'TariffPlans', default: null},
             planPeriod:{type: String, minlength: 4, maxlength: 5, default: 'month'},
-
             stripeId: {type: String, default: null},
             renewEnabled: {type: Boolean, default: false},
-            subscribedDevices: {type: Number, required: true, default: 0}//10 + 95
-            //monthSubscribedDevices: {type: Number, required: true, default: 0}, //TODO remove
-            //active: {type: Boolean, required: true, default: false}, //is need this field
+            subscribedDevices: {type: Number, required: true, default: 0}
         },
         createdAt: {type: Date, default: Date.now},
         updatedAt: {type: Date, default: Date.now}
     }, {collection: 'Users'});
-
 
     mongoose.model('User', userSchema);
 

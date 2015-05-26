@@ -212,25 +212,25 @@ var DeviceHandler = function (db) {
                 });
 
                 /*DeviceModel
-                    .aggregate([{
-                        $match: {
-                            user: userId, //userId
-                            status: DEVICE_STATUSES.SUBSCRIBED
-                        }
-                    }, {
-                        $group: {
-                            _id: "$user",
-                            count: {
-                                $sum: 1
-                            }
-                        }
-                    }])
-                    .exec(function (err, results) {
-                        if (err) {
-                            return cb(err);
-                        }
-                        cb(null, results);
-                    });*/
+                 .aggregate([{
+                 $match: {
+                 user: userId, //userId
+                 status: DEVICE_STATUSES.SUBSCRIBED
+                 }
+                 }, {
+                 $group: {
+                 _id: "$user",
+                 count: {
+                 $sum: 1
+                 }
+                 }
+                 }])
+                 .exec(function (err, results) {
+                 if (err) {
+                 return cb(err);
+                 }
+                 cb(null, results);
+                 });*/
             },
 
             //update the User.billings data:
@@ -1528,6 +1528,8 @@ var DeviceHandler = function (db) {
                 var now = new Date();
                 var from = new Date();
                 var to = new Date();
+                var criteria;
+                var query;
 
                 /*var fromMoment = moment(now).add(10, 'd').hours(0).minutes(0);
                  var toMoment = moment(now).add(11, 'd').hours(0).minutes(0);
@@ -1542,44 +1544,55 @@ var DeviceHandler = function (db) {
                 to.setHours(0);
                 to.setMinutes(0);
 
-                DeviceModel.aggregate([{
-                    $match: {
-                        status: DEVICE_STATUSES.SUBSCRIBED,
-                        "billings.renewEnabled": true,
-                        "billings.expirationDate": {
-                            $gte: from,
-                            $lte: to
-                        }
+                if (process.env.NODE_ENV !== 'production') {
+                    console.log('>>> billings.expirationDate between: %s AND %s', from.toISOString(), to.toISOString());
+                }
+
+                criteria = {
+                    status: DEVICE_STATUSES.SUBSCRIBED,
+                    //"billings.renewEnabled": false, //TODO: use it affter tests
+                    "billings.expirationDate": {
+                        $gte: from,
+                        $lte: to
                     }
-                }, {
-                    $group: {
-                        _id: "$user",
-                        devices: {
-                            $push: {
-                                _id: "$_id",
-                                expirationDate: "$billings.expirationDate"
-                            }
-                        }
-                    }
-                }], function (err, result) {
+                };
+
+                /*query = DeviceModel.aggregate([{
+                 $match: criteria
+                 }, {
+                 $group: {
+                 _id: "$user",
+                 devices: {
+                 $push: {
+                 _id: "$_id",
+                 expirationDate: "$billings.expirationDate",
+                 user: "$user"
+                 }
+                 }
+                 }
+                 }]);*/
+
+                query = DeviceModel.find(criteria, {"billings.expirationDate": 1, user: 1});
+
+                query.exec(function (err, result) {
                     if (err) {
                         return cb(err);
                     }
                     cb(null, result);
                 });
-            },
+            }/*,
 
-            //send email notification:
-            function (users, cb) {
-                async.each(users, function (userData, eachCb) {
-                    eachCb();
-                }, function (err) {
-                    if (err) {
-                        return cb(err);
-                    }
-                    cb(null, users);
-                });
-            }
+             //send email notification:
+             function (users, cb) {
+             async.each(users, function (userData, eachCb) {
+             eachCb();
+             }, function (err) {
+             if (err) {
+             return cb(err);
+             }
+             cb(null, users);
+             });
+             }*/
 
         ], function (err, result) {
             if (err) {
@@ -1625,20 +1638,68 @@ var DeviceHandler = function (db) {
             }
 
         ], function (err, results) {
-            var devices;
+            var nowMoment = moment();
+            var users;
+            var data;
 
             if (err) {
                 if (callback && (typeof callback === 'function')) {
                     callback(err);
                 }
-            } else {
-
-                devices = _.groupBy(_.union(results), '_id');
-
-                if (callback && (typeof callback === 'function')) {
-                    callback(null, devices);
-                }
+                return;
             }
+
+            data = _.union(results[0], results[1], results[2]);
+            data = _.map(data, function (deviceModel) {
+                var deviceJSON = deviceModel.toJSON();
+                var expDate = moment(deviceJSON.billings.expirationDate);
+                var diff = expDate.diff(nowMoment, 'd');
+
+                deviceJSON['daysDiff'] = diff;
+
+                return deviceJSON;
+            });
+
+            users = _.groupBy(data, 'user');
+
+            async.waterfall([
+
+                //map users:
+                function (cb) {
+
+                    async.each(
+                        Object.keys(users),
+                        function (user, eachCb) {
+                            var devices = _.groupBy(users[user], 'daysDiff');
+
+                            users[user] = devices;
+
+                            eachCb();
+                        }, function (err) {
+                            if (err) {
+                                return cb(err);
+                            }
+                            cb(null, users);
+                        });
+                },
+
+                //send mail notification:
+                function (users, cb) {
+                    //TODO: ...
+                    cb(null, users);
+                }
+            ], function (err, users) {
+                if (err) {
+                    if (callback && (typeof callback === 'function')) {
+                        callback(err);
+                    }
+                } else {
+                    if (callback && (typeof callback === 'function')) {
+                        callback(null, users);
+                    }
+                }
+            });
+
         });
     };
 
@@ -1648,12 +1709,11 @@ var DeviceHandler = function (db) {
         var days = req.query.days || 10;
 
         /*checkExpirationDateForNotifications(days, function (err, result) {
-            if (err) {
-                return next(err);
-            }
-            res.status(200).send({success: 'success job', result: result});
-        });*/
-
+         if (err) {
+         return next(err);
+         }
+         res.status(200).send({success: 'success job', result: result});
+         });*/
 
         self.startCronJobForNotifications(function (err, result) {
             if (err) {

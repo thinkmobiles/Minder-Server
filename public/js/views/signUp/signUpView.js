@@ -146,7 +146,7 @@ define([
         render: function () {
             this.$el.html(_.template(template, this.stateModel.toJSON()));
 
-            Recaptcha.create(config.recaptchaSyteKay, 'captcha', {
+            Recaptcha.create(config.recaptchaSiteKey, 'captcha', {
                 tabindex: 4,
                 theme: "clean"
             });
