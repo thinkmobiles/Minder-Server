@@ -9,9 +9,9 @@ var mongoose = require('mongoose');
 var badRequests = require('../helpers/badRequests');
 var logWriter = require('../helpers/logWriter')();
 var SessionHandler = require('../handlers/sessions');
-var stripeModule = require('../helpers/stripe');
 var calculateTariff = require('../public/js/libs/costCounter');
 var moment = require('moment');
+var stripe = require('stripe')(process.env.STRIPE_PRIVATE_KEY);
 
 var DeviceHandler = function (db) {
     var ObjectId = mongoose.Schema.Types.ObjectId;
@@ -96,7 +96,8 @@ var DeviceHandler = function (db) {
                             userId: userModel._id.toString()
                         }
                     };
-                    stripeModule.createCustomer(customerData, function (err, customer) {
+
+                    stripe.customers.create(customerData, function (err, customer) {
                         if (err) {
                             return cb(err);
                         }
@@ -133,18 +134,21 @@ var DeviceHandler = function (db) {
                 var expirationDate;
                 var description;
                 var chargeParams;
+                var planModel;
 
                 if (isFree) { // do nothing if free account
                     return cb(null, null);
                 }
 
-                planId = plan.plan_id.toString();
+                planModel = plan.planData;
+                planId = planModel._id.toString();
                 quantity = plan.devicesToPay;
                 expirationDate = plan.expirationDate;
-                description = 'Minder charge for ' + userModel.email + '. Renew subscription for ' + quantity + ' devices. Plan: ' + plan.name + ', expirationDate: ' + expirationDate.toISOString();
+                description = 'Minder charge for ' + userModel.email + '. Subscription for ' + quantity + ' devices. Plan: ' + planModel.name + ', expirationDate: ' + expirationDate.toISOString();
 
-                chargeParams = {
-                    amount: plan.amount,  //price
+                /*chargeParams = {
+                    amount: planModel.amount,  //price
+                    currency: planModel.currency,
                     source: token.id,
                     description: description,
                     metadata: {
@@ -155,7 +159,26 @@ var DeviceHandler = function (db) {
                     }
                 };
 
-                stripeModule.createCharge(chargeParams, function (err, charge) {
+                stripe.charges.create(chargeParams, function (err, charge) {
+                    if (err) {
+                        return cb(err);
+                    }
+                    cb(null, charge);
+                });*/
+
+                var subscriptionParams = {
+                    plan: planId,
+                    source: token.id,
+                    quantity: quantity,
+                    metadata: {
+                        description: description,
+                        quantity: quantity,
+                        expirationDate: expirationDate,
+                        deviceIds: deviceStringsIds
+                    }
+                };
+
+                stripe.customers.createSubscription(userModel.billings.stripeId, subscriptionParams, function (err, charge) {
                     if (err) {
                         return cb(err);
                     }
@@ -1228,9 +1251,10 @@ var DeviceHandler = function (db) {
                 description = 'Minder charge (renew) for ' + userModel.email + '. Renew subscription for ' + quantity + ' devices. Plan: ' + plan.name + ', expirationDate: ' + expirationDate.toISOString();
 
                 //try to make charge:
-                chargeParams = {
+                /*chargeParams = {
                     customer: userModel.billings.stripeId,
                     amount: price,
+                    currency: plan.currency,
                     description: description,
                     metadata: {
                         planId: planId,
@@ -1240,19 +1264,39 @@ var DeviceHandler = function (db) {
                     }
                 };
 
-                /*
+                /!*
                  https://stripe.com/docs/api:
                  Metadata - "A set of key/value pairs that you can attach to a charge object.
                  It can be useful for storing additional information about the customer in a structured format.
                  It's often a good idea to store an email address in metadata for tracking later."
-                 */
+                 *!/
 
-                stripeModule.createCharge(chargeParams, function (err, charge) {
+                stripe.charges.create(chargeParams, function (err, charge) {
+                    if (err) {
+                        return cb(err);
+                    }
+                    cb(null, charge);
+                });*/
+
+
+                var subscriptionParams = {
+                    plan: planId,
+                    quantity: quantity,
+                    metadata: {
+                        description: description,
+                        quantity: quantity,
+                        expirationDate: expirationDate,
+                        deviceIds: deviceStringsIds
+                    }
+                };
+
+                stripe.customers.createSubscription(userModel.billings.stripeId, subscriptionParams, function (err, charge) {
                     if (err) {
                         return cb(err);
                     }
                     cb(null, charge);
                 });
+
             },
 
             //update the Devices.billings:
@@ -1520,81 +1564,36 @@ var DeviceHandler = function (db) {
     };
 
     function checkExpirationDateForNotifications(daysBefore, callback) {
+        var now = new Date();
+        var from = new Date();
+        var to = new Date();
+        var criteria;
+        var query;
 
-        async.waterfall([
+        from.setDate(now.getDate() + daysBefore - 1);
+        from.setHours(0);
+        from.setMinutes(0);
 
-            // get devices:
-            function (cb) {
-                var now = new Date();
-                var from = new Date();
-                var to = new Date();
-                var criteria;
-                var query;
+        to.setDate(now.getDate() + daysBefore);
+        to.setHours(0);
+        to.setMinutes(0);
 
-                /*var fromMoment = moment(now).add(10, 'd').hours(0).minutes(0);
-                 var toMoment = moment(now).add(11, 'd').hours(0).minutes(0);
-                 var from = fromMoment._d;
-                 var to = toMoment._d;*/
-                //05-06-2015 :
-                from.setDate(now.getDate() + daysBefore - 1);
-                from.setHours(0);
-                from.setMinutes(0);
+        if (process.env.NODE_ENV !== 'production') {
+            console.log('>>> billings.expirationDate between: %s AND %s', from.toISOString(), to.toISOString());
+        }
 
-                to.setDate(now.getDate() + daysBefore);
-                to.setHours(0);
-                to.setMinutes(0);
+        criteria = {
+            status: DEVICE_STATUSES.SUBSCRIBED,
+            "billings.renewEnabled": false,
+            "billings.expirationDate": {
+                $gte: from,
+                $lte: to
+            }
+        };
 
-                if (process.env.NODE_ENV !== 'production') {
-                    console.log('>>> billings.expirationDate between: %s AND %s', from.toISOString(), to.toISOString());
-                }
+        query = DeviceModel.find(criteria, {"billings.expirationDate": 1, user: 1});
 
-                criteria = {
-                    status: DEVICE_STATUSES.SUBSCRIBED,
-                    //"billings.renewEnabled": false, //TODO: use it affter tests
-                    "billings.expirationDate": {
-                        $gte: from,
-                        $lte: to
-                    }
-                };
-
-                /*query = DeviceModel.aggregate([{
-                 $match: criteria
-                 }, {
-                 $group: {
-                 _id: "$user",
-                 devices: {
-                 $push: {
-                 _id: "$_id",
-                 expirationDate: "$billings.expirationDate",
-                 user: "$user"
-                 }
-                 }
-                 }
-                 }]);*/
-
-                query = DeviceModel.find(criteria, {"billings.expirationDate": 1, user: 1});
-
-                query.exec(function (err, result) {
-                    if (err) {
-                        return cb(err);
-                    }
-                    cb(null, result);
-                });
-            }/*,
-
-             //send email notification:
-             function (users, cb) {
-             async.each(users, function (userData, eachCb) {
-             eachCb();
-             }, function (err) {
-             if (err) {
-             return cb(err);
-             }
-             cb(null, users);
-             });
-             }*/
-
-        ], function (err, result) {
+        query.exec(function (err, result) {
             if (err) {
                 if (callback && (typeof callback === 'function')) {
                     callback(err);
@@ -1704,17 +1703,15 @@ var DeviceHandler = function (db) {
     };
 
     this.cron = function (req, res, next) {
-        //self.startCronJob(function (err) {
+        self.startCronJob(function (err, result) {
+            if (err) {
+                return next(err);
+            }
+            res.status(200).send({success: 'success job', result: result});
+        });
+    };
 
-        var days = req.query.days || 10;
-
-        /*checkExpirationDateForNotifications(days, function (err, result) {
-         if (err) {
-         return next(err);
-         }
-         res.status(200).send({success: 'success job', result: result});
-         });*/
-
+    this.cronNotifications = function (req, res, next) {
         self.startCronJobForNotifications(function (err, result) {
             if (err) {
                 return next(err);

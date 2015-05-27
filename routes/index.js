@@ -12,6 +12,7 @@ module.exports = function (app, db) {
     var userHandler = new UserHandler(db);
     var tariffPlan = new TariffPlanHandler(db);
     var devicesRouter;
+    var stripePlansRouter;
 
     app.use(function (req, res, next) {
         if (process.env.NODE_ENV === 'development') {
@@ -46,6 +47,9 @@ module.exports = function (app, db) {
 
     devicesRouter = require('./devices')(db);
     app.use('/devices', devicesRouter);
+
+    stripePlansRouter = require('./stripePlans')(db);
+    app.use('/stripe/plans', stripePlansRouter);
 
 
     // ----------------------------------------------------------

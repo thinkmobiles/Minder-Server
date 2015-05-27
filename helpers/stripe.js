@@ -125,7 +125,7 @@ var StripeModule = function () {
         });
     };
 
-    this.listCards = function (customerId, callback) {
+    /*this.listCards = function (customerId, callback) {
         var err;
 
         if (!customerId) {
@@ -138,7 +138,7 @@ var StripeModule = function () {
             return;
         }
 
-        stripe.customers.listCards(customerId, function (err, cards) {
+        /!*stripe.customers.listCards(customerId, function (err, cards) {
             if (err) {
                 if (callback && (typeof callback === 'function')) {
                     callback(err);
@@ -149,10 +149,10 @@ var StripeModule = function () {
             if (callback && (typeof callback === 'function')) {
                 callback(null, cards);
             }
-        });
-    };
+        });*!/
+    };*/
 
-    this.createSubscription = function (params, callback) {
+    /*this.createSubscription = function (params, callback) {
         var err;
         var customerId;
         var planId;
@@ -187,7 +187,7 @@ var StripeModule = function () {
                 callback(null, subscription);
             }
         });
-    };
+    };*/
 
     this.createCharge = function (params, callback) {
         var err;

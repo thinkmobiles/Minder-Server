@@ -8,6 +8,8 @@
         var date = data.date;
         var period = data.period || 'month';
         var maxDevicesForUser = 0;
+        var expirationDate;
+        var result;
 
         // get maximum of devices
         plans.forEach(function (currentPan) {
@@ -16,7 +18,13 @@
             }
         });
 
-        var result = {
+        if (period === 'month') {
+            expirationDate = new Date(new Date(date).setMonth(date.getMonth() + 1));
+        } else {
+            expirationDate = new Date(new Date(date).setYear(date.getFullYear() + 1));
+        }
+
+        result = {
             amount: 0,
             devicesToPay: 0,
             subscribedDevices: subscribedDevices,
@@ -61,11 +69,7 @@
             result.period = period;
             result.maxDevices = plan.metadata.maxDevices;
             result.subscribedDevices = subscribedDevices;
-            if (period === 'month') {
-                result.expirationDate = new Date(new Date(date).setMonth(date.getMonth() + 1));
-            } else {
-                result.expirationDate = new Date(new Date(date).setYear(date.getFullYear() + 1));
-            }
+            result.expirationDate = expirationDate;
         }
 
         cb(null, result);
