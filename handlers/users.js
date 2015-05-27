@@ -140,7 +140,7 @@ var UserHandler = function (db) {
                     if (err) {
                         cb(err);
                     } else if (!plan) {
-                        cb(badRequests.NotFound());
+                        cb(badRequests.NotFound({message: 'TariffPlanModel was not found'}));
                     } else {
                         cb(null, plan);
                     }
