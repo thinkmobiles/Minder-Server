@@ -13,7 +13,7 @@ define([
 
             this.setDefaultData();
 
-            this.listenTo(this.stateModel, 'change:errors change:messages', this.render);
+            this.listenTo(this.stateModel, 'change:errors change:messages change:eerObj', this.render);
 
             this.render();
         },
@@ -34,7 +34,8 @@ define([
                 lastName: '',
                 iAcceptConditions: false,
                 errors: false,
-                messages: false
+                messages: false,
+                eerObj: {}
             };
             if (this.stateModel) {
                 this.stateModel.set(defaultData);
@@ -81,13 +82,15 @@ define([
                 messages.push('Email is invalid');
             }
 
-            validation.checkNameField(messages, true, stateModelUpdate.firstName, 'First name');
-            validation.checkNameField(messages, true, stateModelUpdate.lastName, 'Last name');
-            validation.checkPasswordField(messages, true, stateModelUpdate.password, 'Password');
-            validation.checkPasswordField(messages, true, stateModelUpdate.confirmPassword, 'Confirm password');
+            var errObj={};
+
+            validation.checkNameField(errObj, true, stateModelUpdate.firstName, 'First name');
+            validation.checkNameField(errObj, true, stateModelUpdate.lastName, 'Last name');
+            validation.checkPasswordField(errObj, true, stateModelUpdate.password, 'Password');
+            validation.checkPasswordField(errObj, true, stateModelUpdate.confirmPassword, 'Confirm password');
 
             if (stateModelUpdate.password !== stateModelUpdate.confirmPassword) {
-                messages.push('Password is not equal to confirm password');
+                errObj['Confirm password'].push('Password is not equal to confirm password');
             }
 
             if (!stateModelUpdate.iAcceptConditions) {
@@ -98,12 +101,20 @@ define([
                 messages.push('please check reCAPTCHA');
             }
 
-            if (errors.length > 0 || messages.length > 0) {
+            var errCount=0;
+            for (var my in errObj){
+                errCount += errObj[my].length;
+            }
+
+            if (errors.length > 0 || messages.length > 0 || errCount>0) {
                 if (errors.length > 0) {
                     stateModelUpdate.errors = errors;
                 }
                 if (messages.length > 0) {
                     stateModelUpdate.messages = messages;
+                }
+                if (errCount > 0) {
+                    stateModelUpdate.errObj = errObj;
                 }
                 this.stateModel.set(stateModelUpdate);
                 return this;
