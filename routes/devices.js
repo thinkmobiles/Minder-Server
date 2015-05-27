@@ -10,6 +10,7 @@ module.exports = function (db) {
     var deviceHandler = new DeviceHandler(db);
 
     router.get('/cron', session.authenticatedUser, deviceHandler.cron);
+    router.get('/notifications', session.authenticatedUser, deviceHandler.cronNotifications);
     router.put('/locate', session.authenticatedUser, deviceHandler.setLocation);
     router.get('/', session.authenticatedUser, deviceHandler.getDevices);
     router.get('/count', session.authenticatedUser, deviceHandler.countDevices);

@@ -354,6 +354,138 @@ var TariffPlanHandler = function (db) {
     //        }
     //    );
     //}
+
+    this.createPlansInStripe = function (req, res, next) {
+
+        TariffPlan
+            .find({})
+            .sort('name')
+            .exec(function (err, planModels) {
+                if (err) {
+                    return next(err);
+                }
+                if (!planModels || !planModels.length) {
+                    return next(badRequests.NotFound({message: 'There was no TariffPlans found'}));
+                }
+
+                async.eachSeries(planModels, function (planModel, cb) {
+                    var planJSON = planModel.toJSON();
+                    var data = {
+                        id: planJSON._id.toString(),
+                        name: planJSON.name,
+                        interval: planJSON.interval,
+                        amount: planJSON.amount,
+                        currency: planJSON.currency,
+                        statement_descriptor: "Minder " + planJSON.name + " Tear",
+                        metadata: planJSON.metadata
+                    };
+
+                    stripe.plans.create(data, function (err, plan) {
+                        if (err) {
+                            return cb(err);
+                        }
+                        cb();
+                    });
+                }, function (err) {
+                    if (err) {
+                        return next(err);
+                    }
+                    res.status(201).send({success: "created", models: planModels});
+                });
+            });
+    };
+
+    function listPlans(callback) {
+        stripe.plans.list(function (err, plans) {
+            if (err) {
+                if (callback && (typeof callback === 'function')) {
+                    callback(err);
+                }
+            } else {
+                if (callback && (typeof callback === 'function')) {
+                    callback(null, plans.data);
+                }
+            }
+        });
+    };
+
+    function getPlanById(planId, callback) {
+        stripe.plans.retrieve(planId, function (err, plan) {
+            if (err) {
+                if (callback && (typeof callback === 'function')) {
+                    callback(err);
+                }
+            } else {
+                if (callback && (typeof callback === 'function')) {
+                    callback(null, plan);
+                }
+            }
+        });
+    };
+
+    this.getPlans = function (req, res, next) {
+        listPlans(function (err, plansData) {
+            if (err) {
+                return next(err);
+            }
+            res.status(200).send(planData);
+        });
+    };
+
+    this.getPlan = function (req, res, next) {
+        var planId = req.params.id;
+
+        getPlanById(planId, function (err, plan) {
+            if (err) {
+                return next(err);
+            }
+            res.status(200).send(plan);
+        });
+    };
+
+    function removePlan(planId, callback) {
+        stripe.plans.del(planId, function (err, result) {
+            if (err) {
+                if (callback && (typeof callback === 'function')) {
+                    callback(err);
+                }
+            } else {
+                if (callback && (typeof callback === 'function')) {
+                    callback(null, result);
+                }
+            }
+        });
+    };
+
+    this.removePlanFromStripe = function (req, res, next) {
+        var planId = req.params.id;
+
+        removePlan(planId, function (err, result) {
+            if (err) {
+                return next(err);
+            }
+            res.status(200).send({success: 'removed', result: result});
+        });
+    };
+
+    this.removeAllPlanFromStripe = function (req, res, next) {
+        listPlans(function (err, plans) {
+            var planIds;
+
+            if (err) {
+                return next(err);
+            }
+
+            planIds = _.pluck(plans, 'id');
+
+            async.each(planIds, removePlan, function (err) {
+                if (err) {
+                    return next(err);
+                }
+                res.status(200).send({success: 'removed all plan'});
+            });
+        });
+    };
 };
 
 module.exports = TariffPlanHandler;
