@@ -13,7 +13,7 @@ define([
 
             this.setDefaultData();
 
-            this.listenTo(this.stateModel, 'change:errors change:messages change:eerObj', this.render);
+            this.listenTo(this.stateModel, 'change:errors change:messages change:errObj', this.render);
 
             this.render();
         },
@@ -21,7 +21,14 @@ define([
 
         events: {
             "submit #loginForm": "signUp",
-            "click .signUpButton": "signUp"
+            "click .signUpButton": "signUp",
+            "focusin .form-control": "clearField"
+        },
+
+        clearField: function (event){
+            var target = $(event.target);
+            var closEl = target.closest('.form-group');
+            closEl.find('.alert-danger').remove();
         },
 
         //reset the data
@@ -35,7 +42,7 @@ define([
                 iAcceptConditions: false,
                 errors: false,
                 messages: false,
-                eerObj: {}
+                errObj: false
             };
             if (this.stateModel) {
                 this.stateModel.set(defaultData);
@@ -57,6 +64,8 @@ define([
 
             var errors = [];
             var messages = [];
+            var errObj = {};
+
             var captchaData;
 
             captchaData = {
@@ -67,6 +76,7 @@ define([
             var stateModelUpdate = {
                 errors: false,
                 messages: false,
+                errObj: false,
                 email: this.$el.find("#email").val().trim(),
                 firstName: this.$el.find("#firstName").val().trim(),
                 lastName: this.$el.find("#lastName").val().trim(),
@@ -82,19 +92,17 @@ define([
                 messages.push('Email is invalid');
             }
 
-            var errObj={};
-
-            validation.checkNameField(errObj, true, stateModelUpdate.firstName, 'First name');
-            validation.checkNameField(errObj, true, stateModelUpdate.lastName, 'Last name');
-            validation.checkPasswordField(errObj, true, stateModelUpdate.password, 'Password');
-            validation.checkPasswordField(errObj, true, stateModelUpdate.confirmPassword, 'Confirm password');
+            validation.checkNameField(errObj, true, stateModelUpdate.firstName, 'firstName');
+            validation.checkNameField(errObj, true, stateModelUpdate.lastName, 'lastName');
+            validation.checkPasswordField(errObj, true, stateModelUpdate.password, 'password');
+            validation.checkPasswordField(errObj, true, stateModelUpdate.confirmPassword, 'confirmPassword');
 
             if (stateModelUpdate.password !== stateModelUpdate.confirmPassword) {
-                errObj['Confirm password'].push('Password is not equal to confirm password');
+                messages.push('Password is not equal to confirm password');
             }
 
             if (!stateModelUpdate.iAcceptConditions) {
-                messages.push('terms and conditions is not checked');
+                messages.push('Terms and conditions is not checked');
             }
 
             if (!captchaData || captchaData === '') {

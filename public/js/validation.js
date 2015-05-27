@@ -115,7 +115,7 @@ define(
             if (errorObj[fieldName] === undefined){errorObj[fieldName]=[]}
             if (required) {
                 if (!fieldValue) {
-                    errorObj[fieldName].push([fieldName, errorMessages.requiredMsg].join(' '));
+                    errorObj[fieldName].push(errorMessages.requiredMsg);
                     //errorArray.push({fieldName : errorMessages.requiredMsg});
                     return;
                 }
@@ -130,11 +130,11 @@ define(
                 }*/
 
                 if (fieldValue.length > 35) {
-                    errorObj[fieldName].push([fieldName, errorMessages.maxLengthMsg(35)].join(' '));
+                    errorObj[fieldName].push(errorMessages.maxLengthMsg(35));
                     return;
                 }
                 if (fieldValue.length > 35) {
-                    errorObj[fieldName].push([fieldName, errorMessages.maxLengthMsg(35)].join(' '));
+                    errorObj[fieldName].push(errorMessages.maxLengthMsg(35));
                     return;
                 }
 
@@ -156,7 +156,7 @@ define(
                     }*/
 
                     if (fieldValue.length > 35) {
-                        errorObj[fieldName].push([fieldName, errorMessages.maxLengthMsg(35)].join(' '));
+                        errorObj[fieldName].push(errorMessages.maxLengthMsg(35));
                         return;
                     }
 
@@ -251,37 +251,37 @@ define(
             if (required) {
                 if (errorObj[fieldName] === undefined){errorObj[fieldName]=[]}
                 if (!fieldValue) {
-                    errorObj[fieldName].push([fieldName, errorMessages.requiredMsg].join(' '));
+                    errorObj[fieldName].push(errorMessages.requiredMsg);
                     return;
                 }
                 if (hasInvalidChars(fieldValue)) {
-                    errorObj[fieldName].push([fieldName, errorMessages.invalidCharsMsg].join(' '));
+                    errorObj[fieldName].push(errorMessages.invalidCharsMsg);
                     return;
                 }
                 if (fieldValue.length < 6) {
-                    errorObj[fieldName].push([fieldName, errorMessages.minLengthMsg(6)].join(' '));
+                    errorObj[fieldName].push(errorMessages.minLengthMsg(6));
                     return;
                 }
                 if (fieldValue.length > 35) {
-                    errorObj[fieldName].push([fieldName, errorMessages.maxLengthMsg(35)].join(' '));
+                    errorObj[fieldName].push(errorMessages.maxLengthMsg(35));
                     return;
                 }
-                if (!validatePass(fieldValue)) errorObj[fieldName].push([fieldName, errorMessages.invalidLoginMsg].join(' '));
+                if (!validatePass(fieldValue)) errorObj[fieldName].push(errorMessages.invalidLoginMsg);
             } else {
                 if (fieldValue) {
                     if (hasInvalidChars(fieldValue)) {
-                        errorObj[fieldName].push([fieldName, errorMessages.invalidCharsMsg].join(' '));
+                        errorObj[fieldName].push(errorMessages.invalidCharsMsg);
                         return;
                     }
                     if (fieldValue.length < 6) {
-                        errorObj[fieldName].push([fieldName, errorMessages.minLengthMsg(6)].join(' '));
+                        errorObj[fieldName].push(errorMessages.minLengthMsg(6));
                         return;
                     }
                     if (fieldValue.length > 35) {
-                        errorObj[fieldName].push([fieldName, errorMessages.maxLengthMsg(35)].join(' '));
+                        errorObj[fieldName].push(errorMessages.maxLengthMsg(35));
                         return;
                     }
-                    if (!validatePass(fieldValue)) errorObj[fieldName].push([fieldName, errorMessages.invalidLoginMsg].join(' '));
+                    if (!validatePass(fieldValue)) errorObj[fieldName].push(errorMessages.invalidLoginMsg);
                 }
             }
         };
