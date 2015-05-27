@@ -34,14 +34,6 @@
         <table class="table">
             <tbody>
             <tr>
-                <!--<td>
-                    <div class="tariffPlan">
-                        Tier
-                    </div>
-                    <div class="tariffPlanInfo">
-                        MINDER Unit Base Cost by Volume RRP per month
-                    </div>
-                </td>-->
                 <% _.each(tearsMonth, function(item){%>
                 <% if (userPlan) { %>
                     <% if (userPlan.id === item.id) { %>
@@ -72,14 +64,6 @@
         <table class="table">
             <tbody>
             <tr>
-                <!--<td>
-                    <div class="tariffPlan">
-                        Tier
-                    </div>
-                    <div class="tariffPlanInfo">
-                        MINDER Unit Base Cost by Volume RRP per year
-                    </div>
-                </td>-->
                 <% _.each(tearsYear, function(item){%>
                 <% if (userPlan) { %>
                 <% if (userPlan.id === item.id) { %>
@@ -131,11 +115,9 @@
 
 </div>
 
-<div class="modal fade" id="waitingModal" <!--role="dialog"-->>
-    <div class="waiting-content">
-        <div class="modal-body" id="welcomeimage">
-            <img class="img-responsive" src="./images/ajax-loader.gif">
-        </div>
+<div class="modal fade" id="waitingModal">
+    <div class="modal-body" id="loadimage">
+        <img class="img-responsive" src="./images/ajax-loader.gif">
     </div>
 </div>
 
