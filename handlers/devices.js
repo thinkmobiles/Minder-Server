@@ -12,6 +12,7 @@ var SessionHandler = require('../handlers/sessions');
 var calculateTariff = require('../public/js/libs/costCounter');
 var moment = require('moment');
 var stripe = require('stripe')(process.env.STRIPE_PRIVATE_KEY);
+var mailer = require('../helpers/mailer');
 
 var DeviceHandler = function (db) {
     var ObjectId = mongoose.Schema.Types.ObjectId;
@@ -1568,6 +1569,12 @@ var DeviceHandler = function (db) {
         var from = new Date();
         var to = new Date();
         var criteria;
+        var fields = {
+            _id: 0,
+            name: 1,
+            user: 1,
+            "billings.expirationDate": 1
+        };
         var query;
 
         from.setDate(now.getDate() + daysBefore - 1);
@@ -1591,7 +1598,7 @@ var DeviceHandler = function (db) {
             }
         };
 
-        query = DeviceModel.find(criteria, {"billings.expirationDate": 1, user: 1});
+        query = DeviceModel.find(criteria, fields);
 
         query.exec(function (err, result) {
             if (err) {
@@ -1653,8 +1660,11 @@ var DeviceHandler = function (db) {
                 var deviceJSON = deviceModel.toJSON();
                 var expDate = moment(deviceJSON.billings.expirationDate);
                 var diff = expDate.diff(nowMoment, 'd');
+                var timeLeft = moment(deviceJSON.billings.expirationDate).fromNow();
+                //var daysLeft = moment(devices[i].device.billings.expirationDate).fromNow()
 
                 deviceJSON['daysDiff'] = diff;
+                deviceJSON['timeLeft'] = timeLeft;
 
                 return deviceJSON;
             });
@@ -1666,12 +1676,12 @@ var DeviceHandler = function (db) {
                 //map users:
                 function (cb) {
 
-                    async.each(
+                    /*async.each(
                         Object.keys(users),
                         function (user, eachCb) {
-                            var devices = _.groupBy(users[user], 'daysDiff');
+                            /!*var devices = _.groupBy(users[user], 'daysDiff');
 
-                            users[user] = devices;
+                            users[user] = devices;*!/
 
                             eachCb();
                         }, function (err) {
@@ -1679,13 +1689,56 @@ var DeviceHandler = function (db) {
                                 return cb(err);
                             }
                             cb(null, users);
+                        });*/
+
+                    cb(null, users);
+                },
+
+                //get the users email:
+                function (users, cb) {
+                    var userIds = Object.keys(users);
+                    var criteria = {
+                        _id: {
+                            $in: userIds
+                        }
+                    };
+                    var fields = {
+                        email: 1,
+                        firstName: 1,
+                        lastName: 1
+                    };
+
+                    UserModel.find(criteria, fields, function (err, userModels) {
+                        var usersData;
+
+                        if (err) {
+                            return cb(err);
+                        }
+
+                        usersData = _.map(userModels, function (userModel) {
+                            var userJSON = userModel.toJSON();
+                            var devices = users[userModel._id];
+
+                            userJSON.devices = _.sortBy(devices, 'daysDiff');
+
+                            return userJSON;
                         });
+
+                        cb(null, usersData);
+                    });
                 },
 
                 //send mail notification:
                 function (users, cb) {
-                    //TODO: ...
-                    cb(null, users);
+                    async.each(users, function (user, eachCb) {
+                        mailer.beforeExpired(user);
+                        eachCb();
+                    }, function (err) {
+                        if (err) {
+                            return cb(err);
+                        }
+                        cb(null, users);
+                    });
                 }
             ], function (err, users) {
                 if (err) {
