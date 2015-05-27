@@ -113,8 +113,11 @@ define(
 
         var checkNameField = function (errorArray, required, fieldValue, fieldName) {
             if (required) {
+                var eRR={};
                 if (!fieldValue) {
-                    errorArray.push([fieldName, errorMessages.requiredMsg].join(' '));
+                    eRR[fieldName]=errorMessages.requiredMsg;
+                    errorArray.push({fieldName : errorMessages.requiredMsg});
+                    //errorArray.push({fieldName : errorMessages.requiredMsg});
                     return;
                 }
                 //if (hasInvalidChars(fieldValue)) {
@@ -145,7 +148,7 @@ define(
                     //    return;
                     //}
                     if (fieldValue.length > 35) {
-                        errorArray.push([fieldName, errorMessages.maxLengthMsg(35)].join(' '));
+                        errorArray.push({fieldName : [fieldName, errorMessages.maxLengthMsg(35)].join(' ')});
                         return;
                     }
                     /*if (fieldValue.length < 1) {

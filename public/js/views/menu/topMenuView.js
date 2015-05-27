@@ -7,7 +7,8 @@ define([
         el: '#topMenu',
 
         events: {
-            'click #logOut': 'logout'
+            'click #logOut': 'logout',
+            'click .topMenuItem' :'changeTab'
         },
 
         // if authorized items
@@ -54,6 +55,14 @@ define([
             this.listenTo(App.sessionData, 'change:user', this.render);
 
             this.render();
+        },
+
+        changeTab: function(event) {
+            var holder = $(event.target);
+            var closestEl = holder.closest('.loggedMenu');
+            closestEl.find(".active").removeClass("active");
+            holder.addClass("active");
+
         },
 
         // logout action
