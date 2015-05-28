@@ -28,7 +28,8 @@ define([
                 email: '',
                 password: '',
                 errors: false,
-                messages: false
+                messages: false,
+                errObj: false
             };
 
             if (this.stateModel) {
@@ -51,6 +52,8 @@ define([
             var self = this;
             var errors = [];
             var messages = [];
+            var errObj = {};
+
             var stateModelUpdate = {
                 errors: false,
                 messages: false,
@@ -63,7 +66,13 @@ define([
 
             // validation
             validation.checkEmailField(messages, true, stateModelUpdate.email, 'Email');
-            validation.checkPasswordField(messages, true, stateModelUpdate.password, 'Password');
+            validation.checkPasswordField(errObj, true, stateModelUpdate.password, 'Password');
+
+            for (var my in errObj) {
+                if (errObj[my].length>0){
+                    messages.push(errObj[my]);
+                }
+            }
 
             if (errors.length > 0 || messages.length > 0) {
                 if (errors.length > 0) {
