@@ -5,14 +5,21 @@ var fs = require("fs");
 var logWriter = require('../helpers/logWriter')();
 var SessionHandler = require('../handlers/sessions');
 var UserHandler = require('../handlers/users');
+var DeviceHandler = require('../handlers/devices');
 var TariffPlanHandler = require('../handlers/tariffPlan');
 
 module.exports = function (app, db) {
     var session = new SessionHandler();
     var userHandler = new UserHandler(db);
-    var tariffPlan = new TariffPlanHandler(db);
+    var deviceHandler = new DeviceHandler(db);
+    var tariffPlanHandler = new TariffPlanHandler(db);
     var devicesRouter;
     var stripePlansRouter;
+
+    // --- setup cron jobs ---
+    deviceHandler.setupJobForCheckExpirationDates();
+    deviceHandler.setupJobForNotifications();
+    // -----------------------
 
     app.use(function (req, res, next) {
         if (process.env.NODE_ENV === 'development') {
@@ -40,10 +47,10 @@ module.exports = function (app, db) {
     app.put('/profile', userHandler.updateCurrentUserProfile);
     app.post('/forgotPassword', userHandler.forgotPassword);
     app.post('/resetPassword', userHandler.resetPassword);
-    app.get('/tariffPlans', session.authenticatedUser, tariffPlan.getTariffPans);
+    app.get('/tariffPlans', session.authenticatedUser, tariffPlanHandler.getTariffPans);
 
     //Test:
-    app.post('/renewal', tariffPlan.renewal); //TODO: use PUT
+    app.post('/renewal', tariffPlanHandler.renewal); //TODO: use PUT
 
     devicesRouter = require('./devices')(db);
     app.use('/devices', devicesRouter);
