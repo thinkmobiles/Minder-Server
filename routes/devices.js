@@ -9,8 +9,19 @@ module.exports = function (db) {
     var session = new SessionHandler();
     var deviceHandler = new DeviceHandler(db);
 
-    router.get('/cron', session.authenticatedUser, deviceHandler.cron);
-    router.get('/notifications', session.authenticatedUser, deviceHandler.cronNotifications);
+    /*router.get('/isMobile', function (req, res, next) {
+        var isMobile = deviceHandler.isMobile(req);
+
+        res.status(200).send({
+            isMobile: isMobile,
+            OS: deviceHandler.getDeviceOS(req),
+            userAgent: req.headers['user-agent'].toLowerCase()
+        });
+    });*/
+
+    router.get('/cron', session.authenticatedUser, deviceHandler.testCronJobForCheckExpirationDates);                       //TODO: use for tests
+    router.get('/notifications', session.authenticatedUser, deviceHandler.testCronJobForNotifications); //TODO: use for tests
+
     router.put('/locate', session.authenticatedUser, deviceHandler.setLocation);
     router.get('/', session.authenticatedUser, deviceHandler.getDevices);
     router.get('/count', session.authenticatedUser, deviceHandler.countDevices);
