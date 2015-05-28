@@ -145,7 +145,7 @@ var DeviceHandler = function (db) {
                 planId = planModel._id.toString();
                 quantity = plan.devicesToPay;
                 expirationDate = plan.expirationDate;
-                description = 'Minder charge for ' + userModel.email + '. Subscription for ' + quantity + ' devices. Plan: ' + planModel.name + ', expirationDate: ' + expirationDate.toISOString();
+                description = 'Minder charge for ' + userModel.email + '. Subscription for ' + quantity + ' devices. Plan: ' + planModel.name;
 
                 /*chargeParams = {
                     amount: planModel.amount,  //price
