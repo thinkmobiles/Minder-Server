@@ -6,13 +6,70 @@
 @color4: #fe102c;
 @img-path: "../images";
 
+
+/* font-family: "SegoeUIRegular"; */
+@font-face {
+    font-family: "SegoeUIRegular";
+    src: url("../fonts/SegoeUIRegular/SegoeUIRegular.eot");
+    src: url("../fonts/SegoeUIRegular/SegoeUIRegular.eot?#iefix")format("embedded-opentype"),
+    url("../fonts/SegoeUIRegular/SegoeUIRegular.woff") format("woff"),
+    url("../fonts/SegoeUIRegular/SegoeUIRegular.ttf") format("truetype");
+    font-style: normal;
+    font-weight: normal;
+}
+/* font-family: "SegoeUIBold"; */
+@font-face {
+    font-family: "SegoeUIBold";
+    src: url("../fonts/SegoeUIBold/SegoeUIBold.eot");
+    src: url("../fonts/SegoeUIBold/SegoeUIBold.eot?#iefix")format("embedded-opentype"),
+    url("../fonts/SegoeUIBold/SegoeUIBold.woff") format("woff"),
+    url("../fonts/SegoeUIBold/SegoeUIBold.ttf") format("truetype");
+    font-style: normal;
+    font-weight: normal;
+}
+/* font-family: "SegoeUIItalic"; */
+@font-face {
+    font-family: "SegoeUIItalic";
+    src: url("../fonts/SegoeUIItalic/SegoeUIItalic.eot");
+    src: url("../fonts/SegoeUIItalic/SegoeUIItalic.eot?#iefix")format("embedded-opentype"),
+    url("../fonts/SegoeUIItalic/SegoeUIItalic.woff") format("woff"),
+    url("../fonts/SegoeUIItalic/SegoeUIItalic.ttf") format("truetype");
+    font-style: normal;
+    font-weight: normal;
+}
+/* font-family: "SegoeUILight"; */
+@font-face {
+    font-family: "SegoeUILight";
+    src: url("../fonts/SegoeUILight/SegoeUILight.eot");
+    src: url("../fonts/SegoeUILight/SegoeUILight.eot?#iefix")format("embedded-opentype"),
+    url("../fonts/SegoeUILight/SegoeUILight.woff") format("woff"),
+    url("../fonts/SegoeUILight/SegoeUILight.ttf") format("truetype");
+    font-style: normal;
+    font-weight: normal;
+}
+/* font-family: "SegoeUISemiBold"; */
+@font-face {
+    font-family: "SegoeUISemiBold";
+    src: url("../fonts/SegoeUISemiBold/SegoeUISemiBold.eot");
+    src: url("../fonts/SegoeUISemiBold/SegoeUISemiBold.eot?#iefix")format("embedded-opentype"),
+    url("../fonts/SegoeUISemiBold/SegoeUISemiBold.woff") format("woff"),
+    url("../fonts/SegoeUISemiBold/SegoeUISemiBold.ttf") format("truetype");
+    font-style: normal;
+    font-weight: normal;
+}
+
 body, html {
-  height: 100%;
+	height: 100%;
 }
 
 .i(@name){
 	background-image: url("@{img-path}/@{name}");
 	background-repeat:no-repeat;
+}
+
+.lh(@height){
+	height:@height;
+	line-height:@height;
 }
 
 .mp{
@@ -24,9 +81,9 @@ body, html {
 	margin-top:15px;
 	margin-left:120px;
 	.i("minder_logo.png");
-  display: block;
-  width: @logoWidth;
-  height: @logoHeight;
+	display: block;
+	width: @logoWidth;
+	height: @logoHeight;
 }
 
 #topMenu{
@@ -34,147 +91,156 @@ body, html {
 	background-color:#bcbbbb;
 	background-position:50% 0;
 	background-size:cover;
-  position: relative;
-  padding-top:1px;
-  width: 100%;
-  height:60px;
+	position: relative;
+	padding-top:1px;
+	width: 100%;
+	height:60px;
 }
 
 #wrapper{
-  width: 100%;
+	width: 100%;
 }
 
 .topMenu {
-  height: @logoHeight;
-  .menu{
-    position: absolute;
-	right:45px;
-    bottom: 0px;
-    .menuItem{
-      display: inline-block;
-	  .btn{
-		  background-color:#fe102c;
-		  border-color:#fe102c;
-		  border-radius:0px;
-		  outline:none;
-		  text-transform:uppercase;
-		  color:white;
-		  font-size:14px;
-	  }
-    }
-  }
+	height: @logoHeight;
+	.menu{
+		position: absolute;
+		right:45px;
+		bottom: 0px;
+		.menuItem{
+			display: inline-block;
+			.btn{
+				background-color:#fe102c;
+				border-color:#fe102c;
+				border-radius:0px;
+				outline:none;
+				text-transform:uppercase;
+				color:white;
+				font-size:14px;
+				font-size:14px;
+				font-family: "SegoeUIRegular";
+
+			}
+		}
+	}
 }
 
 .dropContent{
-  display: none;
+	display: none;
 }
 
 .dropDown:hover .dropContent{
-  position: absolute;
-  top:15px;
-  left:0px;
-  display: table;
-  z-index: 200;
+	position: absolute;
+	top:15px;
+	left:0px;
+	display: table;
+	z-index: 200;
 }
 .dropDown{
-  display: block;
-  position: absolute;
-  right: 0px;
-  bottom: 0px;
-  width: 150px;
+	display: block;
+	position: absolute;
+	right: 0px;
+	bottom: 0px;
+	width: 150px;
 }
 .mainPage{
-  height: 100%;
-  position: relative;
+	height: 100%;
+	position: relative;
 }
 
 #mapLeftPanel{
-  height: 100%;
-  width: @logoWidth;
-  background: @color1;
-  display: block;
-  z-index: 20;
-  position: absolute;
-  top: 0px;
-  left: 0px;
+	float:left;
+	width: 290px;
+	display: block;
+	z-index: 20;
+	margin-left:120px;
+position: relative;
+  z-index: 11;
 }
 
 #mapConteiner {
-  background: #99f;
-  height: 100%;
+  height: 500px;
   width: 100%;
-  top: 0px;
-  left: 0px;
-  position: absolute;
-  padding:  0 0 0 @logoWidth;
   z-index: 10;
+  position: absolute;
+  padding-left: 445px;
+  padding-right: 35px;
+  top: 100px;
 }
+
+#mainPageTopControls{
+	padding-top:1px;
+	height:100px;
+	border-bottom:1px solid #fe102c;
+}
+
 #map{
-  height: 100%;
-  width: 100%;
-  z-index: 15;
+	height: 100%;
+	width: 100%;
+	z-index: 15;
 }
 
 #mainPageContainer {
-  height: 100%;
-  #mapLeftPanel {
-    background: #999;
-    height: 100%;
-  }
+	height: 100%;
+	#mapLeftPanel {
+		background: #999;
+		height: 100%;
+	}
 }
 
 
 
 .textCenter {
-  text-align: center;
+	text-align: center;
 }
 
 .contactMap {
-  min-height: 300px;
-  background: #999;
+	min-height: 300px;
+	background: #999;
 }
 
 .activeDevice {
-  background: rgba(0, 0, 0, 0.1);
+	background: rgba(0, 0, 0, 0.1);
 }
 
 
 .activate{
-  //background: @color4;
+	//background: @color4;
 }
 
 .deleted{
-  color: @color2;
 }
 
 .subscribed{
-  background: @color4;
+
 }
 //#proceedSubscriptionModal{
-//  width: 70%;
+	//  width: 70%;
 //}
 
 .modal-content{
-  margin-top: 20px;
+	margin-top: 20px;
 }
 
 
 .loginForm{
-	width:360px;
+	width:364px;
 	margin:0 auto;
 	margin-top:220px;
 	border-color:transparent;
-		background-color:transparent;
-  box-shadow: none;
+	background-color:transparent;
+	box-shadow: none;
 	.panel-heading{
-		font-size:25px;
+		font-size:27px;
 		color:#fe102c;
 		padding:0px;
 		border-color:transparent;
 		background-color:transparent;
+		font-family: "SegoeUIRegular";
 	}
 	.form-group{
 		span{
+			font-family: "SegoeUIRegular";
 			color:#7c7c7c;
 		}
 		input{
@@ -216,8 +282,8 @@ body, html {
 	margin:0 auto;
 	margin-top:220px;
 	border-color:transparent;
-		background-color:transparent;
-  box-shadow: none;
+	background-color:transparent;
+	box-shadow: none;
 	.panel-heading{
 		font-size:25px;
 		color:#fe102c;
@@ -266,6 +332,7 @@ body, html {
 	font-size:12px;
 	text-decoration:underline;
 	color:red;
+	font-family: "SegoeUIRegular";
 }
 
 .loginBg{
@@ -280,14 +347,25 @@ body, html {
 
 .topMenu .menu.loggedMenu{
 	right:auto;
-	left:500px;
+	left:440px;
 	a.btn{
 		background-color:transparent;
 		border-color:transparent;
 		color:#494949;
 		font-size:14px;
+		display:block;
+		padding:0px;
+		width:85px;
+		float:left;
+		box-shadow:none;
 	}
 }
+
+.remember{
+	font-size:12px;
+	font-family: "SegoeUIRegular";
+}
+
 .topMenu>.dropDown{
 	height:60px;
 	width:auto;
@@ -315,5 +393,241 @@ body, html {
 			right:10px;
 		}
 		
+	}
+	.dropdown-menu{
+		min-width:200px;
+		border-radius:0px;
+		margin-top:-1px;
+		border-color:#d3d3d3;
+		background-color:#d3d3d3;
+		padding:0;
+		box-shadow:none;
+		li{
+			.lh(32px);
+			a{
+				padding:0px;
+				padding-left:5px;
+				.lh(32px);
+				border-bottom:1px solid white;
+				font-size:14px;
+				font-family: "SegoeUIRegular";
+
+				
+			}
+			&:hover{
+				a{
+					background-color:#d3d3d3;	
+					color:#fe102c;
+					
+					
+				}
+			}
+		}
+		li:last-child{
+			a{
+				border-bottom:none;
+			}
+		}
+	
+	}
+}
+
+.billingItem{
+	width:auto;
+	tbody{
+		tr{
+			td{
+				padding:10px;
+				width:162px;
+				>div{
+					background-color:#d4d4d4;
+				}
+				.tariffPlan{
+					.lh(50px);
+					text-align:center;
+					font-family: "SegoeUIBold";
+					font-size:14px;
+				}
+				.tariffPlanInfo{
+					font-family: "SegoeUILight";
+					font-size:12px;
+					text-align:center;
+					padding-top:1px;
+					padding-bottom:1px;
+					.inner{
+						margin:5px;
+						background-color:white;
+						.price{
+							font-family: "SegoeUIBold";
+							font-size:14px;
+							color:#fe102c;
+							margin:0 5px;
+							margin-top:5px;
+							padding-top:5px;
+							border-top:1px solid #d3d3d3;
+
+						}
+						.title{
+							font-family: "SegoeUILight";
+							font-size:12px;
+							color:#494949;
+						}
+						.devicesCount{
+							font-size:14px;
+							font-family: "SegoeUIRegular";
+							color:#7c7c7c;
+						}
+					}
+				}
+
+			}
+		}
+	}
+}
+#searchForm{
+		border:3px solid #d9d9d9;
+		margin-top:26px;
+		width:290px;
+	.goSearch{
+		.i("search-icon.png");
+		width:24px;
+		height:24px;
+		display:block;
+		float:left;
+		margin-top: 3px;
+		margin-left: 4px;
+		&:before{
+			content:"";
+		}
+	}
+	input{
+		border:none;
+		outline:none;
+		box-shadow:none;
+		padding:0px;
+		padding-left:10px;
+		width: 229px;
+	}
+	.clearSearch{
+		.i("search-close-icon.png");
+		width:18px;
+		height:17px;
+		float:right;
+		margin-top:7px;
+		&:before{
+			content:"";
+		}
+
+	}
+}
+#mapLocateButton{
+    font-family: "SegoeUIRegular";
+	font-size:16px;
+	color:white;
+	width:133px;
+	height:39px;
+	display:block;
+	background-color:#fe102c;
+	border-radius:0px;
+	border:none;
+	float:right;
+}
+#devicesMainList{
+	border-bottom: 1px solid #fe102c;
+}
+
+#mainPageBottomControls{
+	.pagination{
+		.item{
+			.goToPage{
+				border:none;
+				font-family: "SegoeUIRegular";
+				font-size:12px;
+				color:#494949;
+			
+			}
+			&.active{
+				a{
+					color:#fe102c;
+					background-color:white;
+				}
+			}
+
+		}
+	}
+}
+
+.devicesListContainer{
+	margin-left: 120px;
+	.pagination{
+		.item{
+			.goToPage{
+				border:none;
+				font-family: "SegoeUIRegular";
+				font-size:12px;
+				color:#494949;
+				
+			}
+			&.active{
+				a{
+					color:#fe102c;
+					background-color:white;
+				}
+			}
+			a{
+				border:none;
+			}
+
+		}
+	}
+}
+
+#devicesList{
+	margin-top:25px;
+	width:620px;
+	button{
+		outline:none;
+		.mp;
+		font-family: "SegoeUIRegular";
+		font-size:16px;
+		height:30px;
+		width:76px;
+		border-radius:0;
+		&:active{
+			box-shadow:none;
+		}
+	}
+	.setEdit{
+
+		border:3px solid #d3d3d3;
+	}
+	.setDelete{
+		border:3px solid #fe102c;
+		color:#fe102c;
+	}
+	.setActive{
+		border:3px solid #2ab637;
+		color:#2ab637;	
+	}
+	.table{
+		tr{
+			td{
+				.mp;
+				.lh(67px);
+				&:last-child{
+					text-align:right;
+				}
+			}
+			&:first-child{
+				td{
+					border-top:1px solid #fe102c;
+				}
+			}
+			&:last-child{
+				td{
+					border-bottom:1px solid #fe102c;
+				}
+			}
+		}
 	}
 }

@@ -31,7 +31,7 @@
     <div class="panel-body">
 
 
-        <table class="table">
+        <table class="table billingItem">
             <tbody>
             <tr>
                 <% _.each(tearsMonth, function(item){%>
@@ -45,23 +45,27 @@
                 <td>
                 <% } %>
 
-                    <div class="tariffPlan">
-                        <%= item.name %> <!-- - <%= item.amount/100 %>$-->
-                    </div>
-                    <div class="tariffPlanInfo">
-                        <!--<%= item.statement_descriptor %><br>-->
-                        MINDER Unit Base<br>
-                        Cost by Volume RRP per month<br>
-                        $<%= (item.amount/100).toFixed(2) %> Cost<br>
-                        for <%= item.metadata.minDevices %> - <%= item.metadata.maxDevices %> devices
-                    </div>
+                <div class="tariffPlan">
+                  <%= item.name %> <!-- - <%= item.amount/100 %>$-->
+                </div>
+                <div class="tariffPlanInfo">
+                  <div class="inner">
+                    <!--<%= item.statement_descriptor %><br>-->
+                    <div class="title">
+                      MINDER Unit Base<br>
+                      Cost by Volume RRP per month<br>
+					</div>
+					<div class="price">$<%= (item.amount/100).toFixed(2) %> Cost<br></div>
+                    <div class="devicesCount">for <%= item.metadata.minDevices %> - <%= item.metadata.maxDevices %> devices</div>
+                  </div>
+                </div>
                 </td>
                 <% }) %>
             </tr>
             </tbody>
         </table>
 
-        <table class="table">
+        <table class="table billingItem">
             <tbody>
             <tr>
                 <% _.each(tearsYear, function(item){%>
@@ -80,9 +84,11 @@
                     </div>
                     <div class="tariffPlanInfo">
                         <!--<%= item.statement_descriptor %><br>-->
+                  <div class="inner">
                         COST PER YEAR<br>
                         $<%= (item.amount/100).toFixed(2) %> Cost<br>
                         for <%= item.metadata.minDevices %> - <%= item.metadata.maxDevices %> devices
+				  </div>
                     </div>
                 </td>
                 <% }) %>
