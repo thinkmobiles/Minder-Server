@@ -36,7 +36,8 @@ define([
                 firstName: user.firstName || '',
                 lastName: user.lastName || '',
                 errors: false,
-                messages: false
+                messages: false,
+                errObj:false
             };
 
             if (this.stateModel) {
@@ -58,11 +59,13 @@ define([
             var self = this;
             var errors = [];
             var messages = [];
+            var errObj = {};
             var data;
 
             var stateModelUpdate = {
                 errors: false,
                 messages: false,
+                errObj: false,
                 email: this.$el.find("#email").val().trim(),
                 firstName: this.$el.find("#firstName").val().trim(),
                 lastName: this.$el.find("#lastName").val().trim(),
@@ -76,17 +79,24 @@ define([
 
             // validations
             validation.checkEmailField(messages, true, stateModelUpdate.email, 'Email');
-            validation.checkNameField(messages, true, stateModelUpdate.firstName, 'First name');
-            validation.checkNameField(messages, true, stateModelUpdate.lastName, 'Last name');
+            validation.checkNameField(errObj, true, stateModelUpdate.firstName, 'First name');
+            validation.checkNameField(errObj, true, stateModelUpdate.lastName, 'Last name');
             if (stateModelUpdate.newPassword || stateModelUpdate.password) {
                 // if need validate passwords
-                validation.checkPasswordField(messages, true, stateModelUpdate.password, 'Password');
-                validation.checkPasswordField(messages, true, stateModelUpdate.newPassword, 'New password');
-                validation.checkPasswordField(messages, true, stateModelUpdate.confirmPassword, 'Confirm password');
+                validation.checkPasswordField(errObj, true, stateModelUpdate.password, 'Password');
+                validation.checkPasswordField(errObj, true, stateModelUpdate.newPassword, 'New password');
+                validation.checkPasswordField(errObj, true, stateModelUpdate.confirmPassword, 'Confirm password');
                 if (stateModelUpdate.newPassword !== stateModelUpdate.confirmPassword) {
                     messages.push('New password is not equal to confirm password');
                 }
             }
+
+            for (var my in errObj){
+                if(errObj[my].length>0) {
+                    messages.push(errObj[my]);
+                }
+            }
+
 
             if (errors.length > 0 || messages.length > 0) {
                 if (errors.length > 0) {
