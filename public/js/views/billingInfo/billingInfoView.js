@@ -148,7 +148,7 @@ define([
                 url: '/renewal',
                 contentType: 'application/json',
                 data: JSON.stringify(data),
-                method: 'POST',
+                method: 'PUT',
                 success: function () {
                     // clean data
                     self.stateModel.set({

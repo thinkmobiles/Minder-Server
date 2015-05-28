@@ -68,6 +68,8 @@ define([
             // if the page is change fetch new models
             this.listenTo(this.stateModel, 'change:params', this.handleParams);
 
+            //this.listenTo(this.stateModel, 'change:checked',this.globalCheckTrigger);
+
             // keep data actual
             this.listenTo(this.devisesCollection, 'sync remove', this.render);
 
@@ -253,6 +255,12 @@ define([
             if (this.devicesView) {
                 this.devicesView.undelegateEvents();
                 this.devicesView.remove();
+            }
+        },
+
+        chekGlobal : function(){
+            if (this.selectedDevicesCollection.length == this.devisesCollection.length){
+                alert ('Hallo')
             }
         },
 
