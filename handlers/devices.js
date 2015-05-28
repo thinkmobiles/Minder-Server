@@ -309,6 +309,92 @@ var DeviceHandler = function (db) {
         });
     };
 
+    function sendExpiredNotificationToUser(userData) {
+        var criteria = {
+            _id: userData._id
+        };
+
+        UserModel.find(criteria)
+    };
+
+    function sendExpiredNotifications(deviceModels, callback) {
+        var users = _.groupBy(deviceModels, 'user');
+        //var userIds = _.pluck(deviceModels, 'user');
+        var userIds = Object.keys(users);
+
+        async.waterfall([
+
+            //find the users:
+            function (cb) {
+                var criteria = {
+                    _id: {
+                        $in: userIds
+                    }
+                };
+                var fields = {
+                    email: 1,
+                    firstName: 1,
+                    lastName: 1
+                };
+
+                UserModel.find(criteria, fields, function (err, userModels) {
+                    if (err) {
+                        return cb(err);
+                    }
+                    cb(null, userModels);
+                });
+            },
+
+            //map users:
+            function (userModels, cb) {
+                async.map(userModels, function (userModel, mapCb) {
+                    var userJSON = userModel.toJSON();
+
+                    userJSON.devices = users[userJSON._id];
+                    //TODO: send notification ...
+
+                    return mapCb(null, userJSON);
+
+                }, function (err, userData) {
+                    if (err) {
+                        return cb(err);
+                    }
+                    cb(null, userData);
+                });
+            }
+
+        ], function (err, result) {
+            if (err) {
+                if (callback && (typeof callback === 'function')) {
+                    callback(err);
+                }
+            } else {
+                if (callback && (typeof callback === 'function')) {
+                    callback(null, result);
+                }
+            }
+        });
+
+        /*async.map(deviceModels, function (deviceModel, cb) {
+            return cb(null, deviceModel.toJSON());
+        }, function (err, devicesJSON) {
+            var users;
+
+            if (err) {
+                if (callback && (typeof callback === 'function')) {
+                    callback(err);
+                }
+            } else {
+
+                users = _.groupBy(devicesJSON, 'user');
+
+                if (callback && (typeof callback === 'function')) {
+                    callback();
+                }
+            }
+        });*/
+    };
+
     this.validateDeviceData = validateDeviceData;
 
     this.prepareDeviceData = prepareDeviceData;
@@ -791,6 +877,11 @@ var DeviceHandler = function (db) {
             //update the device:
             function (deviceModel, cb) {
                 var oldDeviceStatus = deviceModel.status;
+
+                if (deviceStatus === DEVICE_STATUSES.DELETED) {
+                    deviceModel.billings.subscriptionId = null;
+                    deviceModel.billings.expirationDate = null;
+                }
 
                 deviceModel.status = deviceStatus;
                 deviceModel.save(function (err, updatedDevice) {
@@ -1393,7 +1484,7 @@ var DeviceHandler = function (db) {
 
         async.waterfall([
 
-            //update devices with status "subscribed" and expired subscr.date and renewEnabled === false;
+            //find devices with status "subscribed" and expired subscr.date and renewEnabled === false;
             function (cb) {
                 var now = new Date();
                 var criteria = {
@@ -1404,17 +1495,65 @@ var DeviceHandler = function (db) {
                         $lte: now
                     }
                 };
-
-                var update = {
-                    $set: {
-                        status: DEVICE_STATUSES.ACTIVE,
-                        "billings.expirationDate": null,
-                        "billings.subscriptionId": null,
-                        updatedAt: now
-                    }
+                var fields = {
+                    user: 1,
+                    name: 1,
+                    "billings.expirationDate": 1
                 };
 
-                DeviceModel.update(criteria, update, {multi: true}, function (err, devices) {
+                DeviceModel.find(criteria, fields, function (err, devices) {
+                    if (err) {
+                        return cb(err);
+                    }
+                    cb(null, devices);
+                });
+
+            },
+
+            //update devices with status "subscribed" and expired subscr.date and renewEnabled === false;
+            function (devices, cb) {
+                var now = new Date();
+                var criteria;
+                var update;
+                var deviceIds;
+
+                if (devices && devices.length) {
+
+                    deviceIds = _.pluck(devices, '_id');
+                    criteria = {
+                        _id: {
+                            $in: deviceIds
+                        }
+                    };
+                    update = {
+                        $set: {
+                            status: DEVICE_STATUSES.ACTIVE,
+                            "billings.expirationDate": null,
+                            "billings.subscriptionId": null,
+                            updatedAt: now
+                        }
+                    };
+
+                    DeviceModel.update(criteria, update,  {multi: true}, function (err, count) {
+                        if (err) {
+                            return cb(err);
+                        }
+                        cb(null, devices);
+                    });
+
+                } else {
+                    cb(null, devices);
+                }
+            },
+
+            //send notification:
+            function (devices, cb) {
+
+                if (!devices || !devices.length) {
+                    return cb();
+                }
+
+                sendExpiredNotifications(devices, function (err) {
                     if (err) {
                         return cb(err);
                     }
@@ -1661,7 +1800,6 @@ var DeviceHandler = function (db) {
                 var expDate = moment(deviceJSON.billings.expirationDate);
                 var diff = expDate.diff(nowMoment, 'd');
                 var timeLeft = moment(deviceJSON.billings.expirationDate).fromNow();
-                //var daysLeft = moment(devices[i].device.billings.expirationDate).fromNow()
 
                 deviceJSON['daysDiff'] = diff;
                 deviceJSON['timeLeft'] = timeLeft;
@@ -1673,29 +1811,8 @@ var DeviceHandler = function (db) {
 
             async.waterfall([
 
-                //map users:
-                function (cb) {
-
-                    /*async.each(
-                        Object.keys(users),
-                        function (user, eachCb) {
-                            /!*var devices = _.groupBy(users[user], 'daysDiff');
-
-                            users[user] = devices;*!/
-
-                            eachCb();
-                        }, function (err) {
-                            if (err) {
-                                return cb(err);
-                            }
-                            cb(null, users);
-                        });*/
-
-                    cb(null, users);
-                },
-
                 //get the users email:
-                function (users, cb) {
+                function (cb) {
                     var userIds = Object.keys(users);
                     var criteria = {
                         _id: {
