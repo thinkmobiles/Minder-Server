@@ -94,6 +94,10 @@ define([
                     this.render();
                 });
                 self.calculatePlan();
+            } else {
+                paginationOptions.data = {
+                    sort: '-status billings.expirationDate name'
+                };
             }
 
             // create pagination to control devices collection
@@ -308,7 +312,8 @@ define([
                     search: search
                 });
                 this.paginationView.setData({
-                    name: search
+                    name: search,
+                    sort: '-status billings.expirationDate name'
                 });
             }
         },
