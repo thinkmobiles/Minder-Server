@@ -68,8 +68,6 @@ define([
             // if the page is change fetch new models
             this.listenTo(this.stateModel, 'change:params', this.handleParams);
 
-            //this.listenTo(this.stateModel, 'change:checked',this.globalCheckTrigger);
-
             // keep data actual
             this.listenTo(this.devisesCollection, 'sync remove', this.render);
 
@@ -137,22 +135,14 @@ define([
                     }
                 }
             });
-
-            alert(self.selectedDevicesCollection.length+' iz '+self.devisesCollection.length);
-
         },
 
         myChecked: function () {
-            if (this.selectedDevicesCollection.length > 0) {
-                var checkLength = $("input.checkbox:checked").length;
-                if ($("input.checkbox:checked").length > 0) {
-                    if (checkLength == this.selectedDevicesCollection.length) {
-                        $('#globalDevicesChecker').prop('checked', true);
-                    }
-                }
-                else {
-                    $('#globalDevicesChecker').prop('checked', false);
-                }
+            var leng = $('input.deviceCheckbox:checked').length;
+            if (leng == this.devisesCollection.length) {
+                $('#globalDevicesChecker').prop('checked', true);
+            } else {
+                $('#globalDevicesChecker').prop('checked', false);
             }
         },
 
@@ -238,16 +228,6 @@ define([
             });
         },
 
-        /*deviceEdit: function (e) {
-
-            e.preventDefault();
-            var id = $(e.target).attr('value');
-
-            new deviceView({id : id});
-        },
-*/
-
-        //==========================================\/\/\/\/\/\/\/\/
 
         // open the modal
         showEditDeviceModal: function (e) {
@@ -274,15 +254,6 @@ define([
                 this.devicesView.remove();
             }
         },
-
-        //chekGlobal : function(){
-        //    if ((this.selectedDevicesCollection.length == this.devisesCollection.length) && this.selectedDevicesCollection.length>0){
-        //        return alert ('Hallo')
-        //    }
-        //},
-
-
-        //===========================================/\/\/\/\/\/\/\
 
 
         // calculate plan for user to preview
@@ -417,7 +388,6 @@ define([
         render: function () {
 
             this.updateDevicesData();
-            this.myChecked();
 
             var data = this.stateModel.toJSON();
             var now = App.sessionData.get('date');
@@ -435,7 +405,10 @@ define([
 
                 this.$el.html(_.template(Template, data));
             }
+
+            this.myChecked();
             this.$el.find('#pagination').append(this.paginationView.render().$el);
+
 
 
 
