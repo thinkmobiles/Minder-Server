@@ -209,11 +209,10 @@ position: relative;
 }
 
 .deleted{
-	color: @color2;
 }
 
 .subscribed{
-	background: @color4;
+
 }
 //#proceedSubscriptionModal{
 	//  width: 70%;
@@ -559,9 +558,76 @@ position: relative;
 }
 
 .devicesListContainer{
-	  margin-left: 120px;
+	margin-left: 120px;
+	.pagination{
+		.item{
+			.goToPage{
+				border:none;
+				font-family: "SegoeUIRegular";
+				font-size:12px;
+				color:#494949;
+				
+			}
+			&.active{
+				a{
+					color:#fe102c;
+					background-color:white;
+				}
+			}
+			a{
+				border:none;
+			}
+
+		}
+	}
 }
 
 #devicesList{
+	margin-top:25px;
 	width:620px;
+	button{
+		outline:none;
+		.mp;
+		font-family: "SegoeUIRegular";
+		font-size:16px;
+		height:30px;
+		width:76px;
+		border-radius:0;
+		&:active{
+			box-shadow:none;
+		}
+	}
+	.setEdit{
+
+		border:3px solid #d3d3d3;
+	}
+	.setDelete{
+		border:3px solid #fe102c;
+		color:#fe102c;
+	}
+	.setActive{
+		border:3px solid #2ab637;
+		color:#2ab637;	
+	}
+	.table{
+		tr{
+			td{
+				.mp;
+				.lh(67px);
+				&:last-child{
+					text-align:right;
+				}
+			}
+			&:first-child{
+				td{
+					border-top:1px solid #fe102c;
+				}
+			}
+			&:last-child{
+				td{
+					border-bottom:1px solid #fe102c;
+				}
+			}
+		}
+	}
 }
