@@ -4,7 +4,7 @@
     <% if (authorized) { %>
     <div class="menu loggedMenu">
         <% for (i in top) { %>
-        <div class="menuItem topMenuItem">
+        <div class="menuItem topMenuItem active">
             <a class="btn btn-default" href="<%= top[i].url %>"><%= top[i].name %></a>
         </div>
         <% } %>

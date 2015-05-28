@@ -12,6 +12,8 @@ var SessionHandler = require('../handlers/sessions');
 var calculateTariff = require('../public/js/libs/costCounter');
 var moment = require('moment');
 var stripe = require('stripe')(process.env.STRIPE_PRIVATE_KEY);
+var mailer = require('../helpers/mailer');
+var schedule = require('node-schedule');
 
 var DeviceHandler = function (db) {
     var ObjectId = mongoose.Schema.Types.ObjectId;
@@ -59,6 +61,120 @@ var DeviceHandler = function (db) {
         if (callback && (typeof callback === 'function')) {
             callback();
         }
+    };
+
+    function updateTheCurrentPlan(params, callback) {
+
+        if (!params || (!params.userId && !params.userModel)) {
+            if (callback && (typeof callback === 'function')) {
+                callback(badRequests.NotEnParams({reqParams: 'params.userId | params.userModel'}));
+            }
+            return;
+        }
+
+        async.parallel({
+            plans: function (cb) {
+
+                if (params.plans) {
+                    return cb(null, params.plans);
+                }
+
+                TariffPlan.find({}, function (err, plans) {
+                    if (err) {
+                        return cb(err);
+                    }
+                    cb(null, plans);
+                })
+            },
+            userModel: function (cb) {
+
+                if (params.userModel) {
+                    return cb(null, params.userModel);
+                }
+
+                UserModel.findOne({
+                    _id: params.userId
+                }, function (err, user) {
+                    if (err) {
+                        cb(err);
+                    } else if (!user) {
+                        cb(badRequests.NotFound());
+                    } else {
+                        cb(null, user);
+                    }
+                });
+
+            }
+        }, function (err, results) {
+            var userModel = results.userModel;
+            var planModels = results.plans;
+            var quantity = params.quantity || 0;
+
+            if (err) {
+                if (callback && (typeof callback === 'function')) {
+                    callback(err);
+                }
+                return;
+            }
+
+            async.waterfall([
+
+                //recalculate the tariffPlan:
+                function (cb) {
+                    var calculateParams;
+
+                    if (!quantity) {
+                        return cb(null);
+                    }
+
+                    calculateParams = {
+                        date: new Date(),
+                        plans: planModels,
+                        period: params.period || userModel.billings.planPeriod,
+                        user: userModel,
+                        selectedDevicesCount: quantity
+                    };
+
+                    calculateTariff(calculateParams, function (err, plan) {
+                        if (err) {
+                            return cb(err);
+                        }
+                        cb(null, plan);
+                    });
+
+                },
+
+                // update the User.billings.currentPlan:
+                function (plan, cb) {
+
+                    if (!plan || !plan.plan_id) {
+                        return cb(badRequests.NotFound({message: "Can't find the users plan"}));
+                    }
+
+                    userModel.billings.currentPlan = plan.plan_id;
+                    userModel.billings.subscribedDevices += quantity;
+
+                    userModel.save(function (err, updatedUser) {
+                        if (err) {
+                            return cb(err);
+                        }
+                        cb(null, updatedUser);
+                    });
+
+                }
+
+            ], function (err, result) {
+                if (err) {
+                    if (callback && (typeof callback === 'function')) {
+                        callback(err);
+                    }
+                } else {
+                    if (callback && (typeof callback === 'function')) {
+                        callback(null, result);
+                    }
+                }
+            });
+        });
     };
 
     function subscribe(options, callback) {
@@ -144,7 +260,7 @@ var DeviceHandler = function (db) {
                 planId = planModel._id.toString();
                 quantity = plan.devicesToPay;
                 expirationDate = plan.expirationDate;
-                description = 'Minder charge for ' + userModel.email + '. Subscription for ' + quantity + ' devices. Plan: ' + planModel.name + ', expirationDate: ' + expirationDate.toISOString();
+                description = 'Minder charge for ' + userModel.email + '. Subscription for ' + quantity + ' devices. Plan: ' + planModel.name;
 
                 /*chargeParams = {
                     amount: planModel.amount,  //price
@@ -233,27 +349,6 @@ var DeviceHandler = function (db) {
 
                     cb(null, userData);
                 });
-
-                /*DeviceModel
-                 .aggregate([{
-                 $match: {
-                 user: userId, //userId
-                 status: DEVICE_STATUSES.SUBSCRIBED
-                 }
-                 }, {
-                 $group: {
-                 _id: "$user",
-                 count: {
-                 $sum: 1
-                 }
-                 }
-                 }])
-                 .exec(function (err, results) {
-                 if (err) {
-                 return cb(err);
-                 }
-                 cb(null, results);
-                 });*/
             },
 
             //update the User.billings data:
@@ -308,6 +403,376 @@ var DeviceHandler = function (db) {
         });
     };
 
+    function updateSubscribedDevicesCount(options, callback) {
+        var criteria = {
+            _id: options._id
+        };
+        var update = {
+            "billings.subscribedDevices": options.count,
+            updatedAt: new Date()
+        };
+
+        UserModel.findOneAndUpdate(criteria, update, function (err, userModel) {
+            if (err) {
+                if (callback && (typeof callback === 'function')) {
+                    callback(err);
+                }
+            } else {
+                if (callback && (typeof callback === 'function')) {
+                    callback(null, userModel);
+                }
+            }
+        });
+    };
+
+    function renewTheSubscriptionByUser(userData, planModels, callback) {
+        var userId = userData._id;
+        var devices = userData.devices;
+        var deviceIds = _.pluck(devices, '_id');
+        var deviceStringsIds = '';
+
+        deviceIds.forEach(function (deviceId) {
+            deviceStringsIds += deviceId.toString() + ' ';
+        });
+
+        function chargeIsFail(err) {
+
+            if (process.env.NODE_ENV !== 'production') {
+                console.log(' -------------------- ');
+                console.log('>>> charge is fail');
+                console.log('>>> %s', JSON.stringify(userData));
+                console.log('Error: %s', err);
+                console.log(' -------------------- ');
+            }
+
+            var now = new Date();
+            var criteria = {
+                _id: {
+                    $in: deviceIds
+                }
+            };
+            var update = {
+                $set: {
+                    status: DEVICE_STATUSES.ACTIVE,
+                    "billings.expirationDate": null,
+                    "billings.subscriptionId": null,
+                    updatedAt: now
+                }
+            };
+
+            DeviceModel.update(criteria, update, {multi: true}, function (err, devices) {
+                if (err) {
+                    if (process.env.NODE_ENV !== 'production') {
+                        console.error(err);
+                    }
+                }
+            });
+        };
+
+        async.waterfall([
+
+            //find the user:
+            function (cb) {
+                var criteria = {
+                    _id: userId
+                };
+
+                UserModel.findOne(criteria, function (err, userModel) {
+                    if (err) {
+                        return cb(err);
+                    }
+                    cb(null, userModel);
+                });
+            },
+
+            //get the User.currentPlan:
+            function (userModel, cb) {
+                var currentPlanModel = _.find(planModels, function (plan) {
+                    return plan._id.toString() === userModel.billings.currentPlan.toString();
+                });
+
+                cb(null, userModel, currentPlanModel);
+            },
+
+            //try to make charge:
+            function (userModel, plan, cb) {
+                var quantity = devices.length;
+                var price = quantity * plan.amount;
+                var planId = plan._id.toString();
+                var expirationDate;
+                var description;
+                var chargeParams;
+                var date = new Date();
+                var err;
+
+                //calculate the expirationDate:
+                if (plan.metadata.type === PLAN_TYPES.MONTH) {
+                    expirationDate = new Date(date.setMonth(date.getMonth() + 1));
+                } else if (plan.metadata.type === PLAN_TYPES.YEAR) {
+                    expirationDate = new Date(date.setFullYear(date.getFullYear() + 1));
+                } else {
+                    err = new Error();
+                    err.message = 'Invalid value for plan.metadata.type';
+                    return cb(err);
+                }
+
+                description = 'Minder charge (renew) for ' + userModel.email + '. Renew subscription for ' + quantity + ' devices. Plan: ' + plan.name + ', expirationDate: ' + expirationDate.toISOString();
+
+                //try to make charge:
+                /*chargeParams = {
+                 customer: userModel.billings.stripeId,
+                 amount: price,
+                 currency: plan.currency,
+                 description: description,
+                 metadata: {
+                 planId: planId,
+                 quantity: quantity,
+                 expirationDate: expirationDate,
+                 deviceIds: deviceStringsIds
+                 }
+                 };
+
+                 /!*
+                 https://stripe.com/docs/api:
+                 Metadata - "A set of key/value pairs that you can attach to a charge object.
+                 It can be useful for storing additional information about the customer in a structured format.
+                 It's often a good idea to store an email address in metadata for tracking later."
+                 *!/
+
+                 stripe.charges.create(chargeParams, function (err, charge) {
+                 if (err) {
+                 return cb(err);
+                 }
+                 cb(null, charge);
+                 });*/
+
+
+                var subscriptionParams = {
+                    plan: planId,
+                    quantity: quantity,
+                    metadata: {
+                        description: description,
+                        quantity: quantity,
+                        expirationDate: expirationDate,
+                        deviceIds: deviceStringsIds
+                    }
+                };
+
+                stripe.customers.createSubscription(userModel.billings.stripeId, subscriptionParams, function (err, charge) {
+                    if (err) {
+                        return cb(err);
+                    }
+                    cb(null, charge);
+                });
+
+            },
+
+            //update the Devices.billings:
+            function (charge, cb) {
+                var now = new Date();
+                var criteria = {
+                    _id: {
+                        $in: deviceIds
+                    }
+                };
+                var update = {
+                    $set: {
+                        "billings.subscriptionId": charge.id,
+                        "billings.expirationDate": charge.metadata.expirationDate,
+                        updatedAt: now
+                    }
+                };
+
+                DeviceModel.update(criteria, update, {multi: true}, function (err, devices) {
+                    if (err) {
+                        return cb(err);
+                    }
+                    cb(null, charge);
+                });
+            }
+
+        ], function (err, result) {
+            if (err) {
+                chargeIsFail(err);
+                if (callback && (typeof callback === 'function')) {
+                    callback(err);
+                }
+            } else {
+                if (callback && (typeof callback === 'function')) {
+                    callback(null, result);
+                }
+            }
+        });
+    };
+
+    function renewTheSubscription(userData, callback) {
+
+        async.waterfall([
+
+            //get the current active tariff plans:
+            function (cb) {
+                var criteria = {};
+
+                TariffPlan.find(criteria, function (err, plans) {
+                    if (err) {
+                        return cb(err);
+                    }
+                    cb(null, plans)
+                });
+            },
+
+            //try to renew the subscription:
+            function (plans, cb) {
+
+                async.each(userData, function (data, eachCb) {
+                    renewTheSubscriptionByUser(data, plans, function (err, result) {
+                        if (err) {
+                            if (process.env.NODE_ENV !== 'production') {
+                                console.error(err);
+                            }
+                        }
+                        eachCb();
+                    });
+                }, function (err) {
+                    if (err) {
+                        return cb(err);
+                    }
+                    cb();
+                });
+
+            }
+
+        ], function (err, results) {
+            if (err) {
+                if (callback && (typeof callback === 'function')) {
+                    callback(err);
+                }
+            } else {
+                if (callback && (typeof callback === 'function')) {
+                    callback();
+                }
+            }
+        });
+
+    };
+
+    function sendExpiredNotifications(deviceModels, callback) {
+        var users;
+        var userIds;
+
+        if (!deviceModels || !deviceModels.length) {
+            if (callback && (typeof callback === 'function')) {
+                callback();
+            }
+            return;
+        }
+
+        users = _.groupBy(deviceModels, 'user');
+        userIds = Object.keys(users);
+
+        async.waterfall([
+
+            //find the users:
+            function (cb) {
+                var criteria = {
+                    _id: {
+                        $in: userIds
+                    }
+                };
+                var fields = {
+                    email: 1,
+                    firstName: 1,
+                    lastName: 1
+                };
+
+                UserModel.find(criteria, fields, function (err, userModels) {
+                    if (err) {
+                        return cb(err);
+                    }
+                    cb(null, userModels);
+                });
+            },
+
+            //map users and send notification:
+            function (userModels, cb) {
+                async.map(userModels, function (userModel, mapCb) {
+                    var userJSON = userModel.toJSON();
+
+                    userJSON.devices = users[userJSON._id];
+                    mailer.onExpired(userJSON);
+
+                    return mapCb(null, userJSON);
+
+                }, function (err, userData) {
+                    if (err) {
+                        return cb(err);
+                    }
+                    cb(null, userData);
+                });
+            }
+
+        ], function (err, result) {
+            if (err) {
+                if (callback && (typeof callback === 'function')) {
+                    callback(err);
+                }
+            } else {
+                if (callback && (typeof callback === 'function')) {
+                    callback(null, result);
+                }
+            }
+        });
+    };
+
+    function checkExpirationDateForNotifications(daysBefore, callback) {
+        var now = new Date();
+        var from = new Date();
+        var to = new Date();
+        var criteria;
+        var fields = {
+            _id: 0,
+            name: 1,
+            user: 1,
+            "billings.expirationDate": 1
+        };
+        var query;
+
+        from.setDate(now.getDate() + daysBefore);
+        from.setHours(0);
+        from.setMinutes(0);
+
+        to.setDate(now.getDate() + daysBefore + 1);
+        to.setHours(0);
+        to.setMinutes(0);
+
+        if (process.env.NODE_ENV !== 'production') {
+            console.log('>>> billings.expirationDate between: %s AND %s', from.toISOString(), to.toISOString());
+        }
+
+        criteria = {
+            status: DEVICE_STATUSES.SUBSCRIBED,
+            "billings.renewEnabled": false,
+            "billings.expirationDate": {
+                $gte: from,
+                $lte: to
+            }
+        };
+
+        query = DeviceModel.find(criteria, fields);
+
+        query.exec(function (err, result) {
+            if (err) {
+                if (callback && (typeof callback === 'function')) {
+                    callback(err);
+                }
+            } else {
+                if (callback && (typeof callback === 'function')) {
+                    callback(null, result);
+                }
+            }
+        });
+    };
+
     this.validateDeviceData = validateDeviceData;
 
     this.prepareDeviceData = prepareDeviceData;
@@ -315,7 +780,7 @@ var DeviceHandler = function (db) {
     this.getDeviceOS = function (req) {
         var userAgent = req.headers['user-agent'].toLowerCase();
 
-        if ((userAgent.indexOf('iphone') !== -1) || (userAgent.indexOf('darwin/14') !== -1) || (userAgent.indexOf('ipad') !== -1)) {
+        if ((userAgent.indexOf('iphone') !== -1) || (userAgent.indexOf('darwin/14') !== -1) || (userAgent.indexOf('ipad') !== -1) || (userAgent.indexOf('ipod') !== -1)) {
             return DEVICE_OS.IOS;
         }
 
@@ -610,145 +1075,6 @@ var DeviceHandler = function (db) {
 
     };
 
-    this.removeDevice = function (req, res, next) {
-        /*var id = req.params.id;
-         var userId = req.session.userId;
-
-         var criteria = {
-         _id: id
-         };
-
-         if (!session.isAdmin(req)) {
-         criteria.user = userId;
-         }
-
-         DeviceModel.findOneAndRemove(criteria, function (err, result) {
-         if (err) {
-         next(err);
-         } else if (!result) {
-         next(badRequests.NotFound());
-         } else {
-         res.status(200).send({success: 'removed'});
-         }
-         });*/
-
-        res.status(500).send('Not implemented');
-    };
-
-    function updateTheCurrentPlan(params, callback) {
-
-        if (!params || (!params.userId && !params.userModel)) {
-            if (callback && (typeof callback === 'function')) {
-                callback(badRequests.NotEnParams({reqParams: 'params.userId | params.userModel'}));
-            }
-            return;
-        }
-
-        async.parallel({
-            plans: function (cb) {
-
-                if (params.plans) {
-                    return cb(null, params.plans);
-                }
-
-                TariffPlan.find({}, function (err, plans) {
-                    if (err) {
-                        return cb(err);
-                    }
-                    cb(null, plans);
-                })
-            },
-            userModel: function (cb) {
-
-                if (params.userModel) {
-                    return cb(null, params.userModel);
-                }
-
-                UserModel.findOne({
-                    _id: params.userId
-                }, function (err, user) {
-                    if (err) {
-                        cb(err);
-                    } else if (!user) {
-                        cb(badRequests.NotFound());
-                    } else {
-                        cb(null, user);
-                    }
-                });
-
-            }
-        }, function (err, results) {
-            var userModel = results.userModel;
-            var planModels = results.plans;
-            var quantity = params.quantity || 0;
-
-            if (err) {
-                if (callback && (typeof callback === 'function')) {
-                    callback(err);
-                }
-                return;
-            }
-
-            async.waterfall([
-
-                //recalculate the tariffPlan:
-                function (cb) {
-                    var calculateParams;
-
-                    if (!quantity) {
-                        return cb(null);
-                    }
-
-                    calculateParams = {
-                        date: new Date(),
-                        plans: planModels,
-                        period: params.period || userModel.billings.planPeriod,
-                        user: userModel,
-                        selectedDevicesCount: quantity
-                    };
-
-                    calculateTariff(calculateParams, function (err, plan) {
-                        if (err) {
-                            return cb(err);
-                        }
-                        cb(null, plan);
-                    });
-
-                },
-
-                // update the User.billings.currentPlan:
-                function (plan, cb) {
-
-                    if (!plan || !plan.plan_id) {
-                        return cb(badRequests.NotFound({message: "Can't find the users plan"}));
-                    }
-
-                    userModel.billings.currentPlan = plan.plan_id;
-                    userModel.billings.subscribedDevices += quantity;
-
-                    userModel.save(function (err, updatedUser) {
-                        if (err) {
-                            return cb(err);
-                        }
-                        cb(null, updatedUser);
-                    });
-
-                }
-
-            ], function (err, result) {
-                if (err) {
-                    if (callback && (typeof callback === 'function')) {
-                        callback(err);
-                    }
-                } else {
-                    if (callback && (typeof callback === 'function')) {
-                        callback(null, result);
-                    }
-                }
-            });
-        });
-    };
-
     this.updateStatus = function (req, res, next) { // active - 1 / deleted - 0
         var userId = req.session.userId;
         var deviceId = req.params.id;
@@ -790,6 +1116,11 @@ var DeviceHandler = function (db) {
             //update the device:
             function (deviceModel, cb) {
                 var oldDeviceStatus = deviceModel.status;
+
+                if (deviceStatus === DEVICE_STATUSES.DELETED) {
+                    deviceModel.billings.subscriptionId = null;
+                    deviceModel.billings.expirationDate = null;
+                }
 
                 deviceModel.status = deviceStatus;
                 deviceModel.save(function (err, updatedDevice) {
@@ -1135,264 +1466,11 @@ var DeviceHandler = function (db) {
 
     };
 
-    function updateSubscribedDevicesCount(options, callback) {
-        var criteria = {
-            _id: options._id
-        };
-        var update = {
-            "billings.subscribedDevices": options.count,
-            updatedAt: new Date()
-        };
-
-        UserModel.findOneAndUpdate(criteria, update, function (err, userModel) {
-            if (err) {
-                if (callback && (typeof callback === 'function')) {
-                    callback(err);
-                }
-            } else {
-                if (callback && (typeof callback === 'function')) {
-                    callback(null, userModel);
-                }
-            }
-        });
-    };
-
-    function renewTheSubscriptionByUser(userData, planModels, callback) {
-        var userId = userData._id;
-        var devices = userData.devices;
-        var deviceIds = _.pluck(devices, '_id');
-        var deviceStringsIds = '';
-
-        deviceIds.forEach(function (deviceId) {
-            deviceStringsIds += deviceId.toString() + ' ';
-        });
-
-        function chargeIsFail(err) {
-
-            if (process.env.NODE_ENV !== 'production') {
-                console.log(' -------------------- ');
-                console.log('>>> charge is fail');
-                console.log('>>> %s', JSON.stringify(userData));
-                console.log('Error: %s', err);
-                console.log(' -------------------- ');
-            }
-
-            var now = new Date();
-            var criteria = {
-                _id: {
-                    $in: deviceIds
-                }
-            };
-            var update = {
-                $set: {
-                    status: DEVICE_STATUSES.ACTIVE,
-                    "billings.expirationDate": null,
-                    "billings.subscriptionId": null,
-                    updatedAt: now
-                }
-            };
-
-            DeviceModel.update(criteria, update, {multi: true}, function (err, devices) {
-                if (err) {
-                    if (process.env.NODE_ENV !== 'production') {
-                        console.error(err);
-                    }
-                }
-            });
-        };
+    this.cronJobForCheckExpirationDates = function (callback) {
 
         async.waterfall([
 
-            //find the user:
-            function (cb) {
-                var criteria = {
-                    _id: userId
-                };
-
-                UserModel.findOne(criteria, function (err, userModel) {
-                    if (err) {
-                        return cb(err);
-                    }
-                    cb(null, userModel);
-                });
-            },
-
-            //get the User.currentPlan:
-            function (userModel, cb) {
-                var currentPlanModel = _.find(planModels, function (plan) {
-                    return plan._id.toString() === userModel.billings.currentPlan.toString();
-                });
-
-                cb(null, userModel, currentPlanModel);
-            },
-
-            //try to make charge:
-            function (userModel, plan, cb) {
-                var quantity = devices.length;
-                var price = quantity * plan.amount;
-                var planId = plan._id.toString();
-                var expirationDate;
-                var description;
-                var chargeParams;
-                var date = new Date();
-                var err;
-
-                //calculate the expirationDate:
-                if (plan.metadata.type === PLAN_TYPES.MONTH) {
-                    expirationDate = new Date(date.setMonth(date.getMonth() + 1));
-                } else if (plan.metadata.type === PLAN_TYPES.YEAR) {
-                    expirationDate = new Date(date.setFullYear(date.getFullYear() + 1));
-                } else {
-                    err = new Error();
-                    err.message = 'Invalid value for plan.metadata.type';
-                    return cb(err);
-                }
-
-                description = 'Minder charge (renew) for ' + userModel.email + '. Renew subscription for ' + quantity + ' devices. Plan: ' + plan.name + ', expirationDate: ' + expirationDate.toISOString();
-
-                //try to make charge:
-                /*chargeParams = {
-                    customer: userModel.billings.stripeId,
-                    amount: price,
-                    currency: plan.currency,
-                    description: description,
-                    metadata: {
-                        planId: planId,
-                        quantity: quantity,
-                        expirationDate: expirationDate,
-                        deviceIds: deviceStringsIds
-                    }
-                };
-
-                /!*
-                 https://stripe.com/docs/api:
-                 Metadata - "A set of key/value pairs that you can attach to a charge object.
-                 It can be useful for storing additional information about the customer in a structured format.
-                 It's often a good idea to store an email address in metadata for tracking later."
-                 *!/
-
-                stripe.charges.create(chargeParams, function (err, charge) {
-                    if (err) {
-                        return cb(err);
-                    }
-                    cb(null, charge);
-                });*/
-
-
-                var subscriptionParams = {
-                    plan: planId,
-                    quantity: quantity,
-                    metadata: {
-                        description: description,
-                        quantity: quantity,
-                        expirationDate: expirationDate,
-                        deviceIds: deviceStringsIds
-                    }
-                };
-
-                stripe.customers.createSubscription(userModel.billings.stripeId, subscriptionParams, function (err, charge) {
-                    if (err) {
-                        return cb(err);
-                    }
-                    cb(null, charge);
-                });
-
-            },
-
-            //update the Devices.billings:
-            function (charge, cb) {
-                var now = new Date();
-                var criteria = {
-                    _id: {
-                        $in: deviceIds
-                    }
-                };
-                var update = {
-                    $set: {
-                        "billings.subscriptionId": charge.id,
-                        "billings.expirationDate": charge.metadata.expirationDate,
-                        updatedAt: now
-                    }
-                };
-
-                DeviceModel.update(criteria, update, {multi: true}, function (err, devices) {
-                    if (err) {
-                        return cb(err);
-                    }
-                    cb(null, charge);
-                });
-            }
-
-        ], function (err, result) {
-            if (err) {
-                chargeIsFail(err);
-                if (callback && (typeof callback === 'function')) {
-                    callback(err);
-                }
-            } else {
-                if (callback && (typeof callback === 'function')) {
-                    callback(null, result);
-                }
-            }
-        });
-    };
-
-    function renewTheSubscription(userData, callback) {
-
-        async.waterfall([
-
-            //get the current active tariff plans:
-            function (cb) {
-                var criteria = {};
-
-                TariffPlan.find(criteria, function (err, plans) {
-                    if (err) {
-                        return cb(err);
-                    }
-                    cb(null, plans)
-                });
-            },
-
-            //try to renew the subscription:
-            function (plans, cb) {
-
-                async.each(userData, function (data, eachCb) {
-                    renewTheSubscriptionByUser(data, plans, function (err, result) {
-                        if (err) {
-                            if (process.env.NODE_ENV !== 'production') {
-                                console.error(err);
-                            }
-                        }
-                        eachCb();
-                    });
-                }, function (err) {
-                    if (err) {
-                        return cb(err);
-                    }
-                    cb();
-                });
-
-            }
-
-        ], function (err, results) {
-            if (err) {
-                if (callback && (typeof callback === 'function')) {
-                    callback(err);
-                }
-            } else {
-                if (callback && (typeof callback === 'function')) {
-                    callback();
-                }
-            }
-        });
-
-    };
-
-    this.startCronJob = function (callback) {
-
-        async.waterfall([
-
-            //update devices with status "subscribed" and expired subscr.date and renewEnabled === false;
+            //find devices with status "subscribed" and expired subscr.date and renewEnabled === false;
             function (cb) {
                 var now = new Date();
                 var criteria = {
@@ -1403,22 +1481,61 @@ var DeviceHandler = function (db) {
                         $lte: now
                     }
                 };
-
-                var update = {
-                    $set: {
-                        status: DEVICE_STATUSES.ACTIVE,
-                        "billings.expirationDate": null,
-                        "billings.subscriptionId": null,
-                        updatedAt: now
-                    }
+                var fields = {
+                    user: 1,
+                    name: 1,
+                    "billings.expirationDate": 1
                 };
 
-                DeviceModel.update(criteria, update, {multi: true}, function (err, devices) {
+                DeviceModel.find(criteria, fields, function (err, devices) {
                     if (err) {
                         return cb(err);
                     }
-                    cb();
+                    cb(null, devices);
                 });
+
+            },
+
+            //update devices with status "subscribed" and expired subscr.date and renewEnabled === false;
+            function (devices, cb) {
+                var now = new Date();
+                var criteria;
+                var update;
+                var deviceIds;
+
+                if (devices && devices.length) {
+
+                    deviceIds = _.pluck(devices, '_id');
+                    criteria = {
+                        _id: {
+                            $in: deviceIds
+                        }
+                    };
+                    update = {
+                        $set: {
+                            status: DEVICE_STATUSES.ACTIVE,
+                            "billings.expirationDate": null,
+                            "billings.subscriptionId": null,
+                            updatedAt: now
+                        }
+                    };
+
+                    DeviceModel.update(criteria, update,  {multi: true}, function (err, count) {
+                        if (err) {
+                            return cb(err);
+                        }
+                        cb(null, devices);
+                    });
+
+                } else {
+                    cb(null, devices);
+                }
+            },
+
+            //send notification:
+            function (devices, cb) {
+                sendExpiredNotifications(devices);
+                cb();
             },
 
             ////update devices with status "subscribed" and expired subscr.date and renewEnabled === true;
@@ -1563,50 +1680,7 @@ var DeviceHandler = function (db) {
         });
     };
 
-    function checkExpirationDateForNotifications(daysBefore, callback) {
-        var now = new Date();
-        var from = new Date();
-        var to = new Date();
-        var criteria;
-        var query;
-
-        from.setDate(now.getDate() + daysBefore - 1);
-        from.setHours(0);
-        from.setMinutes(0);
-
-        to.setDate(now.getDate() + daysBefore);
-        to.setHours(0);
-        to.setMinutes(0);
-
-        if (process.env.NODE_ENV !== 'production') {
-            console.log('>>> billings.expirationDate between: %s AND %s', from.toISOString(), to.toISOString());
-        }
-
-        criteria = {
-            status: DEVICE_STATUSES.SUBSCRIBED,
-            "billings.renewEnabled": false,
-            "billings.expirationDate": {
-                $gte: from,
-                $lte: to
-            }
-        };
-
-        query = DeviceModel.find(criteria, {"billings.expirationDate": 1, user: 1});
-
-        query.exec(function (err, result) {
-            if (err) {
-                if (callback && (typeof callback === 'function')) {
-                    callback(err);
-                }
-            } else {
-                if (callback && (typeof callback === 'function')) {
-                    callback(null, result);
-                }
-            }
-        });
-    };
-
-    this.startCronJobForNotifications = function (callback) {
+    this.cronJobForNotifications = function (callback) {
         async.parallel([
 
             function (cb) {
@@ -1653,8 +1727,10 @@ var DeviceHandler = function (db) {
                 var deviceJSON = deviceModel.toJSON();
                 var expDate = moment(deviceJSON.billings.expirationDate);
                 var diff = expDate.diff(nowMoment, 'd');
+                var timeLeft = moment(deviceJSON.billings.expirationDate).fromNow();
 
                 deviceJSON['daysDiff'] = diff;
+                deviceJSON['timeLeft'] = timeLeft;
 
                 return deviceJSON;
             });
@@ -1663,29 +1739,51 @@ var DeviceHandler = function (db) {
 
             async.waterfall([
 
-                //map users:
+                //get the users email:
                 function (cb) {
+                    var userIds = Object.keys(users);
+                    var criteria = {
+                        _id: {
+                            $in: userIds
+                        }
+                    };
+                    var fields = {
+                        email: 1,
+                        firstName: 1,
+                        lastName: 1
+                    };
 
-                    async.each(
-                        Object.keys(users),
-                        function (user, eachCb) {
-                            var devices = _.groupBy(users[user], 'daysDiff');
+                    UserModel.find(criteria, fields, function (err, userModels) {
+                        var usersData;
 
-                            users[user] = devices;
+                        if (err) {
+                            return cb(err);
+                        }
 
-                            eachCb();
-                        }, function (err) {
-                            if (err) {
-                                return cb(err);
-                            }
-                            cb(null, users);
+                        usersData = _.map(userModels, function (userModel) {
+                            var userJSON = userModel.toJSON();
+                            var devices = users[userModel._id];
+
+                            userJSON.devices = _.sortBy(devices, 'daysDiff');
+
+                            return userJSON;
                         });
+
+                        cb(null, usersData);
+                    });
                 },
 
                 //send mail notification:
                 function (users, cb) {
-                    //TODO: ...
-                    cb(null, users);
+                    async.each(users, function (user, eachCb) {
+                        mailer.beforeExpired(user);
+                        eachCb();
+                    }, function (err) {
+                        if (err) {
+                            return cb(err);
+                        }
+                        cb(null, users);
+                    });
                 }
             ], function (err, users) {
                 if (err) {
@@ -1702,8 +1800,80 @@ var DeviceHandler = function (db) {
         });
     };
 
-    this.cron = function (req, res, next) {
-        self.startCronJob(function (err, result) {
+    this.setupJobForNotifications = function () {
+        var rule = new schedule.RecurrenceRule();
+        var job;
+
+        rule.hour = 10;
+        rule.minute = 5;
+        rule.second = 0;
+
+        job = schedule.scheduleJob(rule, function () {
+
+            if (process.env.NODE_ENV !== 'production') {
+                console.log('>>> node-schedule was started success ...');
+                console.log('>>> rule: ', JSON.stringify(rule));
+            }
+
+            self.cronJobForNotifications(function (err, result) {
+                if (err) {
+
+                    if (process.env.NODE_ENV !== 'production') {
+                        console.error(err);
+                        console.error(err.stack);
+                    }
+
+                } else {
+
+                    if (process.env.NODE_ENV !== 'production') {
+                        console.log('>>> cron job was finished success. Result: ');
+                        console.log(JSON.stringify(result));
+                        console.log(util.inspect(result, { showHidden: true, depth: 6 }));
+                    }
+
+                }
+            });
+        });
+    };
+
+    this.setupJobForCheckExpirationDates = function () {
+        var rule = new schedule.RecurrenceRule();
+        var job;
+
+        rule.hour = 0;
+        rule.minute = 10;
+        rule.second = 0;
+
+        job = schedule.scheduleJob(rule, function () {
+
+            if (process.env.NODE_ENV !== 'production') {
+                console.log('>>> node-schedule was started success ...');
+                console.log('>>> rule: ', JSON.stringify(rule));
+            }
+
+            self.cronJobForCheckExpirationDates(function (err, result) {
+                if (err) {
+
+                    if (process.env.NODE_ENV !== 'production') {
+                        console.error(err);
+                        console.error(err.stack);
+                    }
+
+                } else {
+
+                    if (process.env.NODE_ENV !== 'production') {
+                        console.log('>>> cron job was finished success. Result: ');
+                        console.log(JSON.stringify(result));
+                        console.log(util.inspect(result, { showHidden: true, depth: 6 }));
+                    }
+
+                }
+            });
+        });
+    };
+
+    this.testCronJobForCheckExpirationDates = function (req, res, next) {
+        self.cronJobForCheckExpirationDates(function (err, result) {
             if (err) {
                 return next(err);
             }
@@ -1711,8 +1881,8 @@ var DeviceHandler = function (db) {
         });
     };
 
-    this.cronNotifications = function (req, res, next) {
-        self.startCronJobForNotifications(function (err, result) {
+    this.testCronJobForNotifications = function (req, res, next) {
+        self.cronJobForNotifications(function (err, result) {
             if (err) {
                 return next(err);
             }

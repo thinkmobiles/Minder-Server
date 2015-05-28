@@ -111,28 +111,33 @@ define(
         };
 
 
-        var checkNameField = function (errorArray, required, fieldValue, fieldName) {
+        var checkNameField = function (errorObj, required, fieldValue, fieldName) {
+            if (errorObj[fieldName] === undefined){errorObj[fieldName]=[]}
             if (required) {
                 if (!fieldValue) {
-                    errorArray.push([fieldName, errorMessages.requiredMsg].join(' '));
+                    errorObj[fieldName].push(errorMessages.requiredMsg);
+                    //errorArray.push({fieldName : errorMessages.requiredMsg});
                     return;
                 }
-                //if (hasInvalidChars(fieldValue)) {
-                //    errorArray.push([fieldName, errorMessages.invalidCharsMsg].join(' '));
-                //    return;
-                //}
-                //if (fieldValue.length < MIN_LENGTH) {
-                //    errorArray.push([fieldName, errorMessages.minLengthMsg(MIN_LENGTH)].join(' '));
-                //    return;
-                //}
-                if (fieldValue.length > 35) {
+
+                /*if (fieldValue.length > 35) {
                     errorArray.push([fieldName, errorMessages.maxLengthMsg(35)].join(' '));
                     return;
                 }
                 if (fieldValue.length > 35) {
                     errorArray.push([fieldName, errorMessages.maxLengthMsg(35)].join(' '));
                     return;
+                }*/
+
+                if (fieldValue.length > 35) {
+                    errorObj[fieldName].push(errorMessages.maxLengthMsg(35));
+                    return;
                 }
+                if (fieldValue.length > 35) {
+                    errorObj[fieldName].push(errorMessages.maxLengthMsg(35));
+                    return;
+                }
+
                 //if (fieldValue.length < 2) {
                 //    errorArray.push([fieldName, errorMessages.minLengthMsg(2)].join(' '));
                 //    return;
@@ -144,10 +149,17 @@ define(
                     //    errorArray.push([fieldName, errorMessages.invalidCharsMsg].join(' '));
                     //    return;
                     //}
+
+                    /*if (fieldValue.length > 35) {
+                        errorArray.push({fieldName : [fieldName, errorMessages.maxLengthMsg(35)].join(' ')});
+                        return;
+                    }*/
+
                     if (fieldValue.length > 35) {
-                        errorArray.push([fieldName, errorMessages.maxLengthMsg(35)].join(' '));
+                        errorObj[fieldName].push(errorMessages.maxLengthMsg(35));
                         return;
                     }
+
                     /*if (fieldValue.length < 1) {
                         errorArray.push([fieldName, errorMessages.minLengthMsg(1)].join(' '));
                         return;
@@ -235,40 +247,41 @@ define(
             }
         };
 
-        var checkPasswordField = function (errorArray, required, fieldValue, fieldName) {
+        var checkPasswordField = function (errorObj, required, fieldValue, fieldName) {
             if (required) {
+                if (errorObj[fieldName] === undefined){errorObj[fieldName]=[]}
                 if (!fieldValue) {
-                    errorArray.push([fieldName, errorMessages.requiredMsg].join(' '));
+                    errorObj[fieldName].push(errorMessages.requiredMsg);
                     return;
                 }
                 if (hasInvalidChars(fieldValue)) {
-                    errorArray.push([fieldName, errorMessages.invalidCharsMsg].join(' '));
+                    errorObj[fieldName].push(errorMessages.invalidCharsMsg);
                     return;
                 }
                 if (fieldValue.length < 6) {
-                    errorArray.push([fieldName, errorMessages.minLengthMsg(6)].join(' '));
+                    errorObj[fieldName].push(errorMessages.minLengthMsg(6));
                     return;
                 }
                 if (fieldValue.length > 35) {
-                    errorArray.push([fieldName, errorMessages.maxLengthMsg(35)].join(' '));
+                    errorObj[fieldName].push(errorMessages.maxLengthMsg(35));
                     return;
                 }
-                if (!validatePass(fieldValue)) errorArray.push([fieldName, errorMessages.invalidLoginMsg].join(' '));
+                if (!validatePass(fieldValue)) errorObj[fieldName].push(errorMessages.invalidLoginMsg);
             } else {
                 if (fieldValue) {
                     if (hasInvalidChars(fieldValue)) {
-                        errorArray.push([fieldName, errorMessages.invalidCharsMsg].join(' '));
+                        errorObj[fieldName].push(errorMessages.invalidCharsMsg);
                         return;
                     }
                     if (fieldValue.length < 6) {
-                        errorArray.push([fieldName, errorMessages.minLengthMsg(6)].join(' '));
+                        errorObj[fieldName].push(errorMessages.minLengthMsg(6));
                         return;
                     }
                     if (fieldValue.length > 35) {
-                        errorArray.push([fieldName, errorMessages.maxLengthMsg(35)].join(' '));
+                        errorObj[fieldName].push(errorMessages.maxLengthMsg(35));
                         return;
                     }
-                    if (!validatePass(fieldValue)) errorArray.push([fieldName, errorMessages.invalidLoginMsg].join(' '));
+                    if (!validatePass(fieldValue)) errorObj[fieldName].push(errorMessages.invalidLoginMsg);
                 }
             }
         };

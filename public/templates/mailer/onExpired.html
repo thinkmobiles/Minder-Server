@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<div class="pm-text">
+    <p>Hi Dear  <b><%=name %></b>!</p>
+    <br>
+    <p>Your subscription in Minder was expired.</p>
+    <p>We can't store the locations for devices bellow:</p>
+    <ul style="list-style: none">
+        <% _.each(devices, function(device) { %>
+        <li><%=device.name %> -  <span style="color:#FE0F2C;font-weight: bold">expired</span></li>
+        <% }) %>
+    </ul>
+    <p>You can manage your devices and subscriptions through our web application <a href="<%=process.env.HOST%>" target="_blank"><%=process.env.HOST%></a></p>
+    <p>If you have received this in error, please delete this email</p>
+</div>
+</body>
+</html>

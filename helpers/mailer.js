@@ -5,44 +5,123 @@ var MailerModule = function () {
     var nodemailer = require("nodemailer");
     var fs = require('fs');
     var FROM = "Minder <" + 'info@minderweb.com' + ">";
-    var forgotPasswordTemplate = fs.readFileSync('public/templates/mailer/forgotPassword.html', 'utf8');
 
     this.emailConfirmation = function (options) {
-        var templateOptions = {
-            name: options.firstName + ' ' + options.lastName,
-            email: options.email,
-            minderId: (options.minderId) ? options.minderId : null,
-            url: process.env.HOST + '/#confirmEmail/' + options.confirmToken
-        };
+        fs.readFile('public/templates/mailer/confirmEmail.html', 'utf8', function (err, template) {
+            var templateOptions;
+            var mailOptions;
 
+            if (err) {
+                if (process.env.NODE_ENV !== 'production') {
+                    console.error(err);
+                }
+            } else {
 
+                templateOptions = {
+                    name: options.firstName + ' ' + options.lastName,
+                    email: options.email,
+                    minderId: (options.minderId) ? options.minderId : null,
+                    url: process.env.HOST + '/#confirmEmail/' + options.confirmToken
+                };
 
-        var mailOptions = {
-            from: FROM,
-            to: options.email,
-            subject: 'Please verify your MinderWeb account',
-            generateTextFromHTML: true,
-            html: _.template(fs.readFileSync('public/templates/mailer/confirmEmail.html', 'utf8'), templateOptions)
-        };
+                mailOptions = {
+                    from: FROM,
+                    to: options.email,
+                    subject: 'Please verify your MinderWeb account',
+                    generateTextFromHTML: true,
+                    html: _.template(fs.readFileSync('public/templates/mailer/confirmEmail.html', 'utf8'), templateOptions)
+                };
 
-        deliver(mailOptions);
+                deliver(mailOptions);
+            }
+        });
     };
 
     this.forgotPassword = function (options) {
-        var templateOptions = {
-            name: options.firstName + ' ' + options.lastName,
-            url: process.env.HOST + '/#resetPassword/' + options.forgotToken
-        };
+        fs.readFile('public/templates/mailer/forgotPassword.html', 'utf8', function (err, template) {
+            var templateOptions;
+            var mailOptions;
 
-        var mailOptions = {
-            from: FROM,
-            to: options.email,
-            subject: 'Forgot password',
-            generateTextFromHTML: true,
-            html: _.template(forgotPasswordTemplate, templateOptions)
-        };
+            if (err) {
+                if (process.env.NODE_ENV !== 'production') {
+                    console.error(err);
+                }
+            } else {
 
-        deliver(mailOptions);
+                templateOptions = {
+                    name: options.firstName + ' ' + options.lastName,
+                    url: process.env.HOST + '/#resetPassword/' + options.forgotToken
+                };
+
+                mailOptions = {
+                    from: FROM,
+                    to: options.email,
+                    subject: 'Forgot password',
+                    generateTextFromHTML: true,
+                    html: _.template(forgotPasswordTemplate, templateOptions)
+                };
+
+                deliver(mailOptions);
+            }
+        });
+    };
+
+    this.beforeExpired = function (options) {
+        fs.readFile('public/templates/mailer/beforeExpired.html', 'utf8', function (err, template) {
+            var templateOptions;
+            var mailOptions;
+
+            if (err) {
+                if (process.env.NODE_ENV !== 'production') {
+                    console.error(err);
+                }
+            } else {
+
+                templateOptions = {
+                    name: options.firstName + ' ' + options.lastName,
+                    devices: options.devices
+                };
+
+                mailOptions = {
+                    from: FROM,
+                    to: options.email,
+                    subject: 'Info',
+                    generateTextFromHTML: true,
+                    html: _.template(template, templateOptions)
+                };
+
+                deliver(mailOptions);
+            }
+        });
+    };
+
+    this.onExpired = function (options) {
+        fs.readFile('public/templates/mailer/onExpired.html', 'utf8', function (err, template) {
+            var templateOptions;
+            var mailOptions;
+
+            if (err) {
+                if (process.env.NODE_ENV !== 'production') {
+                    console.error(err);
+                }
+            } else {
+
+                templateOptions = {
+                    name: options.firstName + ' ' + options.lastName,
+                    devices: options.devices
+                };
+
+                mailOptions = {
+                    from: FROM,
+                    to: options.email,
+                    subject: 'Info',
+                    generateTextFromHTML: true,
+                    html: _.template(template, templateOptions)
+                };
+
+                deliver(mailOptions);
+            }
+        });
     };
 
     function deliver(mailOptions, callback) {

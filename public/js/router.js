@@ -12,20 +12,20 @@ define([
         view: null,
 
         routes: {
-            "login"                     : "login",
-            "main(/page/:page)"         : "main",
-            "forgotPassword"            : "forgotPassword",
-            "signUp"                    : "signUp",
-            "resetPassword/:token"      : "resetPassword",
-            "billingInfo(/:subscribe)"  : "billingInfo",
-            "termsAndConditions"        : "termsAndConditions",
-            "devices"                   : "devices",
-            "device(/:id)"              : "device",
-            "devices(/page/:page)"      : "devices",
-            "profile"                   : "profile",
-            "confirm"                   :"confirm",
-            "confirmEmail/:token"       :"confirmEmail",
-            "*any"                      : "any"
+            "login"                     :  "login",
+            "main(/page/:page)"         :  "main",
+            "forgotPassword"            :  "forgotPassword",
+            "signUp"                    :  "signUp",
+            "resetPassword/:token"      :  "resetPassword",
+            "billingInfo(/:subscribe)"  :  "billingInfo",
+            "termsAndConditions"        :  "termsAndConditions",
+            "devices"                   :  "devices",
+            //"device(/:id)"            :  "device",
+            "devices(/page/:page)"      :  "devices",
+            "profile"                   :  "profile",
+            "confirm"                   :  "confirm",
+            "confirmEmail/:token"       :  "confirmEmail",
+            "*any"                      :  "any"
         },
 
         needAuthorize: [
