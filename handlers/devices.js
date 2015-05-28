@@ -351,7 +351,7 @@ var DeviceHandler = function (db) {
                     var userJSON = userModel.toJSON();
 
                     userJSON.devices = users[userJSON._id];
-                    //TODO: send notification ...
+                    mailer.onExpired(userJSON);
 
                     return mapCb(null, userJSON);
 
@@ -374,25 +374,6 @@ var DeviceHandler = function (db) {
                 }
             }
         });
-
-        /*async.map(deviceModels, function (deviceModel, cb) {
-            return cb(null, deviceModel.toJSON());
-        }, function (err, devicesJSON) {
-            var users;
-
-            if (err) {
-                if (callback && (typeof callback === 'function')) {
-                    callback(err);
-                }
-            } else {
-
-                users = _.groupBy(devicesJSON, 'user');
-
-                if (callback && (typeof callback === 'function')) {
-                    callback();
-                }
-            }
-        });*/
     };
 
     this.validateDeviceData = validateDeviceData;

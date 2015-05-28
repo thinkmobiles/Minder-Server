@@ -95,6 +95,35 @@ var MailerModule = function () {
         });
     };
 
+    this.onExpired = function (options) {
+        fs.readFile('public/templates/mailer/onExpired.html', 'utf8', function (err, template) {
+            var templateOptions;
+            var mailOptions;
+
+            if (err) {
+                if (process.env.NODE_ENV !== 'production') {
+                    console.error(err);
+                }
+            } else {
+
+                templateOptions = {
+                    name: options.firstName + ' ' + options.lastName,
+                    devices: options.devices
+                };
+
+                mailOptions = {
+                    from: FROM,
+                    to: options.email,
+                    subject: 'Info',
+                    generateTextFromHTML: true,
+                    html: _.template(template, templateOptions)
+                };
+
+                deliver(mailOptions);
+            }
+        });
+    };
+
     function deliver(mailOptions, callback) {
         var user = process.env.mailerUserName;
         var pass = process.env.mailerPassword;
