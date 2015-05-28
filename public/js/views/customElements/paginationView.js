@@ -45,6 +45,9 @@ define([
 
         // go to page in not url mode
         goToPage: function (event) {
+
+            //$('#globalDevicesChecker').prop('checked', true);
+
             event.preventDefault();
             var page = event.currentTarget.getAttribute('value');
             page = parseInt(page);
@@ -124,20 +127,23 @@ define([
             } else {
                 if (ends) {
                     pages.push({
-                        html: "first",
-                        data: 1
+                        html: "&lt;&lt;first",
+                        data: 1,
+                        clNam: true
                     });
                 }
                 if (steps) {
                     if (page < 2) {
                         pages.push({
-                            html: "prev",
-                            data: 1
+                            html: "&lt;&lt;prev",
+                            data: 1,
+                            clNam: true
                         });
                     } else {
                         pages.push({
-                            html: "prev",
-                            data: page - 1
+                            html: "&lt;&lt;prev",
+                            data: page - 1,
+                            clNam: true
                         });
                     }
 
@@ -154,13 +160,15 @@ define([
                 if (steps) {
                     if (page < allPages) {
                         pages.push({
-                            html: 'next>>',
-                            data: page + 1
+                            html: 'next&gt;&gt;',
+                            data: page + 1,
+                            clNam: true
                         });
                     } else {
                         pages.push({
-                            html: 'next>>',
-                            data: allPages
+                            html: 'next&gt;&gt;',
+                            data: allPages,
+                            clNam: true
                         });
                     }
 
@@ -168,8 +176,9 @@ define([
 
                 if (ends) {
                     pages.push({
-                        html: 'last>>',
-                        data: allPages
+                        html: 'last&gt;&gt;',
+                        data: allPages,
+                        clNam: true
                     });
                 }
                 this.stateModel.set({

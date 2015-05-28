@@ -137,6 +137,21 @@ define([
                     }
                 }
             });
+
+        },
+
+        myChecked: function () {
+            if (this.selectedDevicesCollection.length > 0) {
+                var checkLength = $("input.checkbox:checked").length;
+                if ($("input.checkbox:checked").length > 0) {
+                    if (checkLength == this.selectedDevicesCollection.length) {
+                        $('#globalDevicesChecker').prop('checked', true);
+                    }
+                }
+                else {
+                    $('#globalDevicesChecker').prop('checked', false);
+                }
+            }
         },
 
         updateUserData: function () {
@@ -258,11 +273,11 @@ define([
             }
         },
 
-        chekGlobal : function(){
-            if (this.selectedDevicesCollection.length == this.devisesCollection.length){
-                alert ('Hallo')
-            }
-        },
+        //chekGlobal : function(){
+        //    if ((this.selectedDevicesCollection.length == this.devisesCollection.length) && this.selectedDevicesCollection.length>0){
+        //        return alert ('Hallo')
+        //    }
+        //},
 
 
         //===========================================/\/\/\/\/\/\/\
@@ -400,6 +415,8 @@ define([
         render: function () {
 
             this.updateDevicesData();
+
+
             var data = this.stateModel.toJSON();
             var now = App.sessionData.get('date');
             var self = this;
@@ -416,8 +433,9 @@ define([
 
                 this.$el.html(_.template(Template, data));
             }
-
             this.$el.find('#pagination').append(this.paginationView.render().$el);
+
+
 
             return this;
         }
