@@ -138,6 +138,8 @@ define([
                 }
             });
 
+            alert(self.selectedDevicesCollection.length+' iz '+self.devisesCollection.length);
+
         },
 
         myChecked: function () {
@@ -415,7 +417,7 @@ define([
         render: function () {
 
             this.updateDevicesData();
-
+            this.myChecked();
 
             var data = this.stateModel.toJSON();
             var now = App.sessionData.get('date');
