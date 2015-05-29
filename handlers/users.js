@@ -327,15 +327,17 @@ var UserHandler = function (db) {
 
             //check captcha:
             function (cb) {
-                var captchaOptions = {
+                var captchaOptions;
+
+                if (!options.captchaChallenge || !options.captchaResponse) {
+                    return cb();
+                }
+
+                captchaOptions = {
                     captchaChallenge: options.captchaChallenge,
                     captchaResponse: options.captchaResponse,
                     ip: req.ip
                 };
-
-                if (deviceHandler.isMobile(req)) {
-                    return cb(); //there is not required captcha
-                }
 
                 checkCaptcha(captchaOptions, function (err) {
                     if (err) {
