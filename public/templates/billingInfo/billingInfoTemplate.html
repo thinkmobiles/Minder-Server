@@ -1,131 +1,136 @@
-<div class="panel panel-default">
-    <!--<div class="panel-heading">Billing Info</div>-->
-    <div>
-        <% if (userPlan) { %>
+<div class="panel panel-default biliingContainer">
+  <!--<div class="panel-heading">Billing Info</div>-->
+  <div class="currentPlanInfo">
+    <% if (userPlan) { %>
 
-        <!--<p>-->
-            <span>Current plan: </span><%= userPlan.name %><br>
-            <span>Number of devices: </span><%= userPlan.metadata.minDevices %> - <%= userPlan.metadata.maxDevices %><br>
-            <!--<span> Plan cost per device: </span><%= userPlan.amount/100 %>$<br>-->
+    <!--<p>-->
+    <span>Current plan: </span><%= userPlan.name %><br>
+    <span>Number of devices: </span><%= userPlan.metadata.minDevices %> - <%= userPlan.metadata.maxDevices %><br>
+    <!--<span> Plan cost per device: </span><%= userPlan.amount/100 %>$<br>-->
 
-        <!--</p>-->
+    <!--</p>-->
 
-        <!--<p>-->
-            <span>Type of subscription: </span><%= user.billings.planPeriod %><br>
-            <span># of current subscribed devices: </span><%= user.billings.subscribedDevices %><br>
-        <!--</p>-->
+    <!--<p>-->
+    <span>Type of subscription: </span><%= user.billings.planPeriod %><br>
+    <span># of current subscribed devices: </span><%= user.billings.subscribedDevices %><br>
+    <!--</p>-->
 
-        <div class="panel panel-default">
-            <div class="panel-body">
-                <div class="checkbox">
-                    <label>
-                        <input type="checkbox" id="renewal" <% if(renewal) {%>checked<% } %> > Renewal
-                        <button class="btn btn-default" id="saveRenewal">Save</button>
-                    </label>
-                </div>
-            </div>
+    <div class="panel panel-default renewalContainer">
+      <div class="panel-body">
+        <div class="checkbox">
+          <label><input type="checkbox" id="renewal" class="customCheckbox"<% if(renewal) {%>checked<% } %> > <label for="renewal"></label>Renewal</label>
+          <button class="btn btn-default" id="saveRenewal">Save</button>
+
         </div>
-
-        <% } %>
+      </div>
     </div>
-    <div class="panel-body">
+
+    <% } %>
+  </div>
+  <div class="panel-body">
 
 
-        <table class="table billingItem">
-            <tbody>
-            <tr>
-                <% _.each(tearsMonth, function(item){%>
-                <% if (userPlan) { %>
-                    <% if (userPlan.id === item.id) { %>
-                        <td class="active">
-                    <% } else { %>
-                        <td>
-                    <% } %>
-                <% } else { %>
-                <td>
-                <% } %>
+    <table class="table billingItem">
+      <tbody>
+        <tr>
+          <% _.each(tearsMonth, function(item){%>
+          <% if (userPlan) { %>
+          <% if (userPlan.id === item.id) { %>
+          <td class="active">
+            <% } else { %>
+          <td>
+            <% } %>
+            <% } else { %>
+          <td>
+            <% } %>
 
-                <div class="tariffPlan">
-                  <%= item.name %> <!-- - <%= item.amount/100 %>$-->
-                </div>
-                <div class="tariffPlanInfo">
-                  <div class="inner">
-                    <!--<%= item.statement_descriptor %><br>-->
-                    <div class="title">
-                      MINDER Unit Base<br>
-                      Cost by Volume RRP per month<br>
-					</div>
-					<div class="price">$<%= (item.amount/100).toFixed(2) %> Cost<br></div>
-                    <div class="devicesCount">for <%= item.metadata.minDevices %> - <%= item.metadata.maxDevices %> devices</div>
-                  </div>
-                </div>
-                </td>
-                <% }) %>
-            </tr>
-            </tbody>
-        </table>
+            <div class="tariffPlan">
+              <%= item.name %> <!-- - <%= item.amount/100 %>$-->
+            </div>
+            <div class="tariffPlanInfo">
+              <div class="inner">
+                <!--<%= item.statement_descriptor %><br>-->
+                <div class="title">
+                  MINDER Unit Base<br>
+                  Cost by Volume RRP per month<br>
+				</div>
+				<div class="price">$<%= (item.amount/100).toFixed(2) %> Cost<br></div>
+                <div class="devicesCount">for <%= item.metadata.minDevices %> - <%= item.metadata.maxDevices %> devices</div>
+              </div>
+            </div>
+          </td>
+          <% }) %>
+        </tr>
+      </tbody>
+    </table>
 
-        <table class="table billingItem">
-            <tbody>
-            <tr>
-                <% _.each(tearsYear, function(item){%>
-                <% if (userPlan) { %>
-                <% if (userPlan.id === item.id) { %>
-                <td class="active">
-                    <% } else { %>
-                <td>
-                    <% } %>
-                    <% } else { %>
-                <td>
-                    <% } %>
+    <table class="table billingItem">
+      <tbody>
+        <tr>
+          <% _.each(tearsYear, function(item){%>
+          <% if (userPlan) { %>
+          <% if (userPlan.id === item.id) { %>
+          <td class="active">
+            <% } else { %>
+          <td>
+            <% } %>
+            <% } else { %>
+          <td>
+            <% } %>
 
-                    <div class="tariffPlan">
-                        <%= item.name %> <!-- - <%= item.amount/100 %>$-->
-                    </div>
-                    <div class="tariffPlanInfo">
-                        <!--<%= item.statement_descriptor %><br>-->
-                  <div class="inner">
-                        COST PER YEAR<br>
-                        $<%= (item.amount/100).toFixed(2) %> Cost<br>
-                        for <%= item.metadata.minDevices %> - <%= item.metadata.maxDevices %> devices
-				  </div>
-                    </div>
-                </td>
-                <% }) %>
-            </tr>
-            </tbody>
-        </table>
+            <div class="tariffPlan">
+              <%= item.name %> <!-- - <%= item.amount/100 %>$-->
+            </div>
+            <div class="tariffPlanInfo">
+              <!--<%= item.statement_descriptor %><br>-->
+			  <div class="inner">
+				<div class="title">
+				  COST PER YEAR<br>
+				</div>
+                <div class="price">$<%= (item.amount/100).toFixed(2) %> Cost<br></div>
 
+                <div class="devicesCount">for <%= item.metadata.minDevices %> - <%= item.metadata.maxDevices %> devices</div>
+			  </div>
+            </div>
+          </td>
+          <% }) %>
+        </tr>
+      </tbody>
+    </table>
+  
+  </div>
+  <div class="clear">
     </div>
+  <span class="subInfo">For subscribing/unsubscribing devices press button below:<br> </span>
+  <button type="button" class="btn btn-success" id="showProceedSubscription">Subscribe/Unsubscribe</button>
+
 </div>
 
 <div class="modal fade container" id="proceedSubscriptionModal" tabindex="-1" role="dialog">
 
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close cancelSubscription" aria-label="Close"><span
-                        aria-hidden="true">&times;</span></button>
-                <h5 class="modal-title" id="myModalLabel">Proceed subscription</h5>
-            </div>
-            <div class="modal-body"  id="modalContent">
+  <div class="modal-content">
+    <div class="modal-header">
+      <button type="button" class="close cancelSubscription" aria-label="Close"><span
+																				   aria-hidden="true">&times;</span></button>
+      <h5 class="modal-title" id="myModalLabel">Detail:</h5>
+    </div>
+    <div class="modal-body"  id="modalContent">
 
 
 
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn subscribe" id="confirmSubscription">confirm subscription</button>
-                <button type="button" class="btn unsubscribe" id="confirmUnSubscribe">unsubscribe</button>
-                <!--<button type="button" class="btn cancelSubscription" >Close</button>-->
-            </div>
-        </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn unsubscribe" id="confirmUnSubscribe">unsubscribe</button>
+      <button type="button" class="btn subscribe" id="confirmSubscription">confirm subscription</button>
+      <!--<button type="button" class="btn cancelSubscription" >Close</button>-->
+    </div>
+  </div>
 
 </div>
 
 <div class="modal fade" id="waitingModal">
-    <div class="modal-body" id="loadimage">
-        <img class="img-responsive" src="./images/ajax-loader.gif">
-    </div>
+  <div class="modal-body" id="loadimage">
+    <img class="img-responsive" src="./images/ajax-loader.gif">
+  </div>
 </div>
 
-<span>For subscribing/unsubscribing devices press button below:<br> </span>
-<button type="button" class="btn btn-success" id="showProceedSubscription">subscribe/unsubscribe</button>
