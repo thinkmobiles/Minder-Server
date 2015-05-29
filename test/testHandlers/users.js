@@ -4,7 +4,7 @@ var async = require('async');
 var Config = require('./../config');
 var testData = require('./../data/testData');
 
-describe('Users', function() {
+describe('Users', function () {
     var conf = new Config();
     var db = conf.db;
     var baseUrl = conf.baseUrl;
@@ -99,7 +99,7 @@ describe('Users', function() {
 
     });
 
-    describe('POST /signUp', function (){
+    describe('POST /signUp', function () {
         var url = '/signUp';
 
         it('User can\'t signUp without email', function (done) {
@@ -339,7 +339,7 @@ describe('Users', function() {
                 .send(data)
                 .end(function (err, res) {
                     if (err) {
-                        done (err);
+                        done(err);
                     } else {
                         expect(res.status).to.equal(400);
                         expect(res.body).to.have.property('error');
@@ -361,11 +361,11 @@ describe('Users', function() {
                 .send(signInData)
                 .end(function (err, res) {
                     if (err) {
-                        done (err);
+                        done(err);
                     } else {
                         expect(res.status).to.equal(400);
                         expect(res.body).to.have.property('error');
-                        expect(res.body.error).to.contains('minderId');
+                        expect(res.body.error).to.equals('Incorrect Minder ID');
                         done();
                     }
                 });
@@ -380,11 +380,12 @@ describe('Users', function() {
                 .send(data)
                 .end(function (err, res) {
                     if (err) {
-                        done (err);
+                        done(err);
                     } else {
                         expect(res.status).to.equal(200);
                         expect(res.body).to.have.property('success');
-                        done();s
+                        done();
+                        s
                     }
                 });
         });
@@ -402,7 +403,7 @@ describe('Users', function() {
                 .send(signInData)
                 .end(function (err, res) {
                     if (err) {
-                        done (err);
+                        done(err);
                     } else {
                         expect(res.status).to.equal(200);
                         expect(res.body).to.have.property('success');
@@ -421,7 +422,7 @@ describe('Users', function() {
 
             userAgent1
                 .get(url)
-                .end(function(err, res) {
+                .end(function (err, res) {
                     if (err) {
                         done(err);
                     } else {
@@ -437,7 +438,7 @@ describe('Users', function() {
 
             userAgent1
                 .get(url)
-                .end(function(err, res) {
+                .end(function (err, res) {
                     if (err) {
                         done(err);
                     } else {

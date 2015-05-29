@@ -31,6 +31,10 @@ var UserHandler = function (db) {
     var TariffPlan = db.model('TariffPlan', tariffPlanSchema);
     var self = this;
 
+    function normalizeEmail(email) {
+        return email.trim().toLowerCase();
+    };
+
     function validateSignUp(userData, callback) { //used for signUpMobile, signUpWeb;
         var errMessage;
 
@@ -61,6 +65,8 @@ var UserHandler = function (db) {
         if (!REG_EXP.EMAIL_REGEXP.test(userData.email)) {
             return callback(badRequests.InvalidEmail());
         }
+
+        userData.email = normalizeEmail(userData.email);
 
         UserModel.findOne({email: userData.email}, function (err, user) {
             if (err) {
@@ -210,86 +216,21 @@ var UserHandler = function (db) {
         });
     };
 
-    this.signUp = function (req, res, next) {
-        var options = req.body;
-
-        async.series([
-
-            //check captcha:
-            function (cb) {
-                var captchaOptions = {
-                    captchaChallenge: options.captchaChallenge,
-                    captchaResponse: options.captchaResponse,
-                    ip: req.ip
-                };
-
-                if (deviceHandler.isMobile(req)) {
-                    return cb(); //there is not required captcha
-                }
-
-                checkCaptcha(captchaOptions, function (err) {
-                    if (err) {
-                        return cb(err);
-                    }
-
-                    delete options.captchaChallenge;
-                    delete options.captchaResponse;
-
-                    cb();
-                });
-            },
-
-            //validation:
-            function (cb) {
-                validateSignUp(options, function (err) {
-                    if (err) {
-                        return cb(err);
-                    }
-                    cb();
-                });
-            },
-
-            //create user:
-            function (cb) {
-                createUser(options, function (err, user) {
-                    if (err) {
-                        return cb(err);
-                    }
-
-                    cb(null, user);
-                });
-            }
-
-        ], function (err, result) {
-            var user = result[2];
-
-            if (err) {
-                return next(err);
-            }
-
-            mailer.emailConfirmation(user);
-
-            res.status(201).send({
-                success: 'success signUp',
-                message: 'Thank you for registering with Minder. Please check your email and verify account',
-                minderId: user.minderId
-            });
-        });
-    };
-
     function signInWeb(req, res, next) {
         var options = req.body;
+        var email = options.email;
         var encryptedPass;
         var query;
         var fields;
 
-        if (!options.email || !options.pass) {
+        if (!email || !options.pass) {
             return next(badRequests.NotEnParams({reqParams: ['email', 'pass']}));
         }
 
+        email = normalizeEmail(email);
         encryptedPass = getEncryptedPass(options.pass);
         query = {
-            email: options.email,
+            email: email,
             pass: encryptedPass
         };
         fields = {
@@ -379,12 +320,84 @@ var UserHandler = function (db) {
         });
     };
 
-    this.signIn = function (req, res, next) {
+    this.signUp = function (req, res, next) {
+        var options = req.body;
 
-        if (deviceHandler.isMobile(req)) {
+        async.series([
+
+            //check captcha:
+            function (cb) {
+                var captchaOptions;
+
+                if (!options.captchaChallenge || !options.captchaResponse) {
+                    return cb();
+                }
+
+                captchaOptions = {
+                    captchaChallenge: options.captchaChallenge,
+                    captchaResponse: options.captchaResponse,
+                    ip: req.ip
+                };
+
+                checkCaptcha(captchaOptions, function (err) {
+                    if (err) {
+                        return cb(err);
+                    }
+
+                    delete options.captchaChallenge;
+                    delete options.captchaResponse;
+
+                    cb();
+                });
+            },
+
+            //validation:
+            function (cb) {
+                validateSignUp(options, function (err) {
+                    if (err) {
+                        return cb(err);
+                    }
+                    cb();
+                });
+            },
+
+            //create user:
+            function (cb) {
+                createUser(options, function (err, user) {
+                    if (err) {
+                        return cb(err);
+                    }
+
+                    cb(null, user);
+                });
+            }
+
+        ], function (err, result) {
+            var user = result[2];
+
+            if (err) {
+                return next(err);
+            }
+
+            mailer.emailConfirmation(user);
+
+            res.status(201).send({
+                success: 'success signUp',
+                message: 'Thank you for registering with Minder. Please check your email and verify account',
+                minderId: user.minderId
+            });
+        });
+    };
+
+    this.signIn = function (req, res, next) {
+        var options = req.body;
+
+        if (options.email && options.pass) {
+            signInWeb(req, res, next);
+        } else if (options.minderId && options.deviceId) {
             signInMobile(req, res, next);
         } else {
-            signInWeb(req, res, next);
+            return next(badRequests.NotEnParams({}));
         }
     };
 
@@ -413,10 +426,6 @@ var UserHandler = function (db) {
 
         });
 
-    };
-
-    this.renderError = function (err, req, res) {
-        res.render('errorTemplate', {error: err});
     };
 
     this.getUserById = function (userId, options, callback) {
@@ -617,30 +626,6 @@ var UserHandler = function (db) {
             }
         });
     };
-
-    /*this.incrementSubscribedDevicesCount = function(userId, quantity, callback) {
-     var criteria = {
-     _id: userId
-     };
-     var update = {
-     $inc: {
-     quantity: quantity,
-     'billings.subscribedDevices': 1
-     }
-     };
-
-     UserModel.findAndModify(criteria, update, function (err, numAffected) {
-     if (err) {
-     if (callback && (typeof callback === 'function')) {
-     callback(err);
-     }
-     } else {
-     if (callback && (typeof callback === 'function')) {
-     callback(null, numAffected);
-     }
-     }
-     });
-     };*/
 
 };
 
