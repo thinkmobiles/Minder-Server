@@ -29,7 +29,7 @@ var MailerModule = function () {
                     to: options.email,
                     subject: 'Please verify your MinderWeb account',
                     generateTextFromHTML: true,
-                    html: _.template(fs.readFileSync('public/templates/mailer/confirmEmail.html', 'utf8'), templateOptions)
+                    html: _.template(template, templateOptions)
                 };
 
                 deliver(mailOptions);
@@ -58,7 +58,7 @@ var MailerModule = function () {
                     to: options.email,
                     subject: 'Forgot password',
                     generateTextFromHTML: true,
-                    html: _.template(forgotPasswordTemplate, templateOptions)
+                    html: _.template(template, templateOptions)
                 };
 
                 deliver(mailOptions);
