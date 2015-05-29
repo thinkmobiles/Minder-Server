@@ -14,7 +14,6 @@ module.exports = (function () {
         lastLocation: {
             long: {type: Number, default: null},
             lat: {type: Number, default: null},
-            //accuracy: {type: Number},  // meters
             dateTime: {type: Date, default: Date.now}
         },
         billings: {
@@ -34,4 +33,9 @@ module.exports = (function () {
     }
 
     mongoose.Schemas['Device'] = deviceSchema;
+
+    if (process.env.NODE_ENV !== 'production') {
+        deviceSchema.set('autoIndex', false);
+    }
+
 })();

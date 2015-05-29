@@ -186,19 +186,14 @@ var TariffPlanHandler = function (db) {
                         updatedAt: new Date()
                     }
                 };
-                //TODO: use if for optimisation;
-                //if (userModel.billings.renewEnabled !== type) {
 
-                    DeviceModel.update(criteria, update, {multi: true}, function (err) {
-                        if (err) {
-                            return cb(err);
-                        }
-                        cb(null, userModel);
-                    });
+                DeviceModel.update(criteria, update, {multi: true}, function (err) {
+                    if (err) {
+                        return cb(err);
+                    }
+                    cb(null, userModel);
+                });
 
-                //} else {
-                //    cb(null, userModel);
-                //}
             },
 
             //update UserModel:
@@ -246,114 +241,6 @@ var TariffPlanHandler = function (db) {
                 .send(plans);
         });
     };
-
-    this.subscribe = function (req, res, next) {
-        res.status(500).send({error: 'Not Implemented'});
-
-        /*var tokenObject = req.body.tokenObject; //TODO: token
-         var devices = req.body.devices;//TODO deviceIds
-         var userId = req.session.userId;
-         var plan = null;
-         var deviceIds = devices;
-
-         if (!tokenObject) {
-         return next(badRequests.NotEnParams({reqParams: ['token', 'deviceIds']}));
-         }
-
-         if (!deviceIds || deviceIds.length === 0) {
-         return next(badRequests.NotEnParams({reqParams: ['token', 'deviceIds']}));
-         }
-
-         async.parallel({
-
-         user: function (cb) {
-         UserModel.findById(userId, function (err, user) {
-         if (err) {
-         return cb(err);
-         }
-         cb(null, user);
-         });
-         },
-
-         plans: function (cb) {
-         var criteria = {};
-
-         TariffPlan.find(criteria, function (err, plans) {
-         if (err) {
-         return cb(err);
-         }
-         cb(null, plans)
-         });
-         },
-
-         checkSubscribedDevices: function (cb) {
-         var criteria = {
-         user: userId,
-         status: STATUSES.SUBSCRIBED,
-         _id: {
-         $in: deviceIds
-         }
-         };
-         var fields = '_id';
-
-         DeviceModel.find(criteria, fields, function (err, devices) {
-         if (err) {
-         cb(err);
-         } else if (devices && devices.length) {
-         cb(badRequests.DeviceIdInUse());
-         } else {
-         cb();
-         }
-         });
-         }
-
-         }, function (err, results) {
-         var userModel = results.user;
-         var plans = results.plans;
-         var customerData;
-
-         plan = calculateTariff({
-         date: new Date(),
-         plans: plans,
-         user: userModel,
-         selectedDevicesCount: deviceIds.length
-         });
-
-         if (!userModel.stripeId) {
-         customerData = {
-         plan: plan.id,
-         quantity: deviceIds.length,
-         source: tokenObject.id,
-         email: userModel.email
-         };
-
-         stripe.customers.create(customerData, function (err, customer) {
-         if (err) {
-         return next(err);
-         }
-
-         res.status(200).send(customer);
-         });
-
-         } else {
-         //TODO: ...
-         }
-
-         });*/
-    };
-
-    //this.getStripeCustomers = function(req, res, next){
-    //    stripe.customers.list(
-    //        function(err, customers) {
-    //            if (err){
-    //                console.log(err);
-    //                return next(err);
-    //            }
-    //            console.log(err, customers);
-    //            res.send(customers);
-    //        }
-    //    );
-    //}
 
     this.createPlansInStripe = function (req, res, next) {
 

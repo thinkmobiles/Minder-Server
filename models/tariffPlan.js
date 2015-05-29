@@ -26,4 +26,9 @@ module.exports = (function () {
     }
 
     mongoose.Schemas['TariffPlan'] = tariffPlanSchema;
+
+    if (process.env.NODE_ENV !== 'production') {
+        tariffPlanSchema.set('autoIndex', false);
+    }
+
 })();

@@ -37,4 +37,8 @@ module.exports = (function () {
 
     mongoose.Schemas['User'] = userSchema;
 
+    if (process.env.NODE_ENV !== 'production') {
+        userSchema.set('autoIndex', false);
+    }
+
 })();

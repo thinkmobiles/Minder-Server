@@ -48,9 +48,7 @@ module.exports = function (app, db) {
     app.post('/forgotPassword', userHandler.forgotPassword);
     app.post('/resetPassword', userHandler.resetPassword);
     app.get('/tariffPlans', session.authenticatedUser, tariffPlanHandler.getTariffPans);
-
-    app.post('/renewal', tariffPlanHandler.renewal); //TODO: use PUT
-    app.put('/renewal', tariffPlanHandler.renewal); //TODO: use PUT
+    app.put('/renewal', tariffPlanHandler.renewal);
 
     devicesRouter = require('./devices')(db);
     app.use('/devices', devicesRouter);

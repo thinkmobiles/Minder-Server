@@ -38,7 +38,7 @@ var DeviceHandler = function (db) {
         }
 
         if (data && data.deviceName) {
-            deviceData.name = data.deviceName; //TODO: use data.name
+            deviceData.name = data.deviceName;
         }
 
         if (data && data.deviceType) {
@@ -795,16 +795,6 @@ var DeviceHandler = function (db) {
         return DEVICE_OS.UNKNOWN;
     };
 
-    this.isMobile = function (req) {
-        var deviceOs = self.getDeviceOS(req);
-
-        if (deviceOs !== DEVICE_OS.UNKNOWN) {
-            return true;
-        } else {
-            return false;
-        }
-    };
-
     this.createDevice = function (deviceData, userModel, callback) {
         var newDevice;
 
@@ -1005,16 +995,21 @@ var DeviceHandler = function (db) {
             });
     };
 
-    this.getDevice = function (req, res, next) { //TODO: question: check criteria
+    this.getDevice = function (req, res, next) {
         var userId = req.session.userId;
         var id = req.params.id;
         var criteria = {
             _id: id
         };
+        var fields = {
+            deviceId: 1,
+            name: 1,
+            createdAt: 1,
+            updatedAt: 1
+        };
 
         DeviceModel
-            .findOne(criteria)
-            .exec(function (err, device) {
+            .findOne(criteria, fields, function (err, device) {
                 var ownerId;
 
                 if (err) {
@@ -1047,10 +1042,6 @@ var DeviceHandler = function (db) {
 
         if (options.name) {
             update.name = options.name;
-        }
-
-        if (options.enabledTrackLocation !== undefined) {
-            //TODO check if isPayed for enabledTrackLocation = true;
         }
 
         if (!Object.keys(update).length) {
