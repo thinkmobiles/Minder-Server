@@ -388,11 +388,14 @@ var UserHandler = function (db) {
     };
 
     this.signIn = function (req, res, next) {
+        var options = req.body;
 
-        if (deviceHandler.isMobile(req)) {
+        if (options.email && options.pass) {
+            signInWeb(req, res, next);
+        } else if (options.minderId && options.deviceId) {
             signInMobile(req, res, next);
         } else {
-            signInWeb(req, res, next);
+            return next(badRequests.NotEnParams({}));
         }
     };
 
