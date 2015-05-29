@@ -1,92 +1,99 @@
 <div class="row">
+  <div class="col-md">
+    <form class="form-inline" id="searchForm">
+
+      <div class="form-group">
+        <label class="sr-only" for="search">Email address</label>
+        <span class="goSearch glyphicon glyphicon-search"></span>
+        <input type="text" class="form-control" id="search" placeholder="Search..." value="<%= search %>">
+        <span class="clearSearch glyphicon glyphicon-remove"></span>
+      </div>
+
+      <!--<button type="submit" class="btn btn-default" id="searchButton">search</button>-->
+    </form>
+  </div>
+
+  <div class="detailContainer">
     <div class="col-md-8">
 
-        <form class="form-inline" id="searchForm">
-
-            <div class="form-group">
-                <label class="sr-only" for="search">Email address</label>
-                <span class="goSearch glyphicon glyphicon-search"></span>
-                <input type="text" class="form-control" id="search" placeholder="Search..." value="<%= search %>">
-                <span class="clearSearch glyphicon glyphicon-remove"></span>
-            </div>
-
-            <!--<button type="submit" class="btn btn-default" id="searchButton">search</button>-->
-        </form>
 
 
-        <div class="checkbox">
-            <label>
-                <!--<input id="globalDevicesChecker" type="checkbox" <% if (checked) { %> checked <% } %> >-->
-                <input id="globalDevicesChecker" type="checkbox" >
-                <label for="globalDevicesChecker">select all/clear all</label>
-            </label>
-        </div>
-        <table class="table">
-            <tbody>
-            <% for (i in devices) { %>
+      <div class="checkbox">
+        <label>
+          <!--<input id="globalDevicesChecker" type="checkbox" <% if (checked) { %> checked <% } %> >-->
+          <input id="globalDevicesChecker" type="checkbox" >
+          <label for="globalDevicesChecker">select all/clear all</label>
+        </label>
+      </div>
+      <table class="table">
+        <tbody>
+          <% for (i in devices) { %>
 
-            <% if (devices[i].selected) { %>
-            <tr class="active">
-                <% } else { %>
-                <% if (devices[i].device.status === DEVICE_STATUSES.DELETED) { %>
-            <tr class="deleted">
-                <% } %>
-                <% if (devices[i].device.status === DEVICE_STATUSES.SUBSCRIBED) { %>
-            <tr class="subscribed">
-                <% } %>
-                <% if (devices[i].device.status === DEVICE_STATUSES.ACTIVE) { %>
-            <tr class="activate">
-                <% } %>
-                <% } %>
-
-                <td>
-                    <% if (devices[i].device.status === DEVICE_STATUSES.DELETED) { %>
-                    <!--<input disabled type="checkbox" name="device" class="deviceCheckbox" value="<%= devices[i].device._id %>" <% if(devices[i].selected) { %>checked<% } %> >-->
-                    <% } else { %>
-                    <input type="checkbox" name="device" class="deviceCheckbox" value="<%= devices[i].device._id %>" <%
-                    if(devices[i].selected) { %>checked<% } %> >
-                    <% } %>
-                </td>
-                <td><%= devices[i].device.name %></td>
-                <td><%= (devices[i].device.billings.expirationDate && devices[i].device.status === DEVICE_STATUSES.SUBSCRIBED) ? (moment(devices[i].device.billings.expirationDate).fromNow()) : ''%></td>
-
-            </tr>
+          <% if (devices[i].selected) { %>
+          <tr class="active">
+            <% } else { %>
+            <% if (devices[i].device.status === DEVICE_STATUSES.DELETED) { %>
+          <tr class="deleted">
             <% } %>
-            </tbody>
-        </table>
+            <% if (devices[i].device.status === DEVICE_STATUSES.SUBSCRIBED) { %>
+          <tr class="subscribed">
+            <% } %>
+            <% if (devices[i].device.status === DEVICE_STATUSES.ACTIVE) { %>
+          <tr class="activate">
+            <% } %>
+            <% } %>
 
-        <div id="pagination"></div>
+            <td>
+              <% if (devices[i].device.status === DEVICE_STATUSES.DELETED) { %>
+              <!--<input disabled type="checkbox" name="device" class="deviceCheckbox" value="<%= devices[i].device._id %>" <% if(devices[i].selected) { %>checked<% } %> >-->
+              <% } else { %>
+              <input type="checkbox" name="device" class="deviceCheckbox" value="<%= devices[i].device._id %>" <%
+																												  if(devices[i].selected) { %>checked<% } %> >
+              <% } %>
+            </td>
+            <td><%= devices[i].device.name %></td>
+            <td><%= (devices[i].device.billings.expirationDate && devices[i].device.status === DEVICE_STATUSES.SUBSCRIBED) ? (moment(devices[i].device.billings.expirationDate).fromNow()) : ''%></td>
+
+          </tr>
+          <% } %>
+        </tbody>
+      </table>
+
+      <div id="pagination"></div>
     </div>
     <div class="col-md-4">
 
-        <div class="form-group">
-            <select class="form-control" id="period">
-                <option value="month"
-                <% if(period === 'month') { %>selected<% } %> >Monthly</option>
-                <option value="year"
-                <% if(period === 'year') { %>selected<% } %> >Yearly</option>
-            </select>
-        </div>
-        <div>
-            <div class="name">Plan  <%= calculations.plan %></div>
-            <div class="name">(<%= (calculations.planData.amount/100)%>$ device/<%= calculations.planData.interval%>)</div>
-            <!--<div class="value"><%= calculations.plan %></div>-->
-        </div>
-        <div>
-            <div>NUMBER OF DEVICES</div>
-            <div class="value"><%= calculations.subscribedDevices %> of <%= calculations.maxDevices %> devices</div>
-        </div>
-        <div>
-            <div>TOTAL COST</div>
-            <div class="value"><%= calculations.amount/100 %>$</div>
-        </div>
+      <div class="form-group">
+        <select class="form-control" id="period">
+          <option value="month"
+                  <% if(period === 'month') { %>selected<% } %> >Monthly</option>
+          <option value="year"
+                  <% if(period === 'year') { %>selected<% } %> >Yearly</option>
+        </select>
+      </div>
+      <div>
+        <div class="name">Plan  <%= calculations.plan %></div>
+        <div class="name">(<%= (calculations.planData.amount/100)%>$ device/<%= calculations.planData.interval%>)</div>
+        <!--<div class="value"><%= calculations.plan %></div>-->
+      </div>
+      <div>
+        <div>NUMBER OF DEVICES</div>
+        <div class="value"><%= calculations.subscribedDevices %> of <%= calculations.maxDevices %> devices</div>
+      </div>
+      <div>
+        <div>TOTAL COST</div>
+        <div class="value"><%= calculations.amount/100 %>$</div>
+      </div>
 
 
-        <div>
-            <img src="images/credit-card.png" class="col-md-12 logos">
-        </div>
+      <div>
+        <img src="images/credit-card.png" class="col-md-12 logos">
+      </div>
 
 
     </div>
+    <div class="clear">
+    </div>
+  </div>
 </div>
 
