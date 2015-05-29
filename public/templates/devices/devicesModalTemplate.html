@@ -15,18 +15,16 @@
 
   <div class="detailContainer">
     <div class="col-md-8">
-
-
-
-      <div class="checkbox">
-        <label>
-          <!--<input id="globalDevicesChecker" type="checkbox" <% if (checked) { %> checked <% } %> >-->
-          <input id="globalDevicesChecker" type="checkbox" >
-          <label for="globalDevicesChecker">select all/clear all</label>
-        </label>
-      </div>
       <table class="table">
         <tbody>
+
+		  <tr>
+			<td>
+			            <input id="globalDevicesChecker" type="checkbox" class="customCheckbox">
+          <label for="globalDevicesChecker"></label>select all/clear all
+			</td>
+			<td></td>
+		  </tr>
           <% for (i in devices) { %>
 
           <% if (devices[i].selected) { %>
@@ -47,11 +45,12 @@
               <% if (devices[i].device.status === DEVICE_STATUSES.DELETED) { %>
               <!--<input disabled type="checkbox" name="device" class="deviceCheckbox" value="<%= devices[i].device._id %>" <% if(devices[i].selected) { %>checked<% } %> >-->
               <% } else { %>
-              <input type="checkbox" name="device" class="deviceCheckbox" value="<%= devices[i].device._id %>" <%
+              <input type="checkbox" name="device" class="deviceCheckbox customCheckbox" id="device<%= i%>" value="<%= devices[i].device._id %>"
+<%
 																												  if(devices[i].selected) { %>checked<% } %> >
+ <label for="device<%= i %>"></label>
               <% } %>
-            </td>
-            <td><%= devices[i].device.name %></td>
+            <%= devices[i].device.name %></td>
             <td><%= (devices[i].device.billings.expirationDate && devices[i].device.status === DEVICE_STATUSES.SUBSCRIBED) ? (moment(devices[i].device.billings.expirationDate).fromNow()) : ''%></td>
 
           </tr>
@@ -59,7 +58,6 @@
         </tbody>
       </table>
 
-      <div id="pagination"></div>
     </div>
     <div class="col-md-4">
 
@@ -95,5 +93,7 @@
     <div class="clear">
     </div>
   </div>
+      <div id="pagination"></div>
+
 </div>
 

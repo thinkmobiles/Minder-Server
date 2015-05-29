@@ -787,7 +787,7 @@ input.customCheckbox:checked+label {
 			font-family: "SegoeUIRegular";
 			font-size: 30px;
 			color:#fe102c;
-			padding-left: 3px;
+			padding-left: 8px;
 		}
 	}
 	#searchForm{
@@ -798,11 +798,104 @@ input.customCheckbox:checked+label {
 		margin:0 20px;
 		padding-left:0px;
 		padding-right:0px;
+		padding-bottom:0px;
 		.detailContainer{
-		border-top:1px solid #fe102c;
-		border-bottom:1px solid #fe102c;
-			
+			border-top:1px solid #fe102c;
+			border-bottom:1px solid #fe102c;
+			margin-top:15px;
+			margin-left:20px;
+			margin-right:20px;
+			position:relative;
+			.col-md-8{
+				padding-left:0px;
+				.table{
+					tr{
+						td{
+							height:66px;
+							padding-left:0px;
+							vertical-align: middle;
+							.customCheckbox+label{
+								margin-top:0px;
+							}
+						}
+					}
+				}
+			}
+			.col-md-4{
+				height: 100%;
+				position: absolute;
+				right: 0;
+				top: 0px;
+			}
 		}
 		
 	}
+	.modal-footer{
+		margin-top:-18px;
+		padding-top:18px;
+		padding-top:0px;
+		padding-right:24px;
+		border:none;
+		position: relative;
+		z-index: 10;
+
+		button.unsubscribe{
+			outline:none;
+			.mp;
+			font-family: "SegoeUIRegular";
+			font-size:16px;
+			height:39px;
+			width:130px;
+			border-radius:0;
+			border:3px solid #fe102c;
+			color:#fe102c;
+			background-color:white;
+
+		}
+		
+
+		button.subscribe{
+			outline:none;
+			.mp;
+			font-family: "SegoeUIRegular";
+			font-size:16px;
+			height:39px;
+			width:210px;
+			border-radius:0;
+			border:3px solid #2ab637;
+			color:white;
+			background-color:#2ab637;
+			margin-left:30px;
+	
+
+		}
+		
+
+	}
+}
+
+
+.modal-content #pagination{
+	.pagination{
+		.mp;
+	.item{
+		.goToPage{
+			border:none;
+			font-family: "SegoeUIRegular";
+			font-size:12px;
+			color:#494949;
+			
+		}
+		&.active{
+			a{
+				color:#fe102c;
+				background-color:white;
+			}
+		}
+		a{
+			border:none;
+		}
+
+	}
+}
 }
