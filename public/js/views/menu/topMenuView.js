@@ -16,7 +16,8 @@ define([
             {
                 name: "Home",
                 url: "#main",
-                title: "Home page"
+                title: "Home page",
+                active: true
             }, {
                 name: "Devices",
                 url: "#devices",

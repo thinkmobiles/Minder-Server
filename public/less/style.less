@@ -348,6 +348,7 @@ position: relative;
 .topMenu .menu.loggedMenu{
 	right:auto;
 	left:440px;
+	
 	a.btn{
 		background-color:transparent;
 		border-color:transparent;
@@ -358,6 +359,11 @@ position: relative;
 		width:85px;
 		float:left;
 		box-shadow:none;
+	}
+	&.active{
+		a{
+			color:#f34156
+		}
 	}
 }
 
@@ -432,6 +438,64 @@ position: relative;
 	}
 }
 
+.biliingContainer{
+	margin-left: 120px;
+	border:none;
+	>.panel-body{
+		.mp;
+		float:left;
+		border-bottom:1px solid #fe102c;
+		margin-bottom:10px;
+	}
+	.currentPlanInfo{
+		margin-top:40px;
+		font-family: "SegoeUILight";
+			font-size:14px;
+		span{
+			font-family: "SegoeUIBold";
+
+		}
+		.renewalContainer{
+			width:240px;
+			height:55px;
+			border:none;
+			border-top:1px solid #fe102c;
+			border-bottom:1px solid #fe102c;
+			border-radius:0;
+			font-family: "SegoeUIBold";
+			font-size:12px;
+			margin-top:20px;
+			>.panel-body{
+				.mp;
+			}
+			.checkbox{
+				line-height:55px;
+				margin:0;
+				label{
+					padding:0;
+					input{
+						position:inherit;
+					}
+				}
+			}
+			button{
+				float:right;
+				border: 3px solid #d3d3d3;
+				outline: none;
+				padding: 0px;
+				margin: 0px;
+				font-family: "SegoeUIRegular";
+				font-size: 16px;
+				height: 30px;
+				width: 76px;
+				border-radius: 0;
+				margin-top:11px;
+			}
+		}
+	}
+	
+}
+
 .billingItem{
 	width:auto;
 	tbody{
@@ -439,6 +503,13 @@ position: relative;
 			td{
 				padding:10px;
 				width:162px;
+				border:none;
+				&:first-child{
+					padding-left:0px;
+				}
+				&:last-child{
+					padding-right:0px;
+				}
 				>div{
 					background-color:#d4d4d4;
 				}
@@ -471,12 +542,22 @@ position: relative;
 							font-family: "SegoeUILight";
 							font-size:12px;
 							color:#494949;
+							padding-top:4px;
+					
 						}
 						.devicesCount{
 							font-size:14px;
 							font-family: "SegoeUIRegular";
 							color:#7c7c7c;
 						}
+					}
+				}
+				&.active{
+					>div{
+						background-color:#2ab737;
+					}
+					.tariffPlan{				
+						color:white;
 					}
 				}
 
@@ -629,5 +710,99 @@ position: relative;
 				}
 			}
 		}
+	}
+}
+
+#showProceedSubscription{
+	width:245px;
+	height:40px;
+	background-color:#fe102c;
+	display:block;
+	outline: none;
+	padding: 0px;
+	margin: 0px;
+	font-family: "SegoeUIRegular";
+	font-size: 16px;
+	border-radius: 0;
+	margin-top:11px;
+	border:none;
+}
+
+.subInfo{
+	font-family: "SegoeUIRegular";
+	font-size: 16px;
+	color:#7c7c7c;
+}
+
+input.customCheckbox+label {
+	margin: 0;
+	cursor: pointer;
+	padding-left: 0px;
+	width: 19px;
+	height: 19px;
+	background-color: #d3d3d3;
+	display: block;
+	float: left;
+	margin-top: 15px;
+	margin-right:5px;
+}
+
+    input.customCheckbox{
+      display: none;
+    }
+input.customCheckbox:checked+label {
+	margin: 0;
+	cursor: pointer;
+	padding-left: 0px;
+	width: 19px;
+	height: 19px;
+	background-color: #fe102c;
+	display: block;
+	float: left;
+	margin-top: 15px;
+	margin-right:5px;
+}
+
+.clear{
+	clear:both;
+}
+
+#proceedSubscriptionModal {
+	.modal-content{
+		border-radius:0;
+		.modal-header{
+			border-bottom:0px;
+			padding-top:0px;
+			padding-bottom:0px;
+			.cancelSubscription{
+				.i("search-close-icon.png");
+				width:18px;
+				height:17px;
+				span{
+					display:none;
+				}
+			}
+		}
+		.modal-title{
+			font-family: "SegoeUIRegular";
+			font-size: 30px;
+			color:#fe102c;
+			padding-left: 3px;
+		}
+	}
+	#searchForm{
+		margin-left:20px;
+		margin-top:9px;
+	}
+	#modalContent{
+		margin:0 20px;
+		padding-left:0px;
+		padding-right:0px;
+		.detailContainer{
+		border-top:1px solid #fe102c;
+		border-bottom:1px solid #fe102c;
+			
+		}
+		
 	}
 }
