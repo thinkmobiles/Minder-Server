@@ -241,6 +241,8 @@ define([
 
             this.devicesView = new deviceView({id : id});
 
+            //this.devicesView.on('customClose',this.closeDevicesView);
+
             this.$el.find('#modalEditContent').append(this.devicesView.el);
 
         },

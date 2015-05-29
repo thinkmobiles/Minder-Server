@@ -353,7 +353,7 @@ define([
                 show: true,
                 backdrop: 'static'
             });
-;       },
+         },
 
         hideWaiting: function(){
             this.$el.find('#waitingModal').modal('hide');

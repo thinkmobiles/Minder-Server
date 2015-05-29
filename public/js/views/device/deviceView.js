@@ -75,7 +75,9 @@ define([
         hideDialog: function () {
             $('#editDeviceModal').modal('hide');
             $('.modal-backdrop').remove();
-            $('body').removeClass('modal-open');
+            $('body').removeClass('modal-open').style="";
+            //$('body').style="";
+            //this.trigger('customClose');
 
         },
 
@@ -179,6 +181,8 @@ define([
                     self.stateModel.set({
                         errors: [err.responseJSON.error]
                     });
+                    self.cleanPageData();
+                    self.hideDialog();
                     //App.error(err);
                 }
             });
