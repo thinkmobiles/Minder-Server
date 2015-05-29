@@ -75,6 +75,8 @@ define([
         hideDialog: function () {
             $('#editDeviceModal').modal('hide');
             $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+
         },
 
         // get device from serer or from devices view collection collection
@@ -124,6 +126,7 @@ define([
                 success: function () {
                     self.cleanPageData();
                     self.hideDialog();
+                    //Backbone.history.navigate('logIn',{trigger : true});
                 }
             });
 

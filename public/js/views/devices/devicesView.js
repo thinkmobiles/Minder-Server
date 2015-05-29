@@ -398,6 +398,7 @@ define([
             // set template
             if (data.modal) {
                 this.$el.html(_.template(ModalTemplate, data));
+                this.myChecked();
             } else {
                 _.each(data.devices, function (device) {
                     device.expirationDate = self.getDateUntil(new Date(now), device.device.billings.expirationDate); // format date (until style)
@@ -406,7 +407,6 @@ define([
                 this.$el.html(_.template(Template, data));
             }
 
-            this.myChecked();
             this.$el.find('#pagination').append(this.paginationView.render().$el);
 
 
