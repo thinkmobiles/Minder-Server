@@ -2,6 +2,7 @@
     function costCounter(data, cb) {
         var subscribedDevices = data.user.billings.subscribedDevices;
         var selectedDevicesCount = data.selectedDevicesCount;
+        var forCounter = data.forCounter;
         var plans = data.plans;
         var devicesToPay = 0;
         var plan;
@@ -33,7 +34,7 @@
         };
 
         devicesToPay = selectedDevicesCount;
-        subscribedDevices = subscribedDevices + selectedDevicesCount;
+        subscribedDevices = subscribedDevices + selectedDevicesCount - forCounter;
 
         // check of maximum devices limit
         if (subscribedDevices > maxDevicesForUser) {

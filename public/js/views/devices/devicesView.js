@@ -270,13 +270,17 @@ define([
             var selectedDevices = this.selectedDevicesCollection.filter(function (device) {
                 if (device.get('status') !== STATUSES.DELETED) return true
             });
+            var forCounter = this.selectedDevicesCollection.filter(function (device) {
+                if (device.get('status') == STATUSES.SUBSCRIBED) return true
+            });
 
             window.costCounter({
                 date: date,
                 plans: plans,
                 user: user,
                 period: period,
-                selectedDevicesCount: selectedDevices.length
+                selectedDevicesCount: selectedDevices.length,
+                forCounter: forCounter.length
             }, function (err, result) {
                 if (err) {
                     return App.error(err);
