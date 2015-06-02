@@ -599,7 +599,7 @@ body, html {
 		font-family: "SegoeUILight";
 			font-size:14px;
 		span{
-			font-family: "SegoeUIBold";
+			font-family: "SegoeUISemiBold";
 
 		}
 		.renewalContainer{
@@ -609,7 +609,7 @@ body, html {
 			border-top:1px solid #fe102c;
 			border-bottom:1px solid #fe102c;
 			border-radius:0;
-			font-family: "SegoeUIBold";
+			font-family: "SegoeUISemiBold";
 			font-size:12px;
 			margin-top:20px;
 			>.panel-body{
@@ -676,7 +676,7 @@ body, html {
 						margin:5px;
 						background-color:white;
 						.price{
-							font-family: "SegoeUIBold";
+							font-family: "SegoeUISemiBold";
 							font-size:14px;
 							color:#fe102c;
 							margin:0 5px;
@@ -798,6 +798,13 @@ body, html {
 
 .devicesListContainer{
 	margin-left: 120px;
+	#pagination{
+		float:left;
+		.pagination{
+			margin-top:-13px;
+			min-width:250px;
+		}
+	}
 	.pagination{
 		.item{
 			.goToPage{
@@ -1089,8 +1096,11 @@ input.customCheckbox:checked+label {
 
 
 .modal-content #pagination{
+	float:left;
 	.pagination{
 		.mp;
+		margin-left:20px;
+		min-width:250px;
 	.item{
 		.goToPage{
 			border:none;
@@ -1162,27 +1172,43 @@ input.customCheckbox:checked+label {
 .pagination {
 	position:relative;
 	z-index:1000;
-	li.item{
-		a{
-			cursor:pointer;
-			font-family: "SegoeUISemiBold";
-			font-size:12px;
-			color:#494949;
-			padding-right:3px;
-			padding-left:3px;
-			&:hover{
-				background-color:inherit;
-				color:#494949;
-			}
-		}
-		&.arrow a{
-			text-decoration:underline;
-			padding-right:10px;
-			padding-left:10px;
-		}
-		&:first-child{
+	width:100%;
+	display:table;	
+	li{
+		display:table-cell;
+		&.item{
+			text-align:center;
 			a{
-				padding-left:0px;
+				cursor:pointer;
+				font-family: "SegoeUISemiBold";
+				font-size:12px;
+				color:#494949;
+				padding:0;
+				display:inline;
+				float:inherit;
+				&:hover{
+					background-color:inherit;
+					color:#494949;
+				}
+			}
+			&.arrow{
+				text-align:right;
+				&:nth-of-type(1){
+					text-align:left;
+
+				}
+				&:nth-of-type(2){
+					text-align:left;
+
+				}
+				a{
+					text-decoration:underline;
+				}
+			}
+			&:first-child{
+				a{
+					padding-left:0px;
+				}
 			}
 		}
 	}
