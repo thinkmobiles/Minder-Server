@@ -1,8 +1,8 @@
 <div class="device <% if (checked) { %>active activeDevice<% } %>">
     <div class="checkbox">
         <label>
-            <input class="deviseMainPageCheck" type="checkbox" <% if (checked) { %>checked<% } %> >
-            <h4><%= name%></h4>
+            <input class="deviseMainPageCheck customCheckbox" type="checkbox" <% if (checked) { %>checked<% } %> id="device<%= _id%>" >			  <label for="device<%= _id %>"></label>
+            <%= name%>
         </label>
         <% if (detail) { %>
         <span class="detailStatus">

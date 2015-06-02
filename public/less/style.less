@@ -60,6 +60,7 @@
 
 body, html {
 	height: 100%;
+	font-family: "SegoeUIRegular";
 }
 
 .i(@name){
@@ -119,6 +120,8 @@ body, html {
 				font-size:14px;
 				font-size:14px;
 				font-family: "SegoeUIRegular";
+				width:80px;
+				text-align:left;
 
 			}
 		}
@@ -154,12 +157,25 @@ body, html {
 	display: block;
 	z-index: 20;
 	margin-left:120px;
-position: relative;
+	position: relative;
   z-index: 11;
+  .checkbox{
+	  margin-top:6px;
+	  margin-bottom:6px;
+  }
+  >.checkbox{
+	  line-height:48px;
+	font-family: "SegoeUISemiBold";
+	font-size:12px;
+	>label{
+		padding-left:0;
+	}
+  }
+
 }
 
 #mapConteiner {
-  height: 500px;
+  height: 548px;
   width: 100%;
   z-index: 10;
   position: absolute;
@@ -170,7 +186,7 @@ position: relative;
 
 #mainPageTopControls{
 	padding-top:1px;
-	height:100px;
+	height:105px;
 	border-bottom:1px solid #fe102c;
 }
 
@@ -200,7 +216,6 @@ position: relative;
 }
 
 .activeDevice {
-	background: rgba(0, 0, 0, 0.1);
 }
 
 
@@ -237,6 +252,13 @@ position: relative;
 		border-color:transparent;
 		background-color:transparent;
 		font-family: "SegoeUIRegular";
+	}
+	input.customCheckbox + label{
+		margin-top:0px;
+	}
+	input.customCheckbox:checked+label {
+		.i("check_mark.png");
+		background-position:50% 50%;
 	}
 	.form-group{
 		span{
@@ -277,10 +299,119 @@ position: relative;
 }
 
 
+.profileForm{
+	width:364px;
+	margin:0 auto;
+	margin-top:120px;
+	border-color:transparent;
+	background-color:transparent;
+	box-shadow: none;
+	.panel-heading{
+		font-size:27px;
+		color:#fe102c;
+		padding:0px;
+		border-color:transparent;
+		background-color:transparent;
+		font-family: "SegoeUIRegular";
+	}
+	.form-group{
+		span{
+			font-family: "SegoeUIRegular";
+			color:#7c7c7c;
+		}
+		input{
+			background-color:#d3d3d3;
+			border-radius:0px;
+		}
+
+		.left{
+			float:left;
+			.btn{
+				width:132px;
+				height:39px;
+				border-radius:0px;
+				border:3px solid #d3d3d3;
+			}
+		}
+		.right{
+			float:right;
+			width:210px;
+
+			.btn{
+				width:205px;
+				height:39px;
+				border-radius:0px;
+				background-color:#fe102c;
+				color:white;
+			}
+			label{
+				font-weight:normal;
+				display:block;
+			}
+		}
+	}
+}
+
+
+.forgotForm{
+	width:364px;
+	margin:0 auto;
+	margin-top:220px;
+	border-color:transparent;
+	background-color:transparent;
+	box-shadow: none;
+	.panel-heading{
+		font-size:27px;
+		color:#fe102c;
+		padding:0px;
+		border-color:transparent;
+		background-color:transparent;
+		font-family: "SegoeUIRegular";
+		margin-bottom:30px;
+	}
+	.form-group{
+		span{
+			font-family: "SegoeUIRegular";
+			color:#7c7c7c;
+		}
+		input{
+			background-color:#d3d3d3;
+			border-radius:0px;
+		}
+
+		.left{
+			float:left;
+			width:210px;
+			.btn{
+				margin-top:0px;
+				width:205px;
+				height:39px;
+				border-radius:0px;
+				border:3px solid #d3d3d3;
+			}
+		}
+		.right{
+			float:right;
+			.btn{
+				width:132px;
+				height:39px;
+				border-radius:0px;
+				background-color:#fe102c;
+				color:white;
+			}
+			label{
+				font-weight:normal;
+				display:block;
+			}
+		}
+	}
+}
+
+
 .registerForm{
 	width:360px;
 	margin:0 auto;
-	margin-top:220px;
+	margin-top:150px;
 	border-color:transparent;
 	background-color:transparent;
 	box-shadow: none;
@@ -302,10 +433,8 @@ position: relative;
 
 		.left{
 			float:left;
-			width:210px;
 			.btn{
-				margin-top:7px;
-				width:205px;
+				width:132px;
 				height:39px;
 				border-radius:0px;
 				border:3px solid #d3d3d3;
@@ -313,8 +442,9 @@ position: relative;
 		}
 		.right{
 			float:right;
+			width:210px;
 			.btn{
-				width:132px;
+				width:205px;
 				height:39px;
 				border-radius:0px;
 				background-color:#fe102c;
@@ -325,6 +455,18 @@ position: relative;
 				display:block;
 			}
 		}
+	}
+	.iAcceptConditions{
+		
+	}
+	.checkbox{
+		line-height:50px;
+		>label{
+			padding-left:0px;
+		}
+	}
+	a{
+		text-decoration:underline;
 	}
 }
 
@@ -359,6 +501,9 @@ position: relative;
 		width:85px;
 		float:left;
 		box-shadow:none;
+		&.active{
+			color:#f34156
+		}
 	}
 	&.active{
 		a{
@@ -370,6 +515,7 @@ position: relative;
 .remember{
 	font-size:12px;
 	font-family: "SegoeUIRegular";
+	margin-bottom:10px;
 }
 
 .topMenu>.dropDown{
@@ -409,6 +555,7 @@ position: relative;
 		padding:0;
 		box-shadow:none;
 		li{
+			cursor:pointer;
 			.lh(32px);
 			a{
 				padding:0px;
@@ -567,7 +714,7 @@ position: relative;
 }
 #searchForm{
 		border:3px solid #d9d9d9;
-		margin-top:26px;
+		margin-top:41px;
 		width:290px;
 	.goSearch{
 		.i("search-icon.png");
@@ -615,6 +762,17 @@ position: relative;
 }
 #devicesMainList{
 	border-bottom: 1px solid #fe102c;
+	label{
+		line-height:40px;
+	}
+	input.customCheckbox + label{
+		margin-top:10px;
+	}
+	.checkbox{
+		>label{
+			padding-left:0px;
+		}
+	}
 }
 
 #mainPageBottomControls{
@@ -751,33 +909,26 @@ input.customCheckbox+label {
       display: none;
     }
 input.customCheckbox:checked+label {
-	margin: 0;
-	cursor: pointer;
-	padding-left: 0px;
-	width: 19px;
-	height: 19px;
 	background-color: #fe102c;
-	display: block;
-	float: left;
-	margin-top: 15px;
-	margin-right:5px;
 }
 
 .clear{
 	clear:both;
 }
 
-#proceedSubscriptionModal {
+#proceedSubscriptionModal, #editDeviceModal {
 	.modal-content{
 		border-radius:0;
 		.modal-header{
 			border-bottom:0px;
 			padding-top:0px;
 			padding-bottom:0px;
-			.cancelSubscription{
+			.cancelSubscription, .cancelEditDevice{
 				.i("search-close-icon.png");
 				width:18px;
 				height:17px;
+				margin-top:18px;
+				opacity:1;
 				span{
 					display:none;
 				}
@@ -806,6 +957,7 @@ input.customCheckbox:checked+label {
 			margin-left:20px;
 			margin-right:20px;
 			position:relative;
+			font-size:12px;
 			.col-md-8{
 				padding-left:0px;
 				.table{
@@ -818,14 +970,75 @@ input.customCheckbox:checked+label {
 								margin-top:0px;
 							}
 						}
+						&.active{
+							td{
+								background-color:white;
+							}
+						}
 					}
 				}
 			}
 			.col-md-4{
 				height: 100%;
+				min-height:745px;
 				position: absolute;
+				width:290px;
 				right: 0;
 				top: 0px;
+				padding:10px 0;
+				.inner{
+					width:290px;
+					background-color:#d3d3d3;
+					height: calc(~"100% - 20px ");
+					position: absolute;
+					right: 0;
+					.arrow{
+						position:absolute;
+						top:calc(~"50% - 5px ");
+						left:0px;
+						width: 0;
+						height: 0;
+						border-style: solid;
+						border-width: 15px 0 15px 10px;
+						border-color: transparent transparent transparent white;
+					}
+					.logos{
+						width:173px;
+						margin:0 auto;
+						display: block;
+						float: none;
+						padding:0;
+					}
+					.line{
+						background-color:white;
+						width:173px;
+						margin:5px auto;
+						text-align:center;
+						font-family: "SegoeUILight";
+						font-size:12px;
+						&.form-group{
+							margin-top:250px;
+						}
+						.red{
+							font-family: "SegoeUIBold";
+							font-size:14px;
+							color:#fe102c;
+						}
+						.big{
+							font-family: "SegoeUISemiBold";
+							font-size:14px;
+							color:#7c7c7c;
+						}
+					
+						.green{
+							color:#2ab637;
+						}
+
+					}
+					.paymentImage{
+						margin-top:16px;
+					}
+				}
 			}
 		}
 		
@@ -898,4 +1111,169 @@ input.customCheckbox:checked+label {
 
 	}
 }
+}
+
+.customSelect{
+	position:relative;
+	.current{
+		.lh(35px);
+		background-color:#d3d3d3;
+		border:1px solid #ecebeb;
+		font-family: "SegoeUISemiBold";
+		font-size:14px;
+		color:white;
+		position:relative;
+		cursor:pointer;
+		.arrowDown{
+			background-image: url("http://localhost:8877/images/arrow-down.png");
+			background-repeat: no-repeat;
+			width: 12px;
+			height: 12px;
+			display: block;
+			position: absolute;
+			top: 12px;
+			right: 10px;
+		}
+	}
+	.list{
+		position:absolute;
+		width:100%;
+		display:none;
+		.item{
+			.lh(35px);
+			background-color: #d3d3d3;
+			color:black;
+			cursor:pointer;
+			border-bottom:1px solid white;
+			border-left:1px solid white;
+			border-right:1px solid white;
+			&:hover{
+				color: #fe102c;
+			}
+		}
+	}
+}
+.bd{
+	font-family: "SegoeUISemiBold";
+	font-size:12px;
+	color:#494949;
+}
+
+.pagination {
+	position:relative;
+	z-index:1000;
+	li.item{
+		a{
+			cursor:pointer;
+			font-family: "SegoeUISemiBold";
+			font-size:12px;
+			color:#494949;
+			padding-right:3px;
+			padding-left:3px;
+			&:hover{
+				background-color:inherit;
+				color:#494949;
+			}
+		}
+		&.arrow a{
+			text-decoration:underline;
+			padding-right:10px;
+			padding-left:10px;
+		}
+		&:first-child{
+			a{
+				padding-left:0px;
+			}
+		}
+	}
+}
+
+.confirm{
+	padding-left:120px;
+	padding-top:60px;
+	font-size:16px;
+	color:#7c7c7c;
+}
+
+
+#editDeviceModal{
+	.modal-title{
+		margin-left:50px;
+		margin-top:17px;
+	}
+	.cancelEditDevice{
+		margin-top:-9px !important;
+	}
+	.form-group{
+		width:355px;
+		margin:0 auto;
+		margin-bottom:10px;
+		span{
+			font-family: "SegoeUIRegular";
+			font-size:14px;
+			color:#7c7c7c;
+		}
+	}
+	input{
+		width:355px;
+		border-radius:0px;
+		background-color:#d3d3d3;
+	}
+	.modal-footer{
+		width:355px;
+		margin:0 auto;
+		padding:0;
+		margin-bottom:30px;
+	}
+	#deleteButton{
+		width:133px;
+		height:39px;
+		display:block;
+		float:left;
+		border-radius:0px;
+		border: 3px solid #d3d3d3;
+	}
+	#editButton{
+		background-color:#fe102c;
+		border: 3px solid #fe102c;
+		width:207px;
+		height:39px;
+		border-radius:0px;
+		float:right;
+		color:white;
+	}
+}
+
+
+.termsCond{
+	width:100%;
+	margin:0 auto;
+	padding:0 207px;
+	background-color:inherit;
+	text-align: justify;
+	font-family: "SegoeUIRegular";
+	font-size:14px;
+	border-bottom:none;
+	box-shadow:none;
+	margin-top:150px;
+	border-top:0px;
+	.panel-heading{
+		background-color:inherit;
+		border-bottom:none;
+		font-size:18px;
+		color:#fe102c;
+	}
+
+}
+.captcha{
+	overflow:hidden;
+	margin-bottom:0px;
+}
+.recaptchatable{
+	border:none !important;
+}
+
+.alert-danger{
+	background-color:inherit;
+	color:#fe102c !important;
 }

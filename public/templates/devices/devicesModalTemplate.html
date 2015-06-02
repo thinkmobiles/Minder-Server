@@ -19,9 +19,9 @@
         <tbody>
 
 		  <tr>
-			<td>
-			            <input id="globalDevicesChecker" type="checkbox" class="customCheckbox">
-          <label for="globalDevicesChecker"></label>select all/clear all
+			<td class="bd">
+			  <input id="globalDevicesChecker" type="checkbox" class="customCheckbox">
+			  <label for="globalDevicesChecker"></label>select all/clear all
 			</td>
 			<td></td>
 		  </tr>
@@ -46,12 +46,12 @@
               <!--<input disabled type="checkbox" name="device" class="deviceCheckbox" value="<%= devices[i].device._id %>" <% if(devices[i].selected) { %>checked<% } %> >-->
               <% } else { %>
               <input type="checkbox" name="device" class="deviceCheckbox customCheckbox" id="device<%= i%>" value="<%= devices[i].device._id %>"
-<%
-																												  if(devices[i].selected) { %>checked<% } %> >
- <label for="device<%= i %>"></label>
+					 <%
+						if(devices[i].selected) { %>checked<% } %> >
+			  <label for="device<%= i %>"></label>
               <% } %>
-            <%= devices[i].device.name %></td>
-            <td><%= (devices[i].device.billings.expirationDate && devices[i].device.status === DEVICE_STATUSES.SUBSCRIBED) ? (moment(devices[i].device.billings.expirationDate).fromNow()) : ''%></td>
+              <%= devices[i].device.name %></td>
+            <td class="bd"><%= (devices[i].device.billings.expirationDate && devices[i].device.status === DEVICE_STATUSES.SUBSCRIBED) ? (moment(devices[i].device.billings.expirationDate).fromNow()) : ''%></td>
 
           </tr>
           <% } %>
@@ -60,40 +60,50 @@
 
     </div>
     <div class="col-md-4">
+<div class="inner">
+  <div class="arrow">
+  </div>
+      <div class="form-group line">
+        <div class="customSelect">
+            <div class="current">
+			  <span class="text">
+				<%= period === 'month'?'Monthly':'Yearly' %>
+			  </span>
+              <div class="arrowDown">
+              </div>
+            </div>
+            <div class="list">
+              <div class="item" data-val="month">Monthly</div>
+              <div class="item" data-val="year">Yearly</div>
 
-      <div class="form-group">
-        <select class="form-control" id="period">
-          <option value="month"
-                  <% if(period === 'month') { %>selected<% } %> >Monthly</option>
-          <option value="year"
-                  <% if(period === 'year') { %>selected<% } %> >Yearly</option>
-        </select>
+            </div>
+        </div>
       </div>
-      <div>
-        <div class="name">Plan  <%= calculations.plan %></div>
+      <div class="line">
+        <div class="name red">Plan  <%= calculations.plan %></div>
         <div class="name">(<%= (calculations.planData.amount/100)%>$ device/<%= calculations.planData.interval%>)</div>
         <!--<div class="value"><%= calculations.plan %></div>-->
       </div>
-      <div>
-        <div>NUMBER OF DEVICES</div>
+      <div class="line">
+        <div class="big">NUMBER OF DEVICES</div>
         <div class="value"><%= calculations.subscribedDevices %> of <%= calculations.maxDevices %> devices</div>
       </div>
-      <div>
-        <div>TOTAL COST</div>
-        <div class="value"><%= calculations.amount/100 %>$</div>
+      <div class="line">
+        <div class="big">TOTAL COST</div>
+        <div class="value green"><%= calculations.amount/100 %>$</div>
       </div>
 
 
-      <div>
+      <div class="paymentImage">
         <img src="images/credit-card.png" class="col-md-12 logos">
       </div>
 
-
+</div>
     </div>
     <div class="clear">
     </div>
   </div>
-      <div id="pagination"></div>
+  <div id="pagination"></div>
 
 </div>
 

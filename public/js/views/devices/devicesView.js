@@ -24,6 +24,8 @@ define([
             'click .setActive'            : 'deviceActivate',
             'click .setEdit'              : 'showEditDeviceModal',
             'click .cancelEditDevice'     : 'closeDevicesView',
+			'click .customSelect .current'     : 'showPeriodList',
+            'click .customSelect .list .item'              : 'choosePeriodList',
             'change #period'              : 'periodObserver' // period observer
         },
 
@@ -104,6 +106,19 @@ define([
             this.paginationView = new PaginationView(paginationOptions);
         },
 
+		showPeriodList:function(){
+			this.$el.find(".customSelect .list").toggle();
+		},
+
+		choosePeriodList:function(e){
+			var period = $(e.target).data("val");
+			this.$el.find("customSelect .current .text").text($(e.target).text());
+			this.$el.find(".customSelect .list").hide();
+			this.stateModel.set({
+                period: period
+            });
+		},
+		
         keydownHandler: function (event) {
             switch (event.which) {
                 case 13:
@@ -237,7 +252,9 @@ define([
             this.$el.find('#editDeviceModal').modal({
                 show: true,
                 backdrop: 'static'
-            });
+            }).css({
+				width: "535"
+			})
 
             this.devicesView = new deviceView({id : id});
 
