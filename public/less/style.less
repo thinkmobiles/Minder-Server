@@ -175,13 +175,13 @@ body, html {
 }
 
 #mapConteiner {
-  height: 548px;
-  width: 100%;
-  z-index: 10;
-  position: absolute;
-  padding-left: 445px;
-  padding-right: 35px;
-  top: 100px;
+	height: 519px;
+	width: 100%;
+	z-index: 10;
+	position: absolute;
+	padding-left: 445px;
+	padding-right: 35px;
+	top: 103px;
 }
 
 #mainPageTopControls{
@@ -700,6 +700,7 @@ body, html {
 					}
 				}
 				&.active{
+					background-color:inherit;
 					>div{
 						background-color:#2ab737;
 					}
@@ -742,6 +743,7 @@ body, html {
 		height:17px;
 		float:right;
 		margin-top:7px;
+		cursor:pointer;
 		&:before{
 			content:"";
 		}
@@ -777,11 +779,11 @@ body, html {
 
 #mainPageBottomControls{
 	.pagination{
+		margin-top:10px;
+		margin-bottom:18px;
 		.item{
 			.goToPage{
 				border:none;
-				font-family: "SegoeUIRegular";
-				font-size:12px;
 				color:#494949;
 			
 			}
@@ -936,6 +938,7 @@ input.customCheckbox:checked+label {
 				height:17px;
 				margin-top:18px;
 				opacity:1;
+				outline:none;
 				span{
 					display:none;
 				}
@@ -1051,7 +1054,7 @@ input.customCheckbox:checked+label {
 		
 	}
 	.modal-footer{
-		margin-top:-18px;
+		margin-top:-3px;
 		padding-top:18px;
 		padding-top:0px;
 		padding-right:24px;
@@ -1174,7 +1177,9 @@ input.customCheckbox:checked+label {
 	z-index:1000;
 	width:100%;
 	display:table;	
+	font-size:14px;
 	li{
+		min-width:8px;
 		display:table-cell;
 		&.item{
 			text-align:center;
@@ -1193,6 +1198,8 @@ input.customCheckbox:checked+label {
 			}
 			&.arrow{
 				text-align:right;
+				font-family: "SegoeUISemiBold";
+				font-size:12px;
 				&:nth-of-type(1){
 					text-align:left;
 
@@ -1302,4 +1309,9 @@ input.customCheckbox:checked+label {
 .alert-danger{
 	background-color:inherit;
 	color:#fe102c !important;
+}
+
+.btn.btn-default{
+	outline:none;
+	background-color:inherit;
 }
