@@ -5,5 +5,6 @@ var conf = new Config();
 
 require('../models/index.js');
 
-require ('./testHandlers/users');
-require ('./testHandlers/devices');
+/*require ('./testHandlers/users');
+require ('./testHandlers/devices');*/
+require ('./testCostCounter');

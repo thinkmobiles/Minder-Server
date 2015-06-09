@@ -15,9 +15,9 @@ describe('Devices', function () {
     var userAgent1 = request.agent(baseUrl);
     var userAgent2 = request.agent(baseUrl);
     var CreateTestData = require('./../data/index');
-    var deviceSchema = mongoose.Schemas['Device'];
     var userSchema = mongoose.Schemas['User'];
     var UserModel = db.model('User', userSchema);
+    var deviceSchema = mongoose.Schemas['Device'];
     var DeviceModel = db.model('Device', deviceSchema);
     var tariffPlanSchema = mongoose.Schemas['TariffPlan'];
     var TariffPlan = db.model('TariffPlan', tariffPlanSchema);

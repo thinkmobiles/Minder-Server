@@ -85,7 +85,12 @@ var TestDataModule = function () {
         deviceName: 'Subscribed device 1',
         deviceType: DEVICE_OS.WINDOWS_PHONE,
         user: self.users[0]._id,
-        status: DEVICE_STATUSES.SUBSCRIBED
+        status: DEVICE_STATUSES.SUBSCRIBED,
+        billings: {
+            currentPlan: _id_T2,
+            subscriptionDateTime: new Date(),
+            expirationDate: new Date()
+        }
     }, {
         deviceId: 'dev_6', // 5
         deviceName: 'Subscribed device 2',

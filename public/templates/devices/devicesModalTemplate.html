@@ -80,13 +80,13 @@
           </div>
 		</div>
 		<div class="line">
-          <div class="name red">Plan  <%= calculations.plan %></div>
-          <div class="name">(<%= (calculations.planData.amount/100)%>$ device/<%= calculations.planData.interval%>)</div>
+          <div class="name red">Plan  <%= calculations.planModel.name %></div>
+          <div class="name">(<%= (calculations.planModel.amount/100)%>$ device/<%= calculations.planModel.interval%>)</div>
           <!--<div class="value"><%= calculations.plan %></div>-->
 		</div>
 		<div class="line">
           <div class="big">NUMBER OF DEVICES</div>
-          <div class="value"><%= calculations.subscribedDevices %> of <%= calculations.maxDevices %> devices</div>
+          <div class="value"><%= calculations.subscribedDevices %> of <%= calculations.planModel.metadata.maxDevices %> devices</div>
 		</div>
 		<div class="line">
           <div class="big">TOTAL COST</div>

@@ -15,18 +15,18 @@ define([
         isNew: true, // prevent query duplication
 
         events: {
-            'click #globalDevicesChecker' : 'globalCheckTrigger', // check all devices
-            'click .goSearch'             : 'search',
-            'keydown'                     : 'keydownHandler',
-            'click .clearSearch'          : 'clearSearch',
-            'click .deviceCheckbox'       : 'deviceCheck', // check separate devices
-            'click .setDelete'            : 'deviceDelete',
-            'click .setActive'            : 'deviceActivate',
-            'click .setEdit'              : 'showEditDeviceModal',
-            'click .cancelEditDevice'     : 'closeDevicesView',
-			'click .customSelect .current'     : 'showPeriodList',
-            'click .customSelect .list .item'              : 'choosePeriodList',
-            'change #period'              : 'periodObserver' // period observer
+            'click #globalDevicesChecker': 'globalCheckTrigger', // check all devices
+            'click .goSearch': 'search',
+            'keydown': 'keydownHandler',
+            'click .clearSearch': 'clearSearch',
+            'click .deviceCheckbox': 'deviceCheck', // check separate devices
+            'click .setDelete': 'deviceDelete',
+            'click .setActive': 'deviceActivate',
+            'click .setEdit': 'showEditDeviceModal',
+            'click .cancelEditDevice': 'closeDevicesView',
+            'click .customSelect .current': 'showPeriodList',
+            'click .customSelect .list .item': 'choosePeriodList',
+            'change #period': 'periodObserver' // period observer
         },
 
         initialize: function (options) {
@@ -41,15 +41,15 @@ define([
             }
 
             this.stateModel = new Backbone.Model({
-                params                : {},                  // current view url params (page)
-                devices               : [],                  // devices array to render
-                checked               : false,               // global checker status
-                selectedDevicesCount  : 0,
-                newPlan               : null,                // user new plan by calculator
-                costForThisMonth      : 0,                   // render the cost
-                modal                 : modal,               // the view mode (modal or not, bool)
-                period                : user.billings.planPeriod || 'month', // for subscription (for calculator),
-                search                : ''
+                params: {},                  // current view url params (page)
+                devices: [],                  // devices array to render
+                checked: false,               // global checker status
+                selectedDevicesCount: 0,
+                newPlan: null,                // user new plan by calculator
+                costForThisMonth: 0,                   // render the cost
+                modal: modal,               // the view mode (modal or not, bool)
+                period: user.billings.planPeriod || 'month', // for subscription (for calculator),
+                search: ''
             });
 
             this.devisesCollection = new DevisesCollection();         // current page devices
@@ -57,13 +57,13 @@ define([
             this.selectedDevicesCollection = new DevisesCollection(); // all selected devices on all pages
 
             paginationOptions = {
-                collection   : this.devisesCollection,
-                onPage       : 10,
-                padding      : 2,
-                page         : 1,
-                ends         : true,
-                steps        : true,
-                url          : 'devices/page',
+                collection: this.devisesCollection,
+                onPage: 10,
+                padding: 2,
+                page: 1,
+                ends: true,
+                steps: true,
+                url: 'devices/page',
                 urlPagination: true
             };
 
@@ -106,19 +106,19 @@ define([
             this.paginationView = new PaginationView(paginationOptions);
         },
 
-		showPeriodList:function(){
-			this.$el.find(".customSelect .list").toggle();
-		},
+        showPeriodList: function () {
+            this.$el.find(".customSelect .list").toggle();
+        },
 
-		choosePeriodList:function(e){
-			var period = $(e.target).data("val");
-			this.$el.find("customSelect .current .text").text($(e.target).text());
-			this.$el.find(".customSelect .list").hide();
-			this.stateModel.set({
+        choosePeriodList: function (e) {
+            var period = $(e.target).data("val");
+            this.$el.find("customSelect .current .text").text($(e.target).text());
+            this.$el.find(".customSelect .list").hide();
+            this.stateModel.set({
                 period: period
             });
-		},
-		
+        },
+
         keydownHandler: function (event) {
             switch (event.which) {
                 case 13:
@@ -163,7 +163,7 @@ define([
 
         updateUserData: function () {
             $.ajax({
-                url : "/currentUser",
+                url: "/currentUser",
                 type: "GET",
                 success: function (data) {
                     App.sessionData.set({
@@ -253,10 +253,10 @@ define([
                 show: true,
                 backdrop: 'static'
             }).css({
-				width: "535"
-			})
+                width: "535"
+            })
 
-            this.devicesView = new deviceView({id : id});
+            this.devicesView = new deviceView({id: id});
 
             //this.devicesView.on('customClose',this.closeDevicesView);
 
@@ -287,18 +287,20 @@ define([
             var selectedDevices = this.selectedDevicesCollection.filter(function (device) {
                 if (device.get('status') !== STATUSES.DELETED) return true
             });
-            var forCounter = this.selectedDevicesCollection.filter(function (device) {
-                if (device.get('status') == STATUSES.SUBSCRIBED) return true
+
+            var devices = _.map(selectedDevices, function (device) {
+                return device.toJSON()
             });
 
-            window.costCounter({
-                date: date,
-                plans: plans,
+            var counterParams = {
                 user: user,
+                plans: plans,
+                now: date,
                 period: period,
-                selectedDevicesCount: selectedDevices.length,
-                forCounter: forCounter.length
-            }, function (err, result) {
+                devices: devices
+            };
+
+            window.costCounter(counterParams, function (err, result) {
                 if (err) {
                     return App.error(err);
                 }
@@ -431,8 +433,6 @@ define([
             }
 
             this.$el.find('#pagination').append(this.paginationView.render().$el);
-
-
 
 
             return this;

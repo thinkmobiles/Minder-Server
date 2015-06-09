@@ -9,7 +9,8 @@ var mongoose = require('mongoose');
 var badRequests = require('../helpers/badRequests');
 var logWriter = require('../helpers/logWriter')();
 var SessionHandler = require('../handlers/sessions');
-var calculateTariff = require('../public/js/libs/costCounter');
+//var calculateTariff = require('../public/js/libs/costCounter');
+var calculateTariff = require('../public/js/libs/costCounter_2');
 var moment = require('moment');
 var stripe = require('stripe')(process.env.STRIPE_PRIVATE_KEY);
 var mailer = require('../helpers/mailer');
@@ -73,6 +74,8 @@ var DeviceHandler = function (db) {
         }
 
         async.parallel({
+
+            //find all plans from db or use params.plans:
             plans: function (cb) {
 
                 if (params.plans) {
@@ -86,6 +89,8 @@ var DeviceHandler = function (db) {
                     cb(null, plans);
                 })
             },
+
+            //find the userModel from db or use params.userModel:
             userModel: function (cb) {
 
                 if (params.userModel) {
@@ -105,10 +110,13 @@ var DeviceHandler = function (db) {
                 });
 
             }
+
         }, function (err, results) {
             var userModel = results.userModel;
             var planModels = results.plans;
             var quantity = params.quantity || 0;
+
+            userModel.billings.subscribedDevices += quantity;
 
             if (err) {
                 if (callback && (typeof callback === 'function')) {
@@ -123,36 +131,47 @@ var DeviceHandler = function (db) {
                 function (cb) {
                     var calculateParams;
 
-                    if (!quantity) {
-                        return cb(null);
-                    }
-
                     calculateParams = {
-                        date: new Date(),
+                        now: new Date(),
                         plans: planModels,
                         period: params.period || userModel.billings.planPeriod,
-                        user: userModel,
-                        selectedDevicesCount: quantity
+                        user: userModel
                     };
 
-                    calculateTariff(calculateParams, function (err, plan) {
+                    calculateTariff(calculateParams, function (err, calcResult) {
                         if (err) {
                             return cb(err);
                         }
-                        cb(null, plan);
+                        cb(null, calcResult);
                     });
 
                 },
 
-                // update the User.billings.currentPlan:
-                function (plan, cb) {
+                // try to find the new plan:
+                /*
+                 function (cb) {
+                 var planModel = _.find(planModels, function (planModel) {
+                 return (planModel.interval === userModel.billings.planPeriod
+                 && planModel.metadata.minDevices <= subscribedDevicesCount
+                 && subscribedDevicesCount <= planModel.metadata.maxDevices
+                 );
+                 });
 
-                    if (!plan || !plan.plan_id) {
+                 cb(null, planModel);
+                 },
+                 */
+
+                // update the User.billings.currentPlan:
+                function (calcResult, cb) {
+
+                    //if (!plan || !plan.plan_id) {
+                    if (!calcResult || !calcResult.planModel || !calcResult.planModel._id) {
                         return cb(badRequests.NotFound({message: "Can't find the users plan"}));
                     }
 
-                    userModel.billings.currentPlan = plan.plan_id;
-                    userModel.billings.subscribedDevices += quantity;
+                    //userModel.billings.currentPlan = plan.plan_id;
+                    userModel.billings.currentPlan = calcResult.planModel._id;
+                    //userModel.billings.subscribedDevices = subscribedDevicesCount;
 
                     userModel.save(function (err, updatedUser) {
                         if (err) {
@@ -179,11 +198,11 @@ var DeviceHandler = function (db) {
 
     function subscribe(options, callback) {
         var userModel = options.userModel;
-        var plan = options.plan;
+        var calcResult = options.calcResult;
         var token = options.token;
         var deviceIds = options.deviceIds;
         var deviceStringsIds = '';
-        var isFree = (plan && (plan.amount === 0)) ? true : false;
+        var isFree = (calcResult && (calcResult.amount === 0)) ? true : false;
 
         if (!isFree && !token) {
             return callback(badRequests.NotEnParams({reqParams: 'token'}));
@@ -256,31 +275,31 @@ var DeviceHandler = function (db) {
                     return cb(null, null);
                 }
 
-                planModel = plan.planData;
+                expirationDate = calcResult.expirationDate;
+                planModel = calcResult.planModel;
                 planId = planModel._id.toString();
-                quantity = plan.devicesToPay;
-                expirationDate = plan.expirationDate;
+                quantity = calcResult.devicesToPay;
                 description = 'Minder charge for ' + userModel.email + '. Subscription for ' + quantity + ' devices. Plan: ' + planModel.name;
 
                 /*chargeParams = {
-                    amount: planModel.amount,  //price
-                    currency: planModel.currency,
-                    source: token.id,
-                    description: description,
-                    metadata: {
-                        planId: planId,
-                        quantity: quantity,
-                        expirationDate: expirationDate,
-                        deviceIds: deviceStringsIds
-                    }
-                };
+                 amount: planModel.amount,  //price
+                 currency: planModel.currency,
+                 source: token.id,
+                 description: description,
+                 metadata: {
+                 planId: planId,
+                 quantity: quantity,
+                 expirationDate: expirationDate,
+                 deviceIds: deviceStringsIds
+                 }
+                 };
 
-                stripe.charges.create(chargeParams, function (err, charge) {
-                    if (err) {
-                        return cb(err);
-                    }
-                    cb(null, charge);
-                });*/
+                 stripe.charges.create(chargeParams, function (err, charge) {
+                 if (err) {
+                 return cb(err);
+                 }
+                 cb(null, charge);
+                 });*/
 
                 var subscriptionParams = {
                     plan: planId,
@@ -318,13 +337,20 @@ var DeviceHandler = function (db) {
     function recalcTheSubscribedDevicesCount(options, callback) {
         var userId;
         var plan;
+        var calcResult;
+        var planModel;
 
         if (!options || !options.userId) {
             return badRequests.NotEnParams({reqParams: ['options.userId']});
         }
 
         userId = options.userId;
-        plan = options.plan;
+        //plan = options.plan;
+        calcResult = options.calcResult;
+
+        if (calcResult && calcResult.planModel && calcResult.planModel._id) {
+           planModel = calcResult.planModel;
+        }
 
         async.waterfall([
 
@@ -366,12 +392,12 @@ var DeviceHandler = function (db) {
                     updatedAt: new Date()
                 };
 
-                if (plan && plan.plan_id) {
-                    updateData["billings.currentPlan"] = plan.plan_id;
+                if (planModel) {
+                    updateData["billings.currentPlan"] = planModel._id;
                 }
 
                 if (plan && plan.period) {
-                    updateData["billings.planPeriod"] = plan.period;
+                    updateData["billings.planPeriod"] = calcResult.period;
                 }
 
                 criteria = {
@@ -1004,6 +1030,7 @@ var DeviceHandler = function (db) {
         var fields = {
             deviceId: 1,
             name: 1,
+            user: 1,
             createdAt: 1,
             updatedAt: 1
         };
@@ -1017,6 +1044,10 @@ var DeviceHandler = function (db) {
                 } else if (!device) {
                     next(badRequests.NotFound());
                 } else {
+
+                    if (!device.user) {
+                        return next(badRequests.InvalidValue({param: 'device.user', value: device.user}));
+                    }
 
                     ownerId = device.user.toString();
 
@@ -1186,26 +1217,26 @@ var DeviceHandler = function (db) {
         }, function (err, results) {
             var user = results.user;
             var plans = results.plans;
-            var calculateParams = {};
+            var calculateParams = options;
             var quantity = options.quantity || 0;
 
             if (err) {
                 return callback(err);
             }
 
-            calculateParams = {
+            /*calculateParams = {
                 date: new Date(),
                 plans: plans,
                 period: options.period || user.billings.planPeriod,
                 user: user,
                 selectedDevicesCount: quantity
-            };
+            };*/
 
-            calculateTariff(calculateParams, function (err, plan) {
+            calculateTariff(calculateParams, function (err, calcResult) {
                 if (err) {
                     return callback(err);
                 }
-                callback(null, plan);
+                callback(null, calcResult);
             });
         });
     };
@@ -1245,7 +1276,7 @@ var DeviceHandler = function (db) {
                 });
             },
 
-            checkActiveDevices: function (cb) {
+            devices: function (cb) {
                 var criteria = {
                     user: userId,
                     status: {
@@ -1255,7 +1286,11 @@ var DeviceHandler = function (db) {
                         $in: deviceIds
                     }
                 };
-                var fields = '_id';
+                var fields = {
+                    _id: 1,
+                    billings: 1,
+                    status: 1
+                };
 
                 DeviceModel.find(criteria, fields, function (err, devices) {
                     var activeIds;
@@ -1267,8 +1302,8 @@ var DeviceHandler = function (db) {
                     } else {
 
                         // get array with active devices ids
-                        activeIds = _.pluck(devices, '_id');
-                        cb(null, activeIds);
+                        //activeIds = _.pluck(devices, '_id');
+                        cb(null, devices);
                     }
                 });
             }
@@ -1276,7 +1311,9 @@ var DeviceHandler = function (db) {
         }, function (err, results) {
             var userModel = results.user;
             var planModels = results.plans;
-            var activeDeviceIds = results.checkActiveDevices;
+            //var activeDeviceIds = results.checkActiveDevices;
+            var deviceModels = results.devices;
+            var activeDeviceIds = _.pluck(results.devices, '_id');
 
             if (err) {
                 return next(err);
@@ -1288,24 +1325,24 @@ var DeviceHandler = function (db) {
                 function (cb) {
                     var calculationOptions = {
                         user: userModel,
-                        quantity: activeDeviceIds.length,
                         plans: planModels,
-                        period: period
+                        period: period,
+                        devices: deviceModels
                     };
 
-                    self.getUserTariffPlan(calculationOptions, function (err, plan) {
+                    self.getUserTariffPlan(calculationOptions, function (err, calcResult) {
                         if (err) {
                             return cb(err);
                         }
-                        cb(null, plan);
+                        cb(null, calcResult);
                     });
                 },
 
                 //subscription:
-                function (plan, cb) {
+                function (calcResult, cb) {
                     var subscriptionOptions = {
                         userModel: userModel,
-                        plan: plan,
+                        calcResult: calcResult,
                         token: token,
                         deviceIds: activeDeviceIds
                     };
@@ -1314,12 +1351,12 @@ var DeviceHandler = function (db) {
                         if (err) {
                             return cb(err);
                         }
-                        cb(null, subscriptionResult, plan);
+                        cb(null, subscriptionResult, calcResult);
                     });
                 },
 
                 //update Devices.billings: (status, subscriptionId, expirationDate, ...)
-                function (subscriptionResult, plan, cb) {
+                function (subscriptionResult, calcResult, cb) {
                     var subscriptionId = (subscriptionResult && subscriptionResult.id) ? subscriptionResult.id : null;
                     var now = new Date();
                     var criteria = {
@@ -1331,7 +1368,7 @@ var DeviceHandler = function (db) {
                     var update = {};
                     var freeAccount = false;
 
-                    if (!plan.amount) {
+                    if (!calcResult.amount) {
                         freeAccount = true;
                     }
 
@@ -1351,7 +1388,7 @@ var DeviceHandler = function (db) {
                                 status: DEVICE_STATUSES.SUBSCRIBED,
                                 "billings.subscriptionId": subscriptionId,
                                 "billings.subscriptionDateTime": now,
-                                "billings.expirationDate": plan.expirationDate,
+                                "billings.expirationDate": calcResult.expirationDate,
                                 updatedAt: now
                             }
                         };
@@ -1361,15 +1398,15 @@ var DeviceHandler = function (db) {
                         if (err) {
                             return cb(err);
                         }
-                        cb(null, plan);
+                        cb(null, calcResult);
                     });
                 },
 
                 //update User.billings data:
-                function (plan, cb) {
+                function (calcResult, cb) {
                     var params = {
                         userId: userId,
-                        plan: plan
+                        calcResult: calcResult
                     };
 
                     recalcTheSubscribedDevicesCount(params, function (err, userModel) {
@@ -1511,7 +1548,7 @@ var DeviceHandler = function (db) {
                         }
                     };
 
-                    DeviceModel.update(criteria, update,  {multi: true}, function (err, count) {
+                    DeviceModel.update(criteria, update, {multi: true}, function (err, count) {
                         if (err) {
                             return cb(err);
                         }
@@ -1819,7 +1856,7 @@ var DeviceHandler = function (db) {
                     if (process.env.NODE_ENV !== 'production') {
                         console.log('>>> cron job was finished success. Result: ');
                         console.log(JSON.stringify(result));
-                        console.log(util.inspect(result, { showHidden: true, depth: 6 }));
+                        console.log(util.inspect(result, {showHidden: true, depth: 6}));
                     }
 
                 }
@@ -1855,7 +1892,7 @@ var DeviceHandler = function (db) {
                     if (process.env.NODE_ENV !== 'production') {
                         console.log('>>> cron job was finished success. Result: ');
                         console.log(JSON.stringify(result));
-                        console.log(util.inspect(result, { showHidden: true, depth: 6 }));
+                        console.log(util.inspect(result, {showHidden: true, depth: 6}));
                     }
 
                 }
