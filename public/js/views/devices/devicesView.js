@@ -15,18 +15,19 @@ define([
         isNew: true, // prevent query duplication
 
         events: {
-            'click #globalDevicesChecker': 'globalCheckTrigger', // check all devices
-            'click .goSearch': 'search',
-            'keydown': 'keydownHandler',
-            'click .clearSearch': 'clearSearch',
-            'click .deviceCheckbox': 'deviceCheck', // check separate devices
-            'click .setDelete': 'deviceDelete',
-            'click .setActive': 'deviceActivate',
-            'click .setEdit': 'showEditDeviceModal',
-            'click .cancelEditDevice': 'closeDevicesView',
-            'click .customSelect .current': 'showPeriodList',
-            'click .customSelect .list .item': 'choosePeriodList',
-            'change #period': 'periodObserver' // period observer
+            'click #globalDevicesChecker'       : 'globalCheckTrigger', // check all devices
+            'click .goSearch'                   : 'search',
+            //'keydown'                         : 'keydownHandler',
+            'keypress #search'                  : 'searchOnEnter',
+            'click .clearSearch'                : 'clearSearch',
+            'click .deviceCheckbox'             : 'deviceCheck', // check separate devices
+            'click .setDelete'                  : 'deviceDelete',
+            'click .setActive'                  : 'deviceActivate',
+            'click .setEdit'                    : 'showEditDeviceModal',
+            'click .cancelEditDevice'           : 'closeDevicesView',
+            'click .customSelect .current'      : 'showPeriodList',
+            'click .customSelect .list .item'   : 'choosePeriodList',
+            'change #period'                    : 'periodObserver' // period observer
         },
 
         initialize: function (options) {
@@ -119,13 +120,9 @@ define([
             });
         },
 
-        keydownHandler: function (event) {
-            switch (event.which) {
-                case 13:
-                    this.search(event);
-                    break;
-                default:
-                    break;
+        searchOnEnter: function (event) {
+            if (event.keyCode === 13) {
+                this.search(event);
             }
         },
 
@@ -260,7 +257,7 @@ define([
 
             //this.devicesView.on('customClose',this.closeDevicesView);
 
-            this.$el.find('#modalEditContent').append(this.devicesView.el);
+            this.$el.find('#modalEditContent').html(this.devicesView.el);
 
         },
 

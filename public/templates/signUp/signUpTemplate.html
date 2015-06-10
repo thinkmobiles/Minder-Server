@@ -56,6 +56,11 @@
           <div>
             <input id="email" type="email" class="form-control" placeholder="Email"
                    value="<%= email %>">
+            <% if (errObj.email) { %>
+          <span class="alert-danger">
+            <%= errObj.email[0] %>
+          </span>
+            <% } %>
           </div>
         </div>
 
@@ -89,6 +94,11 @@
 			<span>Captcha</span>
           <div>
             <div id="captcha"></div>
+            <% if (errObj.captcha) { %>
+          <span class="alert-danger">
+            <%= errObj.captcha[0] %>
+          </span>
+            <% } %>
           </div>
         </div>
 
@@ -100,6 +110,11 @@
                 <a href="#termsAndConditions" target="_blank">I accept the terms and conditions</a>
               </label>
             </div>
+            <% if (errObj.condAndTerm) { %>
+                <span class="alert-danger">
+              <%= errObj.condAndTerm[0] %>
+                </span>
+            <% } %>
           </div>
         </div>
 
