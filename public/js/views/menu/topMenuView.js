@@ -16,16 +16,15 @@ define([
             {
                 name: "Home",
                 url: "#main",
-                title: "Home page",
-                active: true
+                title: "homepage_but"
             }, {
                 name: "Devices",
                 url: "#devices",
-                title: "User devices management"
+                title: "devices_but"
             }, {
                 name: "Billing info",
                 url: "#billingInfo",
-                title: "User billing info"
+                title: "billing_but"
             }
         ],
 
@@ -42,16 +41,18 @@ define([
             {
                 name: "Sign in",
                 url: "#login",
-                title: "Sign in to MinderWeb"
+                title: "signin_but"
             }, {
                 name: "Sign up",
                 url: "#signUp",
-                title: "Sign up to MinderWeb"
+                title: "Signup_but"
             }
         ],
 
         initialize: function () {
             // keep menu actual
+            this.activeButton=window.location.hash;
+
             this.listenTo(App.sessionData, 'change:authorized', this.render);
             this.listenTo(App.sessionData, 'change:user', this.render);
 
@@ -106,14 +107,14 @@ define([
                 top: this.topMenuLeftItemsRaw,
                 dropDown: this.topMenuRightDropdownItemsRaw,
                 topRight: this.topRightMenuItemsRaw,
-                authorized: authorized
+                authorized: authorized,
+                actButt: this.activeButton
             };
 
             // if the user name is to long cut it
             if (user) {
                 data.username = this.prettifyString(user.firstName + ' ' + user.lastName, 20);
             }
-
 
             this.$el.html(_.template(topMenuTemplate, data));
             return this;
