@@ -403,22 +403,13 @@ describe('CostCounter', function () {
             };
             var userModel = new UserModel(userData);
             var currentPlanString = userModel.billings.currentPlan.toString();
-            var deviceData = {
-                deviceId: 'dev_test_' + ticks,
-                status: DEVICE_STATUSES.SUBSCRIBED
-            };
-            var deviceModel = new DeviceModel(deviceData);
             var counterParams = {
                 user: userModel,
-                plans: planModels//,
-                //devices: [deviceModel, deviceModel],
-                //period: 'year'
+                plans: planModels
             };
 
             expect(currentPlanString).to.equals(planModels[6]._id.toString());
             expect(userModel.billings.planPeriod).to.equals('year');
-            //expect(userModel.billings.subscribedDevices).to.equals(1);
-            //expect(deviceModel.status).to.equals(DEVICE_STATUSES.SUBSCRIBED);
 
             calculateTariff(counterParams, function (err, result) {
                 if (err) {

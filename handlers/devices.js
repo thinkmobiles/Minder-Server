@@ -380,10 +380,7 @@ var DeviceHandler = function (db) {
 
                 if (planModel) {
                     updateData["billings.currentPlan"] = planModel._id;
-                }
-
-                if (plan && plan.period) {
-                    updateData["billings.planPeriod"] = calcResult.period;
+                    updateData["billings.planPeriod"] = planModel.metadata.type;
                 }
 
                 criteria = {
@@ -1452,13 +1449,7 @@ var DeviceHandler = function (db) {
 
             //update Users.billings.subscribedDevices:
             function (updatedDevicesCount, cb) {
-                var updateParams;
-
-                if (!updatedDevicesCount) {
-                    return cb(null, null);
-                }
-
-                updateParams = {
+                var updateParams = {
                     userId: userId,
                     quantity: ( -1 ) * updatedDevicesCount
                 };
