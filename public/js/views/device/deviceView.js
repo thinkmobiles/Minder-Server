@@ -24,7 +24,7 @@ define([
         events: {
             'click #editButton': 'update',
             'click #deleteButton': 'deviceDelete',
-            'keydown': 'keydownHandler'
+            'keypress #name': 'saveOnEnter'
         },
 
         // remove the old model of this view ... and remove event listeners from it
@@ -36,13 +36,9 @@ define([
             this.setThisStateModel();
         },
 
-        keydownHandler: function (e) {
-            switch (e.which) {
-                case 13:
-                    this.update(e);
-                    break;
-                default:
-                    break;
+        saveOnEnter: function (event) {
+            if (event.keyCode === 13) {
+                this.update(event);
             }
         },
 
@@ -197,7 +193,9 @@ define([
                 data = _.extend(this.model.toJSON(), data);
             }
 
+            this.undelegateEvents();
             this.$el.html(_.template(template, data));
+            this.delegateEvents();
 
             return this;
         }

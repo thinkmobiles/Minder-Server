@@ -5,7 +5,7 @@
     <div class="menu loggedMenu">
         <% for (i in top) { %>
         <div class="menuItem topMenuItem">
-            <a class="btn btn-default<%if (top[i].active){%> active<%}%>" href="<%= top[i].url %>"><%= top[i].name %></a>
+            <a class="btn btn-default <%if (actButt===top[i].url) {%>active<%}%>" id="<%= top[i].title %>" href="<%= top[i].url %>"><%= top[i].name %></a>
         </div>
         <% } %>
     </div>

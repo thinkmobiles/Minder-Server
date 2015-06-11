@@ -225,24 +225,25 @@ define(
             }
         };
 
-        var checkEmailField = function (errorArray, required, fieldValue, fieldName) {
+        var checkEmailField = function (errorObj, required, fieldValue, fieldName) {
             if (required) {
+                if (errorObj[fieldName] === undefined){errorObj[fieldName]=[]}
                 if (!fieldValue) {
-                    errorArray.push([fieldName, errorMessages.requiredMsg].join(' '));
+                    errorObj[fieldName].push(errorMessages.requiredMsg);
                     return;
                 }
                 if (hasInvalidChars(fieldValue)) {
-                    errorArray.push([fieldName, errorMessages.invalidCharsMsg].join(' '));
+                    errorObj[fieldName].push(errorMessages.invalidCharsMsg);
                     return;
                 }
-                if (!validateEmail(fieldValue)) errorArray.push([fieldName, errorMessages.invalidEmailMsg].join(' '));
+                if (!validateEmail(fieldValue)) errorObj[fieldName].push(errorMessages.invalidEmailMsg);
             } else {
                 if (fieldValue) {
                     if (hasInvalidChars(fieldValue)) {
-                        errorArray.push([fieldName, errorMessages.invalidCharsMsg].join(' '));
+                        errorObj[fieldName].push(errorMessages.invalidCharsMsg);
                         return;
                     }
-                    if (!validateEmail(fieldValue)) errorArray.push([fieldName, errorMessages.invalidEmailMsg].join(' '));
+                    if (!validateEmail(fieldValue)) errorObj[fieldName].push(errorMessages.invalidEmailMsg);
                 }
             }
         };

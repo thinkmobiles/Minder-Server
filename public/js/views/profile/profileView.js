@@ -21,7 +21,8 @@ define([
 
         events: {
             "submit #profileEditForm": "changeProfile",
-            "click .profileFormSubmit": "changeProfile"
+            "click .profileFormSubmit": "changeProfile",
+            "focusin .form-control": "clearField"
         },
 
         // set default data
@@ -47,6 +48,12 @@ define([
             }
         },
 
+        clearField: function (event){
+            var target = $(event.target);
+            var closEl = target.closest('.form-group');
+            closEl.find('.alert-danger').remove();
+        },
+
         // set default data when reopen the page
         afterUpend: function () {
             this.setDefaultStateModel();
@@ -60,6 +67,7 @@ define([
             var errors = [];
             var messages = [];
             var errObj = {};
+            var errCount=0;
             var data;
 
             var stateModelUpdate = {
@@ -78,32 +86,32 @@ define([
             this.stateModel.set(stateModelUpdate);
 
             // validations
-            validation.checkEmailField(messages, true, stateModelUpdate.email, 'Email');
-            validation.checkNameField(errObj, true, stateModelUpdate.firstName, 'First name');
-            validation.checkNameField(errObj, true, stateModelUpdate.lastName, 'Last name');
+            validation.checkEmailField(errObj, true, stateModelUpdate.email, 'email');
+            validation.checkNameField(errObj, true, stateModelUpdate.firstName, 'firstName');
+            validation.checkNameField(errObj, true, stateModelUpdate.lastName, 'lastName');
             if (stateModelUpdate.newPassword || stateModelUpdate.password) {
                 // if need validate passwords
-                validation.checkPasswordField(errObj, true, stateModelUpdate.password, 'Password');
-                validation.checkPasswordField(errObj, true, stateModelUpdate.newPassword, 'New password');
-                validation.checkPasswordField(errObj, true, stateModelUpdate.confirmPassword, 'Confirm password');
+                validation.checkPasswordField(errObj, true, stateModelUpdate.password, 'password');
+                validation.checkPasswordField(errObj, true, stateModelUpdate.newPassword, 'newPassword');
+                validation.checkPasswordField(errObj, true, stateModelUpdate.confirmPassword, 'confirmPassword');
                 if (stateModelUpdate.newPassword !== stateModelUpdate.confirmPassword) {
-                    messages.push('New password is not equal to confirm password');
+                    errObj.confirmPassword.push('New password is not equal to confirm password');
                 }
             }
 
             for (var my in errObj){
-                if(errObj[my].length>0) {
-                    messages.push(errObj[my]);
-                }
+                errCount += errObj[my].length;
             }
 
-
-            if (errors.length > 0 || messages.length > 0) {
+            if (errors.length > 0 || messages.length > 0 || errCount>0) {
                 if (errors.length > 0) {
                     stateModelUpdate.errors = errors;
                 }
                 if (messages.length > 0) {
                     stateModelUpdate.messages = messages;
+                }
+                if (errCount > 0) {
+                    stateModelUpdate.errObj = errObj;
                 }
                 this.stateModel.set(stateModelUpdate);
 
@@ -132,7 +140,8 @@ define([
                         newPassword: '',
                         confirmPassword: '',
                         errors: false,
-                        messages: false
+                        messages: false,
+                        errObj: false
                     });
 
                     alert('Profile updated successfully');

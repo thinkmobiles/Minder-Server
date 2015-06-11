@@ -22,7 +22,9 @@ define([
         events: {
             "submit #loginForm": "signUp",
             "click .signUpButton": "signUp",
-            "focusin .form-control": "clearField"
+            "focusin .form-control": "clearField",
+            "click #captcha": "clearField",
+            "click .customCheckbox": "clearField"
         },
 
         clearField: function (event){
@@ -30,6 +32,16 @@ define([
             var closEl = target.closest('.form-group');
             closEl.find('.alert-danger').remove();
         },
+
+        clearCaptchaField: function(event){
+            var container = this.$el.find('.captcha');
+            container.find('.alert-danger').remove();
+        },
+
+        //clearChekField: function(){
+        //    var target = $(event.target);
+        //    target.sibling('.alert-danger').remove();
+        //},
 
         //reset the data
         setDefaultData: function () {
@@ -61,10 +73,15 @@ define([
             event.preventDefault();
 
             var self = this;
+            var errCount=0;
 
             var errors = [];
             var messages = [];
-            var errObj = {};
+            var errObj = {
+                email:[],
+                condAndTerm:[],
+                captcha:[]
+            };
 
             var captchaData;
 
@@ -89,7 +106,8 @@ define([
             this.stateModel.set(stateModelUpdate);
 
             if (!stateModelUpdate.email || !validation.validEmail(stateModelUpdate.email)) {
-                messages.push('Email is invalid');
+                //messages.push('Email is invalid');
+                errObj.email.push('Password is not equal to confirm password');
             }
 
             validation.checkNameField(errObj, true, stateModelUpdate.firstName, 'firstName');
@@ -98,18 +116,20 @@ define([
             validation.checkPasswordField(errObj, true, stateModelUpdate.confirmPassword, 'confirmPassword');
 
             if (stateModelUpdate.password !== stateModelUpdate.confirmPassword) {
-                messages.push('Password is not equal to confirm password');
+                //messages.push('Password is not equal to confirm password');
+                errObj.confirmPassword.push('Password is not equal to confirm password');
             }
 
             if (!stateModelUpdate.iAcceptConditions) {
-                messages.push('Terms and conditions is not checked');
+                //messages.push('Terms and conditions is not checked');
+                errObj.condAndTerm.push('Terms and conditions is not checked');
             }
 
-            if (!captchaData || captchaData === '') {
-                messages.push('please check reCAPTCHA');
+            if (!captchaData || captchaData.response === '') {
+                errObj.captcha.push('please check reCAPTCHA');
             }
 
-            var errCount=0;
+
             for (var my in errObj){
                 errCount += errObj[my].length;
             }
