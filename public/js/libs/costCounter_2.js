@@ -43,7 +43,7 @@
         userModel = params.user;
         planModels = params.plans;
         devices = params.devices || [];
-        period = params.period || 'month';
+        period = params.period || userModel.billings.planPeriod || 'month';
         period = period.toLowerCase();
 
         devices.forEach(function (device) {

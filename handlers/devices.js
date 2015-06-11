@@ -147,20 +147,6 @@ var DeviceHandler = function (db) {
 
                 },
 
-                // try to find the new plan:
-                /*
-                 function (cb) {
-                 var planModel = _.find(planModels, function (planModel) {
-                 return (planModel.interval === userModel.billings.planPeriod
-                 && planModel.metadata.minDevices <= subscribedDevicesCount
-                 && subscribedDevicesCount <= planModel.metadata.maxDevices
-                 );
-                 });
-
-                 cb(null, planModel);
-                 },
-                 */
-
                 // update the User.billings.currentPlan:
                 function (calcResult, cb) {
 
@@ -430,6 +416,7 @@ var DeviceHandler = function (db) {
     };
 
     function updateSubscribedDevicesCount(options, callback) {
+        //TODO: FIXME: re-calc the tariff plan:
         var criteria = {
             _id: options._id
         };
@@ -635,7 +622,7 @@ var DeviceHandler = function (db) {
 
         async.waterfall([
 
-            //get the current active tariff plans:
+            //get the all tariff plans:
             function (cb) {
                 var criteria = {};
 
