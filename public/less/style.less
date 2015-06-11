@@ -764,6 +764,7 @@ body, html {
 }
 #devicesMainList{
 	border-bottom: 1px solid #fe102c;
+    min-height: 369px;
 	label{
 		line-height:40px;
 	}
@@ -781,6 +782,7 @@ body, html {
 	.pagination{
 		margin-top:10px;
 		margin-bottom:18px;
+      height: 20px;
 		.item{
 			.goToPage{
 				border:none;
@@ -833,6 +835,9 @@ body, html {
 #devicesList{
 	margin-top:25px;
 	width:620px;
+  min-height: 681px;
+  margin-bottom: 20px;
+  border-bottom:1px solid #fe102c;
 	button{
 		outline:none;
 		.mp;
@@ -858,6 +863,7 @@ body, html {
 		color:#2ab637;	
 	}
 	.table{
+        margin-bottom: 0px;
 		tr{
 			td{
 				.mp;
@@ -871,11 +877,7 @@ body, html {
 					border-top:1px solid #fe102c;
 				}
 			}
-			&:last-child{
-				td{
-					border-bottom:1px solid #fe102c;
-				}
-			}
+
 		}
 	}
 }
@@ -1179,6 +1181,7 @@ input.customCheckbox:checked+label {
 	width:100%;
 	display:table;	
 	font-size:14px;
+    height: 20px;
 	li{
 		min-width:8px;
 		display:table-cell;
