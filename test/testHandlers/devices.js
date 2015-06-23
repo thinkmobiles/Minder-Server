@@ -310,6 +310,50 @@ describe('Devices', function () {
 
     });
 
+    describe('PUT /devices/geoFence/:id', function () {
+
+        it('Owner can update the geo fence options', function (done) {
+            var devId = testData.devices[0]._id.toString();
+            var url = '/devices/geoFence/' + devId;
+            var enabled = true;
+            var long = 22.299042;
+            var lat =  48.618308;
+            var radius = 5;
+
+            var data = {
+                enabled: enabled,
+                fixedLocation: {
+                    long: long,
+                    lat: lat
+                },
+                radius: radius
+            };
+
+            adminAgent
+                .put(url)
+                .send(data)
+                .end(function (err, res) {
+                    var deviceModel;
+
+                    expect(res.status).to.equals(200);
+                    expect(res.body).to.be.instanceOf(Object);
+                    expect(res.body).to.have.property('success');
+                    expect(res.body).to.have.property('model');
+                    expect(res.body.model).to.have.property('geoFence');
+
+                    deviceModel = res.body.model;
+
+                    expect(deviceModel.geoFence.enabled).to.equals(enabled);
+                    expect(deviceModel.geoFence.fixedLocation.long).to.equals(long);
+                    expect(deviceModel.geoFence.fixedLocation.lat).to.equals(lat);
+                    expect(deviceModel.geoFence.radius).to.equals(radius);
+
+                    done();
+                });
+        });
+
+    });
+
     describe('PATCH /device/:id', function () {
 
         //ACTIVATE:
