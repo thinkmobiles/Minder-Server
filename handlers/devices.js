@@ -1015,28 +1015,31 @@ var DeviceHandler = function (db) {
             deviceId: 1,
             name: 1,
             user: 1,
+            geoFence: 1,
             createdAt: 1,
             updatedAt: 1
         };
 
         DeviceModel
-            .findOne(criteria, fields, function (err, device) {
+            .findOne(criteria, fields, function (err, deviceModel) {
                 var ownerId;
 
                 if (err) {
                     next(err);
-                } else if (!device) {
+                } else if (!deviceModel) {
                     next(badRequests.NotFound());
                 } else {
 
-                    if (!device.user) {
-                        return next(badRequests.InvalidValue({param: 'device.user', value: device.user}));
+                    if (!deviceModel.user) {
+                        return next(badRequests.InvalidValue({param: 'device.user', value: deviceModel.user}));
                     }
 
-                    ownerId = device.user.toString();
+                    ownerId = deviceModel.user.toString();
 
                     if (session.isAdmin(req) || (ownerId === userId)) {
-                        res.status(200).send(device);
+                        console.log('>>> device');
+                        console.dir(deviceModel);
+                        res.status(200).send(deviceModel);
                     } else {
                         next(badRequests.AccessError());
                     }
