@@ -17,7 +17,6 @@ define([
         events: {
             'click #globalDevicesChecker'       : 'globalCheckTrigger', // check all devices
             'click .goSearch'                   : 'search',
-            //'keydown'                         : 'keydownHandler',
             'keypress #search'                  : 'searchOnEnter',
             'click .clearSearch'                : 'clearSearch',
             'click .deviceCheckbox'             : 'deviceCheck', // check separate devices
