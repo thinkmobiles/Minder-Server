@@ -22,6 +22,14 @@ module.exports = (function () {
             expirationDate: {type: Date, default: null},
             renewEnabled: {type: Boolean, default: false}
         },
+        geoFence: {
+            enabled: {type: Boolean, default: false},
+            fixedLocation: {
+                long: {type: Number, default: null},
+                lat: {type: Number, default: null}
+            },
+            radius: {type: Number, default: 3}
+        },
         createdAt: {type: Date, default: Date.now},
         updatedAt: {type: Date, default: Date.now}
     }, {collection: 'Devices'});

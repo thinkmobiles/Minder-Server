@@ -24,7 +24,7 @@ describe('Devices', function () {
 
     before(function (done) {
         var createTestData;
-        this.timeout(5000);
+        this.timeout(10000);
 
         createTestData = new CreateTestData(db);
 
@@ -237,7 +237,7 @@ describe('Devices', function () {
 
     });
 
-    describe('GET /users/:id', function () {
+    describe('GET /devices/:id', function () {
 
         it('Admin can get devices by id', function (done) {
             var devId = testData.devices[0]._id.toString();
@@ -265,6 +265,8 @@ describe('Devices', function () {
                     expect(res.body).to.be.instanceOf(Object);
                     expect(res.body).to.have.property('_id');
                     expect(res.body._id).to.equals(devId);
+                    expect(res.body).to.have.property('geoFence');
+                    expect(res.body.geoFence).to.be.instanceOf(Object);
                     done();
                 });
         });
@@ -284,7 +286,7 @@ describe('Devices', function () {
 
     });
 
-    describe('PUT /users/:id', function () {
+    describe('PUT /devices/:id', function () {
 
         it('Admin can update the device', function (done) {
             var devId = testData.devices[0]._id.toString();

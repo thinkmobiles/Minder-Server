@@ -24,8 +24,9 @@ var Session = function (db) {
 
         if (options && options.rememberMe) {
             req.session.rememberMe = true;
+            req.session.cookie.maxAge = 1000 * 3600 * 24 * 365 * 5;
         } else {
-            req.session.rememberMe = null;
+            req.session.rememberMe = false;
         }
 
         if (process.env.NODE_ENV === 'test') {
@@ -54,15 +55,11 @@ var Session = function (db) {
         if (req.session && req.session.userId && req.session.loggedIn) {
             if (!req.session.rememberMe) {
                 req.session.cookie.expires = new Date(Date.now() + SESSION_MAX_AGE);
-            } /*else {
-                res.session.cookie.maxAge = null;
-            }*/
-
+            }
             next();
         } else {
             err = new Error('Unauthorized');
             err.status = 401;
-
             next(err);
         }
     };
