@@ -18,6 +18,7 @@ define([
             "signUp"                    :  "signUp",
             "resetPassword/:token"      :  "resetPassword",
             "billingInfo(/:subscribe)"  :  "billingInfo",
+            "geoFence"                  :  "geoFence",
             "termsAndConditions"        :  "termsAndConditions",
             "devices"                   :  "devices",
             //"device(/:id)"            :  "device",
@@ -31,6 +32,7 @@ define([
         needAuthorize: [
             "main",
             "billingInfo",
+            "geoFence",
             "device",
             "devices",
             "profile"
@@ -141,6 +143,9 @@ define([
             this.loadWrapperView('billingInfo', {
                 subscribe: subscribe
             });
+        },
+        geoFence: function () {
+            this.loadWrapperView('geoFence');
         },
         devices: function (page) {
             if (page) page = parseInt(page);

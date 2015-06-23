@@ -25,6 +25,10 @@ define([
                 name: "Billing info",
                 url: "#billingInfo",
                 title: "billing_but"
+            }, {
+                name: "Geo fence",
+                url: "#geoFence",
+                title: "geo_fence"
             }
         ],
 
