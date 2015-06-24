@@ -5,8 +5,10 @@ define([
     'views/device/deviceMainListView',
     'views/customElements/paginationView',
     'constants/statuses',
-    'views/device/deviceView'
-], function (Template, ModalTemplate, DevisesCollection, deviceMainListView, PaginationView, STATUSES, deviceView) {
+    'views/device/deviceView',
+    'views/geoFence/geoFenceView'
+
+], function (Template, ModalTemplate, DevisesCollection, deviceMainListView, PaginationView, STATUSES, deviceView, GeoFenceView) {
 
     var View;
     View = Backbone.View.extend({
@@ -26,7 +28,8 @@ define([
             'click .cancelEditDevice'           : 'closeDevicesView',
             'click .customSelect .current'      : 'showPeriodList',
             'click .customSelect .list .item'   : 'choosePeriodList',
-            'change #period'                    : 'periodObserver' // period observer
+            'change #period'                    : 'periodObserver', // period observer
+            'click .setGeo'                     : 'testGeo'
         },
 
         initialize: function (options) {
@@ -260,9 +263,25 @@ define([
 
         },
 
+        testGeo: function (e) {
+
+            var id = $(e.target).attr('data-id');
+
+            this.$el.find('#editGeoFenceModal').modal({
+                show: true,
+                backdrop: 'static'
+            }).css({
+                width: "1000"
+            });
+
+            this.devicesView = new GeoFenceView({id: id});
+            //this.devicesView.delegateEvents();
+        },
+
         closeDevicesView: function () {
             // hide modal
             this.$el.find('#editDeviceModal').modal('hide');
+            this.$el.find('#editGeoFenceModal').modal('hide');
             // remove devices view
             if (this.devicesView) {
                 this.devicesView.undelegateEvents();
