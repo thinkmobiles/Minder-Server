@@ -994,8 +994,6 @@ var DeviceHandler = function (db) {
             }
         }
 
-        //console.log(params, skip);
-
         DeviceModel.count(criteria)
             .exec(function (err, devices) {
                 if (err) {
@@ -1037,8 +1035,6 @@ var DeviceHandler = function (db) {
                     ownerId = deviceModel.user.toString();
 
                     if (session.isAdmin(req) || (ownerId === userId)) {
-                        console.log('>>> device');
-                        console.dir(deviceModel);
                         res.status(200).send(deviceModel);
                     } else {
                         next(badRequests.AccessError());
@@ -1069,6 +1065,58 @@ var DeviceHandler = function (db) {
         if (!session.isAdmin(req)) {
             criteria.user = userId;
         }
+
+        DeviceModel
+            .findOneAndUpdate(criteria, update)
+            .exec(function (err, device) {
+                if (err) {
+                    next(err);
+                } else if (!device) {
+                    next(badRequests.NotFound());
+                } else {
+                    res.status(200).send({success: 'updated', model: device});
+                }
+            });
+
+    };
+
+    this.updateGeoFence = function (req, res, next) {
+        var options = req.body;
+        var userId = req.session.userId;
+        var id = req.params.id;
+        var criteria = {
+            _id: id
+        };
+        var update = {
+            $set: {
+            }
+        };
+
+        if (options.enabled !== undefined) {
+            update.$set['geoFence.enabled'] = options.enabled;
+        }
+
+        if (options.fixedLocation && (options.fixedLocation.long !== undefined))  {
+            update.$set['geoFence.fixedLocation.long'] = options.fixedLocation.long;
+        }
+
+        if (options.fixedLocation && (options.fixedLocation.lat !== undefined))  {
+            update.$set['geoFence.fixedLocation.lat'] = options.fixedLocation.lat;
+        }
+
+        if (options.radius !== undefined)  {
+            update.$set['geoFence.radius'] = options.radius;
+        }
+
+        if (!Object.keys(update.$set).length) {
+            return next(badRequests.NotEnParams({message: 'There are no params for update.'}));
+        }
+
+        if (!session.isAdmin(req)) {
+            criteria.user = userId; //check permissions
+        }
+
+        update.$set.updatedAt = new Date();
 
         DeviceModel
             .findOneAndUpdate(criteria, update)

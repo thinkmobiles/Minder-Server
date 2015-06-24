@@ -21,7 +21,7 @@ module.exports = function (db) {
     router.post('/getLocations', session.authenticatedUser, deviceHandler.getLocation);
     router.post('/subscribe', session.authenticatedUser, deviceHandler.subscribeDevices);
     router.post('/unsubscribe', session.authenticatedUser, deviceHandler.unsubscribeDevices);
-    router.put('/geoFence/:id', session.authenticatedUser, deviceHandler.updateDevice);
+    router.put('/geoFence/:id', session.authenticatedUser, deviceHandler.updateGeoFence);
 
     return router;
 };
