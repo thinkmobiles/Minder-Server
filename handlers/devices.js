@@ -1084,6 +1084,7 @@ var DeviceHandler = function (db) {
         var options = req.body;
         var userId = req.session.userId;
         var id = req.params.id;
+        var geoFence = options.geoFence
         var criteria = {
             _id: id
         };
@@ -1092,20 +1093,24 @@ var DeviceHandler = function (db) {
             }
         };
 
-        if (options.enabled !== undefined) {
-            update.$set['geoFence.enabled'] = options.enabled;
+        if (!geoFence) {
+            return next(badRequests.NotEnParams({reqParams: 'geoFence'}));
         }
 
-        if (options.fixedLocation && (options.fixedLocation.long !== undefined))  {
-            update.$set['geoFence.fixedLocation.long'] = options.fixedLocation.long;
+        if (geoFence.enabled !== undefined) {
+            update.$set['geoFence.enabled'] = geoFence.enabled;
         }
 
-        if (options.fixedLocation && (options.fixedLocation.lat !== undefined))  {
-            update.$set['geoFence.fixedLocation.lat'] = options.fixedLocation.lat;
+        if (geoFence.fixedLocation && (geoFence.fixedLocation.long !== undefined))  {
+            update.$set['geoFence.fixedLocation.long'] = geoFence.fixedLocation.long;
         }
 
-        if (options.radius !== undefined)  {
-            update.$set['geoFence.radius'] = options.radius;
+        if (geoFence.fixedLocation && (geoFence.fixedLocation.lat !== undefined))  {
+            update.$set['geoFence.fixedLocation.lat'] = geoFence.fixedLocation.lat;
+        }
+
+        if (geoFence.radius !== undefined)  {
+            update.$set['geoFence.radius'] = geoFence.radius;
         }
 
         if (!Object.keys(update.$set).length) {

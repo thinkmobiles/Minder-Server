@@ -317,16 +317,18 @@ describe('Devices', function () {
             var url = '/devices/geoFence/' + devId;
             var enabled = true;
             var long = 22.299042;
-            var lat =  48.618308;
+            var lat = 48.618308;
             var radius = 5;
 
             var data = {
-                enabled: enabled,
-                fixedLocation: {
-                    long: long,
-                    lat: lat
-                },
-                radius: radius
+                geoFence: {
+                    enabled: enabled,
+                    fixedLocation: {
+                        long: long,
+                        lat: lat
+                    },
+                    radius: radius
+                }
             };
 
             adminAgent
@@ -334,6 +336,9 @@ describe('Devices', function () {
                 .send(data)
                 .end(function (err, res) {
                     var deviceModel;
+
+                    console.log('>>> error');
+                    console.log(res.body);
 
                     expect(res.status).to.equals(200);
                     expect(res.body).to.be.instanceOf(Object);
@@ -498,7 +503,10 @@ describe('Devices', function () {
                             //check devices:
                             function (cb) {
 
-                                DeviceModel.find({_id: {$in: deviceIds}, status: DEVICE_STATUSES.SUBSCRIBED}, function (err, devices) {
+                                DeviceModel.find({
+                                    _id: {$in: deviceIds},
+                                    status: DEVICE_STATUSES.SUBSCRIBED
+                                }, function (err, devices) {
                                     if (err) {
                                         return cb(err);
                                     }
@@ -513,7 +521,6 @@ describe('Devices', function () {
                             }
                             done();
                         });
-
 
                     }
                 });
