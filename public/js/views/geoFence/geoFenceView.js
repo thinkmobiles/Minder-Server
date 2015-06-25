@@ -52,8 +52,8 @@ define([
                         },
                     radius : this.$el.find('#radius').val().trim()
                 };
-            this.model.url = '/devices/geoFence/'+this.model.get('_id');
-            this.model.save(saveData,{
+            this.model.url = '/devices/'+this.model.get('_id')+'/geoFence';
+            this.model.save({geoFence : saveData},{
                 wait : true,
                 success : function(){alert('success')},
                 error   : function(){alert('error')}
