@@ -337,9 +337,6 @@ describe('Devices', function () {
                 .end(function (err, res) {
                     var deviceModel;
 
-                    console.log('>>> error');
-                    console.log(res.body);
-
                     expect(res.status).to.equals(200);
                     expect(res.body).to.be.instanceOf(Object);
                     expect(res.body).to.have.property('success');
