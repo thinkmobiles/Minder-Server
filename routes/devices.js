@@ -18,10 +18,10 @@ module.exports = function (db) {
     router.get('/:id', session.authenticatedUser, deviceHandler.getDevice);
     router.put('/:id', session.authenticatedUser, deviceHandler.updateDevice);
     router.patch('/:id', session.authenticatedUser, deviceHandler.updateStatus); //req.body.status = "active" | "deleted"
+    router.put('/:id/geoFence', session.authenticatedUser, deviceHandler.updateGeoFence);
     router.post('/getLocations', session.authenticatedUser, deviceHandler.getLocation);
     router.post('/subscribe', session.authenticatedUser, deviceHandler.subscribeDevices);
     router.post('/unsubscribe', session.authenticatedUser, deviceHandler.unsubscribeDevices);
-    router.put('/geoFence/:id', session.authenticatedUser, deviceHandler.updateGeoFence);
 
     return router;
 };
