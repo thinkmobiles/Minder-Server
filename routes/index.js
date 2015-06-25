@@ -14,6 +14,7 @@ module.exports = function (app, db) {
     var deviceHandler = new DeviceHandler(db);
     var tariffPlanHandler = new TariffPlanHandler(db);
     var devicesRouter;
+    var syncRouter;
     var stripePlansRouter;
 
     // --- setup cron jobs ---
@@ -56,6 +57,8 @@ module.exports = function (app, db) {
     stripePlansRouter = require('./stripePlans')(db);
     app.use('/stripe/plans', stripePlansRouter);
 
+    syncRouter = require('./sync')(db);
+    app.use('/sync', syncRouter);
 
     // ----------------------------------------------------------
     // Error Handler:

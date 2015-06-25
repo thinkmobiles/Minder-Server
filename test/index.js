@@ -7,4 +7,5 @@ require('../models/index.js');
 
 //require ('./testHandlers/users');
 require ('./testHandlers/devices');
-//require ('./testCostCounter');
+//require ('./testHelpers/testCostCounter');
+//require ('./testHandlers/testSync');
