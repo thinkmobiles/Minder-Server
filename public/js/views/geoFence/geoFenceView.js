@@ -10,7 +10,7 @@ define([
     var View;
 
     View = Backbone.View.extend({
-        el : '#modalEditGeoFenceContent',
+        //el : '#modalEditGeoFenceContent',
 
         events: {
             "click  #setRadius"   : "changeRadius",

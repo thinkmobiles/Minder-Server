@@ -1081,7 +1081,7 @@ var DeviceHandler = function (db) {
     };
 
     this.updateGeoFence = function (req, res, next) {
-        var options = req.body;
+        var options = req.body.geoFence;
         var userId = req.session.userId;
         var id = req.params.id;
         var criteria = {

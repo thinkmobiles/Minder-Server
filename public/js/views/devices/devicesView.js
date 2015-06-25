@@ -274,8 +274,11 @@ define([
                 width: "1000"
             });
 
+            if (this.devicesView){this.devicesView.undelegateEvents();}
             this.devicesView = new GeoFenceView({id: id});
-            //this.devicesView.delegateEvents();
+            this.devicesView.delegateEvents();
+
+            this.$el.find('#modalEditGeoFenceContent').html(this.devicesView.el);
         },
 
         closeDevicesView: function () {
