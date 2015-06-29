@@ -1527,6 +1527,14 @@ var DeviceHandler = function (db) {
         });
 
     };
+    
+    this.subscribeGeoFence = function (req, res, next) {
+        next(badRequests.InvalidValue({ message: 'Not Implemented Yet', status: 500 }));
+    };
+
+    this.unsubscribeGeoFence = function (req, res, next) {
+        next(badRequests.InvalidValue({message: 'Not Implemented Yet', status: 500}));
+    };
 
     this.cronJobForCheckExpirationDates = function (callback) {
 
