@@ -71,6 +71,11 @@ var SyncHandler = function (db) {
                 }
             });
     };
+    
+    function getFilePath(fileName, bucket, rootDir) {
+        var rootDir = rootDir || process.env.BUCKET;
+        return path.join(rootDir, bucket, fileName);
+    };
 
     this.saveFile = function (options, callback) {
         var fileNams;
@@ -201,6 +206,7 @@ var SyncHandler = function (db) {
     this.getFile = function (req, res, next) {
         var fileName = req.params.fileName;
         var bucket = process.env.FILES_BUCKET;
+        var rootDir = process.env.BUCKET;        
         var filePath = imageUploader.getImageUrl(fileName, bucket);
 
         fs.exists(filePath, function (exists) {
