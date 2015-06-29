@@ -1,10 +1,10 @@
-var DEVICE_STATUSES = require('../constants/deviceStatuses');
+var DEVICE_STATUSES = require('../../constants/deviceStatuses');
 var request = require('supertest');
 var expect = require("chai").expect;
 var async = require('async');
-var Config = require('./config');
+var Config = require('../config');
 var mongoose = require('mongoose');
-var calculateTariff = require('../public/js/libs/costCounter_2');
+var calculateTariff = require('../../public/js/libs/costCounter_2');
 
 //TODO: return devicesToPay ...
 

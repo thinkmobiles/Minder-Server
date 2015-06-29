@@ -296,7 +296,6 @@ describe('Devices', function () {
                         return done(err)
                     }
 
-                    console.log('>>> len = ', res.body.length);
                     expect(res.status).to.equals(200);
                     expect(res.body).to.be.instanceOf(Array);
                     expect(res.body.length).to.equals(2);
@@ -306,7 +305,6 @@ describe('Devices', function () {
                     expect(fileModel).to.be.instanceOf(Object);
                     expect(fileModel).to.have.property('url');
                     expect(fileModel.url).to.include('/sync/files/');
-                    console.log('+++++ url ', fileModel.url);
                     done();
                 });
         });

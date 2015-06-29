@@ -16,6 +16,7 @@
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
   <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
   <ItemGroup>
+    <Compile Include="test\testHelpers\testCostCounter.js" />
     <Content Include="index.html" />
     <Content Include="package.json" />
     <Content Include="README.md" />
@@ -223,6 +224,7 @@
     <Folder Include="test" />
     <Folder Include="test\data" />
     <Folder Include="test\developData" />
+    <Folder Include="test\testHelpers\" />
     <Folder Include="test\testHandlers" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
