@@ -22,6 +22,6 @@ process.env.STRIPE_PRIVATE_KEY = 'sk_test_94bnoDRl6nHuWHXbfRqk50yH'; //istvan.na
 //file uploader
 process.env.UPLOADER_TYPE = 'FileSystem'; //FileSystem || AmazonS3
 //process.env.BUCKET = 'uploads_' + process.env.NODE_ENV.toLowerCase();
-//process.env.BUCKET = path.join('uploads', process.env.NODE_ENV.toLowerCase());
-process.env.BUCKET = path.join('uploads', 'test');
+process.env.BUCKET = path.join('uploads', process.env.NODE_ENV.toLowerCase());
+//process.env.BUCKET = path.join('uploads', 'test');
 process.env.FILES_BUCKET = path.join('sync');

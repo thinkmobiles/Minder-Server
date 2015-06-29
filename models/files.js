@@ -41,7 +41,7 @@ module.exports = (function () {
         return imageUploader.generateImageUrl(this.name, this.key);
     };
     fileSchema.virtual('url').get(function () {
-        return imageUploader.getImageUrl(this.name, this.key);
+        return imageUploader.generateImageUrl(this.name, this.key);
     });
     fileSchema.set('toJSON', { getters: true, virtuals: true });
 

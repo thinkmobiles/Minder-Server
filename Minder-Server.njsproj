@@ -1,0 +1,270 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{92839ca0-e981-4271-947b-d5f1f20fbe2b}</ProjectGuid>
+    <ProjectHome />
+    <ProjectView>ProjectFiles</ProjectView>
+    <StartupFile>server.js</StartupFile>
+    <WorkingDirectory>.</WorkingDirectory>
+    <OutputPath>.</OutputPath>
+    <ProjectTypeGuids>{3AF33F2E-1136-4D97-BBB7-1795711AC8B8};{349c5851-65df-11da-9384-00065b846f21};{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}</ProjectTypeGuids>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
+  <ItemGroup>
+    <Content Include="index.html" />
+    <Content Include="package.json" />
+    <Content Include="README.md" />
+    <Compile Include="app.js" />
+    <Compile Include="models.js" />
+    <Compile Include="server.js" />
+    <Compile Include="config\aws.js" />
+    <Compile Include="config\development.js" />
+    <Compile Include="config\production.js" />
+    <Compile Include="config\test.js" />
+    <Compile Include="constants\deviceOs.js" />
+    <Compile Include="constants\deviceStatuses.js" />
+    <Compile Include="constants\index.js" />
+    <Compile Include="constants\planTypes.js" />
+    <Compile Include="constants\regExp.js" />
+    <Compile Include="constants\responses.js" />
+    <Compile Include="constants\sessions.js" />
+    <Compile Include="constants\userRoles.js" />
+    <Compile Include="handlers\devices.js" />
+    <Compile Include="handlers\saas.js" />
+    <Compile Include="handlers\sessions.js" />
+    <Compile Include="handlers\sync.js" />
+    <Compile Include="handlers\tariffPlan.js" />
+    <Compile Include="handlers\users.js" />
+    <Compile Include="helpers\badRequests.js" />
+    <Compile Include="helpers\dbRegistrator.js" />
+    <Compile Include="helpers\logWriter.js" />
+    <Compile Include="helpers\mailer.js" />
+    <Compile Include="helpers\randomPass.js" />
+    <Compile Include="helpers\sessionParser.js" />
+    <Compile Include="helpers\stripe.js" />
+    <Compile Include="helpers\subdomain.js" />
+    <Compile Include="models\device.js" />
+    <Compile Include="models\files.js" />
+    <Compile Include="models\index.js" />
+    <Compile Include="models\tariffPlan.js" />
+    <Compile Include="models\user.js" />
+    <Compile Include="routes\devices.js" />
+    <Compile Include="routes\index.js" />
+    <Compile Include="routes\stripePlans.js" />
+    <Compile Include="routes\sync.js" />
+    <Content Include="stripe\plans.json" />
+    <Content Include="stripe\tariffPlans.json" />
+    <Compile Include="stripe\stripe.js" />
+    <Compile Include="test\config.js" />
+    <Compile Include="test\index.js" />
+    <Compile Include="helpers\imageUploader\imageAmazonS3.js" />
+    <Compile Include="helpers\imageUploader\imageFileSystem.js" />
+    <Compile Include="helpers\imageUploader\imageUploader.js" />
+    <Content Include="public\css\bootstrap-theme.min.css" />
+    <Content Include="public\css\bootstrap.min.css" />
+    <Content Include="public\fonts\glyphicons-halflings-regular.svg" />
+    <Content Include="public\images\arrow-down.png" />
+    <Content Include="public\images\check_mark.png" />
+    <Content Include="public\images\credit-card.png" />
+    <Content Include="public\images\cvv.png" />
+    <Content Include="public\images\header-bg.png" />
+    <Content Include="public\images\login-bg.png" />
+    <Content Include="public\images\minder_logo.png" />
+    <Content Include="public\images\search-close-icon.png" />
+    <Content Include="public\images\search-icon.png" />
+    <Content Include="public\images\user-icon.png" />
+    <Content Include="public\images\logoForPaiments.jpg" />
+    <Content Include="public\images\ajax-loader.gif" />
+    <Content Include="public\images\favicon.ico" />
+    <Compile Include="public\js\app.js" />
+    <Compile Include="public\js\communication.js" />
+    <Compile Include="public\js\custom.js" />
+    <Compile Include="public\js\dataService.js" />
+    <Compile Include="public\js\main.js" />
+    <Compile Include="public\js\router.js" />
+    <Compile Include="public\js\validation.js" />
+    <Content Include="public\static\errorTemplate.html" />
+    <Content Include="public\static\successConfirm.html" />
+    <Content Include="public\images\markers\default.png" />
+    <Compile Include="public\js\collections\devicesCollection.js" />
+    <Compile Include="public\js\collections\tariffPlansCollection.js" />
+    <Compile Include="public\js\config\config.js" />
+    <Compile Include="public\js\constants\statuses.js" />
+    <Compile Include="public\js\libs\backbone-min.map.1.1.2.js" />
+    <Compile Include="public\js\libs\bootstrap.min.js" />
+    <Compile Include="public\js\libs\costCounter.js" />
+    <Compile Include="public\js\libs\costCounter_2.js" />
+    <Compile Include="public\js\libs\jquery-2.1.0.min.map.js" />
+    <Compile Include="public\js\libs\less.min.js" />
+    <Compile Include="public\js\libs\moment.js" />
+    <Compile Include="public\js\libs\require.js" />
+    <Compile Include="public\js\libs\text.js" />
+    <Compile Include="public\js\libs\underscore-min.map.1.6.0.js" />
+    <Compile Include="public\js\models\deviceModel.js" />
+    <Compile Include="public\js\models\tariffPlanModel.js" />
+    <Compile Include="public\js\views\billingInfo\billingInfoView.js" />
+    <Compile Include="public\js\views\confirm\confirmView.js" />
+    <Compile Include="public\js\views\confirmEmail\confirmEmailView.js" />
+    <Compile Include="public\js\views\customElements\mapInfowindow.js" />
+    <Compile Include="public\js\views\customElements\paginationView.js" />
+    <Compile Include="public\js\views\device\deviceMainListView.js" />
+    <Compile Include="public\js\views\device\deviceView.js" />
+    <Compile Include="public\js\views\devices\devicesView.js" />
+    <Compile Include="public\js\views\forgotPassword\forgotPasswordView.js" />
+    <Compile Include="public\js\views\geoFence\geoFenceView.js" />
+    <Compile Include="public\js\views\login\loginView.js" />
+    <Compile Include="public\js\views\main\mainView.js" />
+    <Compile Include="public\js\views\map\mapView.js" />
+    <Compile Include="public\js\views\map\markerView.js" />
+    <Compile Include="public\js\views\menu\topMenuView.js" />
+    <Compile Include="public\js\views\profile\profileView.js" />
+    <Compile Include="public\js\views\resetPassword\resetPasswordView.js" />
+    <Compile Include="public\js\views\signUp\signUpView.js" />
+    <Compile Include="public\js\views\termsAndConditions\termsAndConditionsView.js" />
+    <Content Include="public\templates\billingInfo\billingInfoTemplate.html" />
+    <Content Include="public\templates\confirm\confirmTemplate.html" />
+    <Content Include="public\templates\confirmEmail\confirmEmailTemplate.html" />
+    <Content Include="public\templates\customElements\mapInfowindowTemplate.html" />
+    <Content Include="public\templates\customElements\paginationTemplate.html" />
+    <Content Include="public\templates\device\deviceMainListTemplate.html" />
+    <Content Include="public\templates\device\deviceTemplate.html" />
+    <Content Include="public\templates\devices\devicesModalTemplate.html" />
+    <Content Include="public\templates\devices\devicesTemplate.html" />
+    <Content Include="public\templates\forgotPassword\forgotPasswordTemplate.html" />
+    <Content Include="public\templates\geoFence\geoFenceTemplate.html" />
+    <Content Include="public\templates\login\LoginTemplate.html" />
+    <Content Include="public\templates\mailer\beforeExpired.html" />
+    <Content Include="public\templates\mailer\confirmEmail.html" />
+    <Content Include="public\templates\mailer\forgotPassword.html" />
+    <Content Include="public\templates\mailer\onExpired.html" />
+    <Content Include="public\templates\main\MainTemplate.html" />
+    <Content Include="public\templates\menu\footerTemplate.html" />
+    <Content Include="public\templates\menu\menuDropDownTemplate.html" />
+    <Content Include="public\templates\menu\menuItemTemplate.html" />
+    <Content Include="public\templates\menu\topMenuTemplate.html" />
+    <Content Include="public\templates\profile\profileTemplate.html" />
+    <Content Include="public\templates\resetPassword\resetPasswordTemplate.html" />
+    <Content Include="public\templates\signUp\signUpTemplate.html" />
+    <Content Include="public\templates\termsAndConditions\termsAndConditionsTemplate.html" />
+    <Compile Include="test\data\index.js" />
+    <Compile Include="test\data\testData.js" />
+    <Compile Include="test\developData\index.js" />
+    <Compile Include="test\developData\testData.js" />
+    <Compile Include="test\testHandlers\devices.js" />
+    <Compile Include="test\testHandlers\testSync.js" />
+    <Compile Include="test\testHandlers\users.js" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="config" />
+    <Folder Include="constants" />
+    <Folder Include="handlers" />
+    <Folder Include="helpers" />
+    <Folder Include="helpers\imageUploader" />
+    <Folder Include="models" />
+    <Folder Include="public" />
+    <Folder Include="public\css" />
+    <Folder Include="public\fonts" />
+    <Folder Include="public\fonts\SegoeUIBold" />
+    <Folder Include="public\fonts\SegoeUIItalic" />
+    <Folder Include="public\fonts\SegoeUILight" />
+    <Folder Include="public\fonts\SegoeUIRegular" />
+    <Folder Include="public\fonts\SegoeUISemiBold" />
+    <Folder Include="public\images" />
+    <Folder Include="public\images\markers" />
+    <Folder Include="public\js" />
+    <Folder Include="public\js\collections" />
+    <Folder Include="public\js\config" />
+    <Folder Include="public\js\constants" />
+    <Folder Include="public\js\libs" />
+    <Folder Include="public\js\models" />
+    <Folder Include="public\js\views" />
+    <Folder Include="public\js\views\billingInfo" />
+    <Folder Include="public\js\views\confirm" />
+    <Folder Include="public\js\views\confirmEmail" />
+    <Folder Include="public\js\views\customElements" />
+    <Folder Include="public\js\views\device" />
+    <Folder Include="public\js\views\devices" />
+    <Folder Include="public\js\views\forgotPassword" />
+    <Folder Include="public\js\views\geoFence" />
+    <Folder Include="public\js\views\login" />
+    <Folder Include="public\js\views\main" />
+    <Folder Include="public\js\views\map" />
+    <Folder Include="public\js\views\menu" />
+    <Folder Include="public\js\views\profile" />
+    <Folder Include="public\js\views\resetPassword" />
+    <Folder Include="public\js\views\signUp" />
+    <Folder Include="public\js\views\termsAndConditions" />
+    <Folder Include="public\less" />
+    <Folder Include="public\static" />
+    <Folder Include="public\templates" />
+    <Folder Include="public\templates\billingInfo" />
+    <Folder Include="public\templates\confirm" />
+    <Folder Include="public\templates\confirmEmail" />
+    <Folder Include="public\templates\customElements" />
+    <Folder Include="public\templates\device" />
+    <Folder Include="public\templates\devices" />
+    <Folder Include="public\templates\forgotPassword" />
+    <Folder Include="public\templates\geoFence" />
+    <Folder Include="public\templates\login" />
+    <Folder Include="public\templates\mailer" />
+    <Folder Include="public\templates\main" />
+    <Folder Include="public\templates\menu" />
+    <Folder Include="public\templates\profile" />
+    <Folder Include="public\templates\resetPassword" />
+    <Folder Include="public\templates\signUp" />
+    <Folder Include="public\templates\termsAndConditions" />
+    <Folder Include="routes" />
+    <Folder Include="stripe" />
+    <Folder Include="test" />
+    <Folder Include="test\data" />
+    <Folder Include="test\developData" />
+    <Folder Include="test\testHandlers" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <!--Do not delete the following Import Project.  While this appears to do nothing it is a marker for setting TypeScript properties before our import that depends on them.-->
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets" Condition="False" />
+  <Import Project="$(VSToolsPath)\Node.js Tools\Microsoft.NodejsTools.targets" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
+        <WebProjectProperties>
+          <UseIIS>False</UseIIS>
+          <AutoAssignPort>True</AutoAssignPort>
+          <DevelopmentServerPort>0</DevelopmentServerPort>
+          <DevelopmentServerVPath>/</DevelopmentServerVPath>
+          <IISUrl>http://localhost:48022/</IISUrl>
+          <NTLMAuthentication>False</NTLMAuthentication>
+          <UseCustomServer>True</UseCustomServer>
+          <CustomServerUrl>http://localhost:1337</CustomServerUrl>
+          <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
+        </WebProjectProperties>
+      </FlavorProperties>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}" User="">
+        <WebProjectProperties>
+          <StartPageUrl>
+          </StartPageUrl>
+          <StartAction>CurrentPage</StartAction>
+          <AspNetDebugging>True</AspNetDebugging>
+          <SilverlightDebugging>False</SilverlightDebugging>
+          <NativeDebugging>False</NativeDebugging>
+          <SQLDebugging>False</SQLDebugging>
+          <ExternalProgram>
+          </ExternalProgram>
+          <StartExternalURL>
+          </StartExternalURL>
+          <StartCmdLineArguments>
+          </StartCmdLineArguments>
+          <StartWorkingDirectory>
+          </StartWorkingDirectory>
+          <EnableENC>False</EnableENC>
+          <AlwaysStartWebServerOnDebug>False</AlwaysStartWebServerOnDebug>
+        </WebProjectProperties>
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+</Project>
