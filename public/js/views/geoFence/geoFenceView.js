@@ -10,7 +10,6 @@ define([
     var View;
 
     View = Backbone.View.extend({
-        //el : '#modalEditGeoFenceContent',
 
         events: {
             "click  #setRadius"   : "changeRadius",
@@ -42,7 +41,14 @@ define([
             this.circle.setRadius(+radius);
         },
 
+        hideDialog: function () {
+            $('#editGeoFenceModal').modal('hide');
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open').style="";
+        },
+
         saveDevice : function(){
+            var self = this;
             var saveData = {
                     enabled : this.$el.find('#check_fence').prop('checked'),
                     fixedLocation: {
@@ -54,7 +60,9 @@ define([
             this.model.url = '/devices/'+this.model.get('_id')+'/geoFence';
             this.model.save({geoFence : saveData},{
                 wait : true,
-                success : function(){alert('success')},
+                success : function(){
+                    self.hideDialog();
+                },
                 error   : function(){alert('error')}
             });
         },
@@ -76,8 +84,8 @@ define([
                 minZoom   : 2,
                 streetViewControl:false
             };
+
             this.map = new google.maps.Map(document.getElementById("map_container"), mapOptions);
-            //this.map = new google.maps.Map(self.$el.find("#map_container"), mapOptions);
 
             var markerOptions={
                 map: self.map,
@@ -97,11 +105,13 @@ define([
 
             if (startLat && startLng){
                 markerOptions.position = new google.maps.LatLng(startLat, startLng);
-                circleOptions.center   = new google.maps.LatLng(startLat, startLng)
-            }
+                circleOptions.center   = new google.maps.LatLng(startLat, startLng);
 
+            }
             this.marker = new google.maps.Marker(markerOptions);
             this.circle = new google.maps.Circle(circleOptions);
+
+            this.map.fitBounds(this.circle.getBounds());
 
             google.maps.event.addListener(self.map, 'click', function(e){self.on_MapClick(e.latLng)});
             google.maps.event.addListener(self.circle, 'bounds_changed', function(){
