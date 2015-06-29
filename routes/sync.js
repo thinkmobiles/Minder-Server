@@ -11,6 +11,7 @@ module.exports = function (db) {
 
     router.post('/', session.authenticatedUser, syncHandler.storeFile);
     router.get('/files/:fileName', session.authenticatedUser, syncHandler.getFile);
+    router.get('/devices/:id/files', session.authenticatedUser, syncHandler.getFilesByDevice);
 
     return router;
 };

@@ -6,7 +6,7 @@ var Config = require('./../config');
 var testData = require('./../data/testData');
 var mongoose = require('mongoose');
 
-describe('Devices', function () {
+describe('sync', function () {
     var conf = new Config();
     var db = conf.db;
     var baseUrl = conf.baseUrl;
