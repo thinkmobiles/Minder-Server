@@ -2,12 +2,12 @@ var imagesUploader = function (dirConfig) {
     "use strict";
 
     var rootDir = dirConfig;
-
     var defaultUploadsDir = 'uploads';
     var defaultImageDir = 'images';
 
     var fs = require('fs');
     var os = require('os');
+    var path = require('path');
 
     var osPathData = getDirAndSlash();
 
@@ -96,15 +96,14 @@ var imagesUploader = function (dirConfig) {
 
     function getImagePath(imageName, folderName) {
         var folder = folderName || defaultImageDir;
-        return process.env.HOST + '/' + defaultUploadsDir + "\/" + process.env.NODE_ENV.toLowerCase() + "\/" + folder + "\/" + imageName;
+        return path.join(rootDir, folder, imageName);
     }
 
     function uploadImage(imageData, imageName, folderName, callback) {
         var slash = osPathData.slash;
-        //var webDir = osPathData.webDir + defaultUploadsDir + slash + folderName + slash + imageName;
-        //var dir = osPathData.dir + defaultUploadsDir + slash;
         var dir = osPathData.dir + slash;
         var webDir = osPathData.webDir + slash + folderName + slash + imageName;
+
         encodeFromBase64(imageData, function (err, data) {
             if (err) {
                 if (callback && typeof callback === 'function') {
@@ -166,7 +165,7 @@ var imagesUploader = function (dirConfig) {
     function duplicateImage(path, imageName, folderName, callback) {
         var slash = osPathData.slash;
         var dir = osPathData.dir + defaultUploadsDir + slash;
-        var imageData ={};
+        var imageData = {};
 
         path = osPathData.dir + path;
 
@@ -203,11 +202,16 @@ var imagesUploader = function (dirConfig) {
         });
     }
 
+    function generateImageUrl(name, key) {
+        return '/sync/files/' + key + '.png';
+    };
+
     return {
         uploadImage: uploadImage,
         duplicateImage: duplicateImage,
         removeImage: removeImage,
-        getImageUrl: getImagePath
+        getImageUrl: getImagePath,
+        generateImageUrl: generateImageUrl
     };
 };
 

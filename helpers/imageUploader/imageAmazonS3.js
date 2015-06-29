@@ -99,7 +99,8 @@ var imageUploader = (function (awsConfig) {
     return {
         uploadImage: uploadImage,
         removeImage: removeImage,
-        getImageUrl: getImageUrl
+        getImageUrl: getImageUrl,
+        generateImageUrl: getImageUrl
     };
 });
 

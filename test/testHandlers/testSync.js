@@ -137,13 +137,13 @@ describe('Devices', function () {
 
     });
 
-    describe('sync', function () {
+    describe('POST /sync', function () {
 
         it('User can\'t sync without deviceId', function (done) {
             var url = '/sync';
             var data = {
                 src: conf.base64,
-                name: 'guitar_logo.jpg',
+                originalName: 'guitar_logo.jpg',
                 path: 'c:/images',
                 size: 2.3
             };
@@ -171,7 +171,7 @@ describe('Devices', function () {
             var data = {
                 deviceId: deviceId,
                 src: conf.base64,
-                name: 'guitar_logo.jpg',
+                originalName: 'guitar_logo.jpg',
                 path: 'c:/images',
                 size: 2.3
             };
@@ -198,7 +198,7 @@ describe('Devices', function () {
             var data = {
                 deviceId: deviceId,
                 src: conf.base64,
-                name: 'guitar_logo.jpg',
+                originalName: 'guitar_logo.jpg',
                 path: 'c:/images',
                 size: 2.3
             };
@@ -218,6 +218,10 @@ describe('Devices', function () {
                 });
         });
 
+    });
+
+    describe('GET /sync/files/:fileName', function () {
+
         it('User can get the uploaded image', function (done) {
 
             async.waterfall([
@@ -229,7 +233,7 @@ describe('Devices', function () {
                     var data = {
                         deviceId: deviceId,
                         src: conf.base64,
-                        name: 'guitar_logo.jpg',
+                        originalName: 'guitar_logo.jpg',
                         path: 'c:/images',
                         size: 2.3
                     };
@@ -254,7 +258,6 @@ describe('Devices', function () {
                 //try to get the image:
                 function (url, cb) {
                     var fileUrl = url;
-                    console.log('>>> fileUrl ', fileUrl);
 
                     userAgent1
                         .get(fileUrl)
@@ -266,7 +269,6 @@ describe('Devices', function () {
                             expect(res.status).to.equals(200);
                             cb(null, res.body.url);
                         });
-                    cb();
                 }
 
             ], function (err) {
@@ -278,4 +280,37 @@ describe('Devices', function () {
         });
 
     });
+
+    describe('GET /sync/devices/:id/files', function () {
+
+        it('User can get the files by device\'s _id', function (done) {
+            var deviceId = testData.devices[0]._id.toString();
+            var url = '/sync/devices/' + deviceId + '/files';
+
+            userAgent1
+                .get(url)
+                .end(function (err, res) {
+                    var fileModel;
+
+                    if (err) {
+                        return done(err)
+                    }
+
+                    console.log('>>> len = ', res.body.length);
+                    expect(res.status).to.equals(200);
+                    expect(res.body).to.be.instanceOf(Array);
+                    expect(res.body.length).to.equals(2);
+
+                    fileModel = res.body[0];
+
+                    expect(fileModel).to.be.instanceOf(Object);
+                    expect(fileModel).to.have.property('url');
+                    expect(fileModel.url).to.include('/sync/files/');
+                    console.log('+++++ url ', fileModel.url);
+                    done();
+                });
+        });
+
+    });
+
 });

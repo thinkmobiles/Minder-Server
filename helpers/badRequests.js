@@ -6,7 +6,7 @@ var BadRequestModule = function () {
     var DEFAULT_ERROR_STATUS = 400;
 
     var NOT_ENAUGH_PARAMS = "Not enough incoming parameters.";
-    var INVALID_EMAIL = "Invalid email address.";
+    var INVALID_EMAIL = "Incorrect email address.";
     var EMAIL_IN_USE = 'Email in use. Please input another email address.';
     var DEVICE_IN_USE = 'deviceId in use. Please input another deviceId';
     var NO_UPDATE_PARAMS = 'There are no params for update.';
