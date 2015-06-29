@@ -1,12 +1,15 @@
 <div id="map_container">
 
 </div>
-<div class="clear"></div>
+
 <div id="fence_info">
     <span><%= model.name %></span>
-    <input id="check_fence" type="checkbox" <%if (model.geoFence.enabled){%>checked<%}%>><label for="check_fence" >Enable|Disable</label>
+    <input id="check_fence" type="checkbox" <% if (model.geoFence.enabled){%>checked<%}%> ><label for="check_fence" >Enable|Disable</label>
     <input id="radius" type="text" value="<%= model.geoFence.radius.toFixed(2)%>" placeholder="Fence radius">
     <input id="setRadius" type="button" value="Set">
     <input id="saveChanges" type="button" value="Save">
+    <input id="bootTest" type="button" value="bootTest">
 
 </div>
+
+<div class="clear"></div>

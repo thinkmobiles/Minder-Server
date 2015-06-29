@@ -18,7 +18,7 @@ define([
             "signUp"                    :  "signUp",
             "resetPassword/:token"      :  "resetPassword",
             "billingInfo(/:subscribe)"  :  "billingInfo",
-            //"geoFence"                  :  "geoFence",
+            "photoList"                 :  "photoList",
             "termsAndConditions"        :  "termsAndConditions",
             "devices"                   :  "devices",
             //"device(/:id)"            :  "device",
@@ -32,7 +32,7 @@ define([
         needAuthorize: [
             "main",
             "billingInfo",
-            //"geoFence",
+            "photoList",
             "device",
             "devices",
             "profile"
@@ -144,9 +144,9 @@ define([
                 subscribe: subscribe
             });
         },
-        //geoFence: function () {
-        //    this.loadWrapperView('geoFence');
-        //},
+        photoList: function () {
+            this.loadWrapperView('photoList');
+        },
         devices: function (page) {
             if (page) page = parseInt(page);
             this.loadWrapperView('devices', {page: page});

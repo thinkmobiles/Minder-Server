@@ -14,7 +14,8 @@ define([
 
         events: {
             "click  #setRadius"   : "changeRadius",
-            "click  #saveChanges" : "saveDevice"
+            "click  #saveChanges" : "saveDevice",
+            "click  #bootTest"    : "initializeGeoMap"
         },
 
         initialize: function (options) {
@@ -38,14 +39,12 @@ define([
 
         changeRadius : function (){
             var radius = this.$el.find('#radius').val().trim();
-            this.model.set({radius : radius});
-
             this.circle.setRadius(+radius);
         },
 
         saveDevice : function(){
             var saveData = {
-                    enabled : this.$el.find('#check_fence').val(),
+                    enabled : this.$el.find('#check_fence').prop('checked'),
                     fixedLocation: {
                         long  : this.circle.getCenter().lng(),
                         lat   : this.circle.getCenter().lat()
@@ -67,33 +66,41 @@ define([
 
         initializeGeoMap : function(){
             var self = this;
+            var startLat=this.model.get('geoFence').fixedLocation.lat;
+            var startLng=this.model.get('geoFence').fixedLocation.long;
+
             var mapOptions = {
-                center: new google.maps.LatLng(0, 0),
-                zoom: 2,
-                mapTypeId: google.maps.MapTypeId.ROADMAP,
-                minZoom:2,
+                center    : new google.maps.LatLng(startLat ? startLat : 0,startLng ? startLng : 0),
+                zoom      : 2,
+                mapTypeId : google.maps.MapTypeId.ROADMAP,
+                minZoom   : 2,
                 streetViewControl:false
             };
-
             this.map = new google.maps.Map(document.getElementById("map_container"), mapOptions);
+            //this.map = new google.maps.Map(self.$el.find("#map_container"), mapOptions);
 
-            this.marker = new google.maps.Marker({
+            var markerOptions={
                 map: self.map,
                 icon: {
                     url: '/images/markers/default.png'
                 }
-            });
-
+            };
             var circleOptions = {
                 strokeColor : '#FF0000',
                 strokeWeight: 1.5      ,
                 fillopacity : 1,
                 map         : this.map ,
-                radius      : +this.model.get('geoFence.radius'),
+                radius      : +this.model.get('geoFence').radius,
                 editable    : true,
                 clickable   : false
             };
 
+            if (startLat && startLng){
+                markerOptions.position = new google.maps.LatLng(startLat, startLng);
+                circleOptions.center   = new google.maps.LatLng(startLat, startLng)
+            }
+
+            this.marker = new google.maps.Marker(markerOptions);
             this.circle = new google.maps.Circle(circleOptions);
 
             google.maps.event.addListener(self.map, 'click', function(e){self.on_MapClick(e.latLng)});
@@ -110,7 +117,10 @@ define([
 
         render: function () {
             var modelForTMPL = this.model.toJSON();
+
+            this.undelegateEvents();
             this.$el.html(_.template(GeoFenceTmpl , {model : modelForTMPL}));
+            this.delegateEvents();
 
             this.initializeGeoMap();
 

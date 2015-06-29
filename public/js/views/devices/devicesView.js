@@ -107,6 +107,8 @@ define([
 
             // create pagination to control devices collection
             this.paginationView = new PaginationView(paginationOptions);
+
+
         },
 
         showPeriodList: function () {
@@ -253,7 +255,9 @@ define([
                 backdrop: 'static'
             }).css({
                 width: "535"
-            })
+            });
+
+
 
             this.devicesView = new deviceView({id: id});
 
@@ -265,33 +269,43 @@ define([
 
         testGeo: function (e) {
 
+            var self = this;
             var id = $(e.target).attr('data-id');
+            //$('#editGeoFenceModal').on('shown.bs.modal', function () {
+            //    $('#editGeoFenceModal').focus();
+            //    if (self.devicesView.initializeGeoMap){
+            //        self.devicesView.initializeGeoMap();
+            //    }
+            //    //alert('ololololo');
+            //});
 
-            this.$el.find('#editGeoFenceModal').modal({
-                show: true,
-                backdrop: 'static'
-            }).css({
-                width: "1000"
+            if (this.devicesView){
+                this.devicesView.undelegateEvents();
+            }
+
+            this.devicesView = new GeoFenceView({id: id});
+            this.$el.find('#modalEditGeoFenceContent').html(this.devicesView.el);
+
+            this.$el.find('#editGeoFenceModal').modal('show').css({
+                width: "1000px"
             });
 
-            if (this.devicesView){this.devicesView.undelegateEvents();}
-            this.devicesView = new GeoFenceView({id: id});
-            this.devicesView.delegateEvents();
+            //this.devicesView = new GeoFenceView({id: id});
 
-            this.$el.find('#modalEditGeoFenceContent').html(this.devicesView.el);
+
+            this.$el.find('#editGeoFenceModal').off('shown.bs.modal')
         },
 
         closeDevicesView: function () {
-            // hide modal
+
             this.$el.find('#editDeviceModal').modal('hide');
             this.$el.find('#editGeoFenceModal').modal('hide');
-            // remove devices view
+
             if (this.devicesView) {
                 this.devicesView.undelegateEvents();
                 this.devicesView.remove();
             }
         },
-
 
         // calculate plan for user to preview
         calculatePlan: function () {
