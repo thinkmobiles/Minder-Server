@@ -15,6 +15,7 @@ var moment = require('moment');
 var stripe = require('stripe')(process.env.STRIPE_PRIVATE_KEY);
 var mailer = require('../helpers/mailer');
 var schedule = require('node-schedule');
+var DEVICE_FIELDS = '_id deviceId name user geoFence createdAt updatedAt';
 
 var DeviceHandler = function (db) {
     var ObjectId = mongoose.Schema.Types.ObjectId;
@@ -782,6 +783,32 @@ var DeviceHandler = function (db) {
             }
         });
     };
+    
+    function unsubscribeGeoFencePack(userId, deviceId, callback) {
+        var criteria =  {
+            _id: deviceId,
+            user: userId
+        };
+        var update = {
+            $set: {
+                'geoFence.status': DEVICE_STATUSES.ACTIVE
+            }
+        };
+        var fields = DEVICE_FIELDS;
+
+        DeviceModel.findOneAndUpdate(criteria, update, function (err, deviceModel) {
+            if (err) {
+                if (callback && (typeof callback === 'function')) {
+                    callback(err);
+                }
+            } else {
+                if (callback && (typeof callback === 'function')) {
+                    callback(null, deviceModel);
+                }
+            }
+        });
+
+    };
 
     this.validateDeviceData = validateDeviceData;
 
@@ -1009,14 +1036,15 @@ var DeviceHandler = function (db) {
         var criteria = {
             _id: id
         };
-        var fields = {
-            deviceId: 1,
-            name: 1,
-            user: 1,
-            geoFence: 1,
-            createdAt: 1,
-            updatedAt: 1
-        };
+        //var fields = {
+        //    deviceId: 1,
+        //    name: 1,
+        //    user: 1,
+        //    geoFence: 1,
+        //    createdAt: 1,
+        //    updatedAt: 1
+        //};
+        var fields = DEVICE_FIELDS;
 
         DeviceModel
             .findOne(criteria, fields, function (err, deviceModel) {
@@ -1533,7 +1561,17 @@ var DeviceHandler = function (db) {
     };
 
     this.unsubscribeGeoFence = function (req, res, next) {
-        next(badRequests.InvalidValue({message: 'Not Implemented Yet', status: 500}));
+        //return next(badRequests.InvalidValue({message: 'Not implemented'}));
+    
+        var userId = req.session.userId;
+        var deviceId = req.params.id;
+        
+        unsubscribeGeoFencePack(userId, deviceId, function (err, deviceModel) {
+            if (err) {
+                return next(err);
+            }
+            res.status(200).send({success: 'success unsubscribe', device: deviceModel});
+        });
     };
 
     this.cronJobForCheckExpirationDates = function (callback) {
