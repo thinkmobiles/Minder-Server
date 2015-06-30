@@ -199,7 +199,7 @@ var SyncHandler = function (db) {
             //fileName = fileModel.;
             url = fileModel.generateImageUrl();
 
-            res.status(201).send({success: 'success', model: fileModel, url: url});
+            res.status(201).send({success: 'successs created', model: fileModel, url: url});
         });
     };
 
