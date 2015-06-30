@@ -6,9 +6,11 @@ define([
     'views/customElements/paginationView',
     'constants/statuses',
     'views/device/deviceView',
-    'views/geoFence/geoFenceView'
+    'views/geoFence/geoFenceView',
+    'config/config',
+    'stripeCheckout'
 
-], function (Template, ModalTemplate, DevisesCollection, deviceMainListView, PaginationView, STATUSES, deviceView, GeoFenceView) {
+], function (Template, ModalTemplate, DevisesCollection, deviceMainListView, PaginationView, STATUSES, deviceView, GeoFenceView, config, StripeCheckout) {
 
     var View;
     View = Backbone.View.extend({
@@ -29,7 +31,9 @@ define([
             'click .customSelect .current'      : 'showPeriodList',
             'click .customSelect .list .item'   : 'choosePeriodList',
             'change #period'                    : 'periodObserver', // period observer
-            'click .setGeo'                     : 'testGeo'
+            'click .setGeo'                     : 'testGeo',
+            'click #buttonSubscribe'            : 'startSubscribe',
+            'click .iconTick'                   : 'subscribeHandler'
         },
 
         initialize: function (options) {
@@ -44,15 +48,20 @@ define([
             }
 
             this.stateModel = new Backbone.Model({
-                params: {},                  // current view url params (page)
-                devices: [],                  // devices array to render
-                checked: false,               // global checker status
+                params            : {},                  // current view url params (page)
+                devices           : [],                  // devices array to render
+                checked           : false,               // global checker status
                 selectedDevicesCount: 0,
-                newPlan: null,                // user new plan by calculator
-                costForThisMonth: 0,                   // render the cost
-                modal: modal,               // the view mode (modal or not, bool)
-                period: user.billings.planPeriod || 'month', // for subscription (for calculator),
-                search: ''
+                newPlan           : null,                // user new plan by calculator
+                costForThisMonth  : 0,                   // render the cost
+                modal             : modal,               // the view mode (modal or not, bool)
+                period            : user.billings.planPeriod || 'month', // for subscription (for calculator),
+                search            : ''
+            });
+
+            this.billingModel = new Backbone.Model({
+                billingId: null,
+                token: null
             });
 
             this.devisesCollection = new DevisesCollection();         // current page devices
@@ -60,15 +69,27 @@ define([
             this.selectedDevicesCollection = new DevisesCollection(); // all selected devices on all pages
 
             paginationOptions = {
-                collection: this.devisesCollection,
-                onPage: 10,
-                padding: 2,
-                page: 1,
-                ends: true,
-                steps: true,
-                url: 'devices/page',
-                urlPagination: true
+                collection    : this.devisesCollection,
+                onPage        : 10,
+                padding       : 2,
+                page          : 1,
+                ends          : true,
+                steps         : true,
+                url           : 'devices/page',
+                urlPagination : true
             };
+
+            this.Stripe = StripeCheckout.configure({
+                key: config.stripePublicKey,
+                image: '/images/logoForPaiments.jpg',
+                token: function (token) {
+                    self.stripeTokenHandler(token); ////// singe!!! coll when token is generated ... for all actions!
+                },
+                email: App.sessionData.get('user').email,
+                panelLabel: 'Subscribe'
+            });
+
+            this.listenTo(this.billingModel, 'change:token', this.subscribeHandler);
 
             // if the page is change fetch new models
             this.listenTo(this.stateModel, 'change:params', this.handleParams);
@@ -107,8 +128,67 @@ define([
 
             // create pagination to control devices collection
             this.paginationView = new PaginationView(paginationOptions);
+        },
 
+        stripeTokenHandler: function (token) {  // handel token and start an action by type
+            this.billingModel.set({
+                token: token
+            });
+            //var action = this.stateModel.get('action');
+            //if (action) {
+            //    switch (action.name) {
+            //        case "subscribe":
+            //            this.subscribeHandler();
+            //            break;
+            //        case "renewal":
+            //            this.renewalHandler();
+            //            break;
+            //    }
+            //}
+        },
 
+        startSubscribe : function () {
+            var currentId = this.$el.find('#modalEditGeoFenceContent>div').attr('id');
+            var myModalWindow = this.$el.find('#editGeoFenceModal');
+
+            this.billingModel.set({billingId : currentId});
+
+            myModalWindow.on('hidden.bs.modal',this.showStripe());
+            myModalWindow.modal('hide');
+
+            myModalWindow.off('hidden.bs.modal');
+        },
+
+        subscribeHandler: function () {
+            var self = this;
+            var myId = this.billingModel.get('billingId');
+            var myToken = this.billingModel.get('token');
+            var data = {
+                token : myToken
+            };
+
+            if (myToken) {
+                $.ajax({
+                    url: '/devices/' + myId + '/geoFence/subscribe',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(data),
+                    //beforeSend: self.showWaiting(),
+
+                    success: function () {
+                        // clean data from memory
+                        self.billingModel.set({token: null});
+                        //self.hideWaiting();
+                        alert('Success subscription');
+                        // update user data to keep actual
+                        App.updateUser();
+                    },
+                    error: function (err) {
+                        //self.hideWaiting();
+                        App.error(err);
+                    }
+                });
+            }
         },
 
         showPeriodList: function () {
@@ -129,7 +209,6 @@ define([
                 this.search(event);
             }
         },
-
 
         // update period, keep actual
         periodObserver: function () {
@@ -257,27 +336,32 @@ define([
                 width: "535"
             });
 
-
-
             this.devicesView = new deviceView({id: id});
-
-            //this.devicesView.on('customClose',this.closeDevicesView);
 
             this.$el.find('#modalEditContent').html(this.devicesView.el);
 
         },
 
+        //onModalHide: function (cllbk) {
+        //    this.$el.find('#editGeoFenceModal').on('hidden.bs.modal', function () {
+        //        cllbk();
+        //    });
+        //},
+
+        showStripe: function () {
+            this.Stripe.open({
+                name: 'Minder'
+            });
+
+            this.stateModel.set({
+                token: null
+            });
+        },
+
         testGeo: function (e) {
 
-            var self = this;
             var id = $(e.target).attr('data-id');
-            //$('#editGeoFenceModal').on('shown.bs.modal', function () {
-            //    $('#editGeoFenceModal').focus();
-            //    if (self.devicesView.initializeGeoMap){
-            //        self.devicesView.initializeGeoMap();
-            //    }
-            //    //alert('ololololo');
-            //});
+            var geoModal = this.$el.find('#editGeoFenceModal');
 
             if (this.devicesView){
                 this.devicesView.undelegateEvents();
@@ -286,14 +370,11 @@ define([
             this.devicesView = new GeoFenceView({id: id});
             this.$el.find('#modalEditGeoFenceContent').html(this.devicesView.el);
 
-            this.$el.find('#editGeoFenceModal').modal('show').css({
+            geoModal.off('hidden.bs.modal');
+
+            geoModal.modal('show').css({
                 width: "1000px"
             });
-
-            //this.devicesView = new GeoFenceView({id: id});
-
-
-            this.$el.find('#editGeoFenceModal').off('shown.bs.modal')
         },
 
         closeDevicesView: function () {
@@ -325,11 +406,11 @@ define([
             });
 
             var counterParams = {
-                user: user,
-                plans: plans,
-                now: date,
-                period: period,
-                devices: devices
+                user      : user,
+                plans     : plans,
+                now       : date,
+                period    : period,
+                devices   : devices
             };
 
             window.costCounter(counterParams, function (err, result) {
@@ -434,9 +515,9 @@ define([
 
             var days = moment(until).diff(now, 'days');
             var result = {
-                months: months,
-                weeks: weeks,
-                days: days
+                months : months,
+                weeks  : weeks,
+                days   : days
             };
 
             return result
@@ -447,7 +528,7 @@ define([
             this.updateDevicesData();
 
             var data = this.stateModel.toJSON();
-            var now = App.sessionData.get('date');
+            var now  = App.sessionData.get('date');
             var self = this;
 
             data.DEVICE_STATUSES = STATUSES;
