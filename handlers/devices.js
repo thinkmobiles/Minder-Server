@@ -1690,16 +1690,16 @@ var DeviceHandler = function (db) {
                     var quantity = 1;
                     var description = 'Minder charge for ' + userModel.email + '. Subscription for ' + planId + ', device ' + deviceId;
                     var subscriptionParams = {
-                            plan: planId,
-                            source: token.id,
+                        plan: planId,
+                        source: token.id,
+                        quantity: quantity,
+                        metadata: {
+                            description: description,
                             quantity: quantity,
-                            metadata: {
-                                description: description,
-                                quantity: quantity,
-                                expirationDate: expirationDate,
-                                deviceId: deviceId
-                            }
-                        };
+                            expirationDate: expirationDate,
+                            deviceId: deviceId
+                        }
+                    };
                     
                     stripe.customers.createSubscription(customerId, subscriptionParams, function (err, charge) {
                         if (err) {
@@ -1707,49 +1707,6 @@ var DeviceHandler = function (db) {
                         }
                         cb(null, charge);
                     });
-
-                    //var charge = {
-                    //    "id": "sub_6WMCqvFpavKW6J",
-                    //    "plan": {
-                    //        "interval": "month",
-                    //        "name": "T1",
-                    //        "created": 1432640858,
-                    //        "amount": 0,
-                    //        "currency": "usd",
-                    //        "id": "554ccf1d6337dedc1c000001",
-                    //        "object": "plan",
-                    //        "livemode": false,
-                    //        "interval_count": 1,
-                    //        "trial_period_days": null,
-                    //        "metadata": {
-                    //            "type": "month",
-                    //            "minDevices": "0",
-                    //            "maxDevices": "1"
-                    //        },
-                    //        "statement_descriptor": "Minder T1 Tear"
-                    //    },
-                    //    "object": "subscription",
-                    //    "start": 1435650545,
-                    //    "status": "active",
-                    //    "customer": "cus_6WM0RwSvXfUd0R",
-                    //    "cancel_at_period_end": false,
-                    //    "current_period_start": 1435650545,
-                    //    "current_period_end": 1438242545,
-                    //    "ended_at": null,
-                    //    "trial_start": null,
-                    //    "trial_end": null,
-                    //    "canceled_at": null,
-                    //    "quantity": 1,
-                    //    "application_fee_percent": null,
-                    //    "discount": null,
-                    //    "tax_percent": null,
-                    //    "metadata": {
-                    //        "expirationDate": new Date(new Date(now).setMonth(now.getMonth() + 1))
-                    //    }
-                    //};
-
-                    //cb(null, charge);
-
                 },
 
                 //update changes in deviceModel:
