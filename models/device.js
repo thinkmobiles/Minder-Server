@@ -28,7 +28,7 @@ module.exports = (function () {
                 long: {type: Number, default: null},
                 lat: {type: Number, default: null}
             },
-            radius: { type: Number, default: 3 },
+            radius: { type: Number, default: 3000 },
             subscriptionId: { type: String, default: null },
             subscriptionDateTime: { type: Date, default: null },
             expirationDate: { type: Date, default: null },
