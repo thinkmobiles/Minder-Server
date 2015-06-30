@@ -11,6 +11,7 @@ define([
 
     View = Backbone.View.extend({
 
+
         events: {
             "click  #setRadius"   : "changeRadius",
             "click  #saveChanges" : "saveDevice",
@@ -49,22 +50,29 @@ define([
 
         saveDevice : function(){
             var self = this;
-            var saveData = {
-                    enabled : this.$el.find('#check_fence').prop('checked'),
+            var resCenter = this.circle.getCenter();
+            if (resCenter) {
+                var saveData = {
+                    enabled: this.$el.find('#check_fence').prop('checked'),
                     fixedLocation: {
-                        long  : this.circle.getCenter().lng(),
-                        lat   : this.circle.getCenter().lat()
-                        },
-                    radius : this.$el.find('#radius').val().trim()
+                        long: resCenter.lng(),
+                        lat : resCenter.lat()
+                    },
+                    radius  : this.$el.find('#radius').val().trim()
                 };
-            this.model.url = '/devices/'+this.model.get('_id')+'/geoFence';
-            this.model.save({geoFence : saveData},{
-                wait : true,
-                success : function(){
-                    self.hideDialog();
-                },
-                error   : function(){alert('error')}
-            });
+                this.model.url = '/devices/' + this.model.get('_id') + '/geoFence';
+                this.model.save({geoFence: saveData}, {
+                    wait: true,
+                    success: function () {
+                        self.hideDialog();
+                    },
+                    error: function () {
+                        alert('error')
+                    }
+                });
+            } else {
+                alert('Enter some data');
+            }
         },
 
         on_MapClick : function(loc){
@@ -111,7 +119,9 @@ define([
             this.marker = new google.maps.Marker(markerOptions);
             this.circle = new google.maps.Circle(circleOptions);
 
-            this.map.fitBounds(this.circle.getBounds());
+            if (startLat && startLng){
+                this.map.fitBounds(this.circle.getBounds());
+            }
 
             google.maps.event.addListener(self.map, 'click', function(e){self.on_MapClick(e.latLng)});
             google.maps.event.addListener(self.circle, 'bounds_changed', function(){

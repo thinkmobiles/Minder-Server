@@ -49,11 +49,11 @@ define([
         },
 
         events: {
-            'click #saveRenewal': "renewal", // start renewal actions chain
-            'click #showProceedSubscription': "showProceedSubscriptionModal", // show ProceedSubscription modal
-            'click .cancelSubscription': "cancelProceedSubscriptionModal", // hide modal and destroy devices view
-            'click #confirmSubscription': "confirmProceedSubscriptionModal",// start ProceedSubscription chain
-            'click #confirmUnSubscribe': "confirmUnSubscribeModal"// start UnSubscribe chain
+            'click #saveRenewal'              : "renewal", // start renewal actions chain
+            'click #showProceedSubscription'  : "showProceedSubscriptionModal", // show ProceedSubscription modal
+            'click .cancelSubscription'       : "cancelProceedSubscriptionModal", // hide modal and destroy devices view
+            'click #confirmSubscription'      : "confirmProceedSubscriptionModal",// start ProceedSubscription chain
+            'click #confirmUnSubscribe'       : "confirmUnSubscribeModal"// start UnSubscribe chain
         },
 
         setUserPlans: function () { // find and set user plan
@@ -228,7 +228,7 @@ define([
 
             if (devicesToSubscribe.length <1) {
                 return alert('Check some devices !!')
-            };
+            }
 
             /*invalidToSubscribe = this.devicesView.selectedDevicesCollection.filter(function(device){
                 if(device.get('status') === STATUSES.SUBSCRIBED){
@@ -314,8 +314,8 @@ define([
             var stateModel = this.stateModel.toJSON();
             var data = {
                 deviceIds: stateModel.action.data.deviceIds,
-                token: stateModel.token,
-                period: stateModel.action.data.period
+                token    : stateModel.token,
+                period   : stateModel.action.data.period
             };
 
             //startAnimation();

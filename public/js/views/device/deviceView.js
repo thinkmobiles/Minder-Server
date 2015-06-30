@@ -22,9 +22,9 @@ define([
         },
 
         events: {
-            'click #editButton': 'update',
+            'click #editButton'  : 'update',
             'click #deleteButton': 'deviceDelete',
-            'keypress #name': 'saveOnEnter'
+            'keypress #name'     : 'saveOnEnter'
         },
 
         // remove the old model of this view ... and remove event listeners from it
