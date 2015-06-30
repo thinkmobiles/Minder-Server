@@ -36,7 +36,6 @@
     <Compile Include="constants\sessions.js" />
     <Compile Include="constants\userRoles.js" />
     <Compile Include="handlers\devices.js" />
-    <Compile Include="handlers\saas.js" />
     <Compile Include="handlers\sessions.js" />
     <Compile Include="handlers\sync.js" />
     <Compile Include="handlers\tariffPlan.js" />

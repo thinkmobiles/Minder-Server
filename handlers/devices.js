@@ -182,6 +182,66 @@ var DeviceHandler = function (db) {
             });
         });
     };
+    
+    function checkStripeId(userModel, callback) {
+        
+        async.waterfall([
+
+        //check is exists customer in stripe and create if need:
+            function (cb) {
+                var stripeId = userModel.billings.stripeId;
+                var customerData;
+                
+                if (!stripeId) {
+                    
+                    customerData = {
+                        email: userModel.email,
+                        metadata: {
+                            userId: userModel._id.toString()
+                        }
+                    };
+                    
+                    stripe.customers.create(customerData, function (err, customer) {
+                        if (err) {
+                            return cb(err);
+                        }
+                        cb(null, customer.id, userModel);
+                    });
+
+                } else {
+                    cb(null, stripeId, userModel);
+                }
+            },
+
+        //update user.stripeId if need:
+            function (stripeId, user, cb) {
+                
+                if (stripeId && !user.billings.stripeId) {
+                    
+                    user.billings.stripeId = stripeId;
+                    user.save(function (err, updatedUser) {
+                        if (err) {
+                            return cb(err);
+                        }
+                        cb(null, updatedUser);
+                    });
+
+                } else {
+                    cb(null, user);
+                }
+            }
+        ], function (err, userModel) {
+            if (err) {
+                if (callback && (typeof callback === 'function')) {
+                    callback(err);
+                }
+            } else {
+                if (callback && (typeof callback === 'function')) {
+                    callback(null, userModel);
+                }
+            }
+        });
+    };
 
     function subscribe(options, callback) {
         var userModel = options.userModel;
@@ -200,6 +260,8 @@ var DeviceHandler = function (db) {
         });
 
         async.waterfall([
+            
+            //TODO: ... use checkStripeId. Don't forget about if (isFree) { ,,
 
             //check is exists customer in stripe and create if need:
             function (cb) {
@@ -791,12 +853,13 @@ var DeviceHandler = function (db) {
         };
         var update = {
             $set: {
-                'geoFence.status': DEVICE_STATUSES.ACTIVE
+                'geoFence.status': DEVICE_STATUSES.ACTIVE,
+                updatedAt: new Date()
             }
         };
         var fields = DEVICE_FIELDS;
 
-        DeviceModel.findOneAndUpdate(criteria, update, function (err, deviceModel) {
+        DeviceModel.findOneAndUpdate(criteria, update, fields, function (err, deviceModel) {
             if (err) {
                 if (callback && (typeof callback === 'function')) {
                     callback(err);
@@ -807,7 +870,6 @@ var DeviceHandler = function (db) {
                 }
             }
         });
-
     };
 
     this.validateDeviceData = validateDeviceData;
@@ -1557,7 +1619,130 @@ var DeviceHandler = function (db) {
     };
     
     this.subscribeGeoFence = function (req, res, next) {
-        next(badRequests.InvalidValue({ message: 'Not Implemented Yet', status: 500 }));
+        var userId = req.session.userId;
+        var deviceId = req.params.id;
+        var options = req.body;
+        var token = options.token;
+        
+        if (!token) {
+            return next(badRequests.NotEnParams({reqParams: 'token'}));
+        }
+        
+        async.parallel({
+            
+            //find the current User:
+            userModel: function (cb) {
+                var criteria = {
+                    _id: userId
+                };
+
+                UserModel.findOne(criteria, function (err, model) {
+                    if (err) { 
+                        return cb(err);
+                    }
+                    cb(null, model);
+                });
+            },
+
+            //find the device:
+            deviceModel: function (cb) {
+                var criteria = {
+                    _id: deviceId
+                };
+
+                DeviceModel.findOne(criteria, function (err, model) {
+                    if (err) {
+                        return cb(err);
+                    }
+                    cb(null, model);
+                });
+            }
+
+        }, function (err, results) {
+            var deviceModel
+            var now = new Date();
+
+            if (err) {
+                return next(err);
+            }
+            
+            deviceModel = results.deviceModel;
+
+            async.waterfall([
+
+                //check is registered in stripe:
+                function (cb) {
+                    var currentUser = results.userModel;
+
+                    checkStripeId(currentUser, function (err, userModel) {
+                        if (err) {
+                            return cb(err);
+                        }
+                        cb(null, userModel);
+                    });
+                },
+
+                //create subscription:
+                function (userModel, cb) {
+                    var customerId = userModel.billings.stripeId;
+                    var planId = 'geoFence'; 
+                    var expirationDate = new Date(new Date(now).setMonth(now.getMonth() + 1));
+                    var quantity = 1;
+                    var description = 'Minder charge for ' + userModel.email + '. Subscription for ' + planId + ', device ' + deviceId;
+                    var subscriptionParams = {
+                        plan: planId,
+                        source: token.id,
+                        quantity: quantity,
+                        metadata: {
+                            description: description,
+                            quantity: quantity,
+                            expirationDate: expirationDate,
+                            deviceId: deviceId
+                        }
+                    };
+                    
+                    stripe.customers.createSubscription(customerId, subscriptionParams, function (err, charge) {
+                        if (err) {
+                            return cb(err);
+                        }
+                        cb(null, charge);
+                    });
+                },
+
+                //update changes in deviceModel:
+                function (charge, cb) {
+                    var criteria = {
+                        _id: deviceId
+                    };
+                    var update = {
+                        $set: {
+                            'geoFence.status': DEVICE_STATUSES.SUBSCRIBED,
+                            'geoFence.subscriptionId': charge.id,
+                            'geoFence.subscriptionDateTime': now,
+                            'geoFence.expirationDate': charge.metadata.expirationDate,
+                            updatedAt: new Date()
+                        }
+                    };
+                    
+                    DeviceModel.findOneAndUpdate(criteria, update, function (err, udpatedDevice) {
+                        if (err) {
+                            return cb(err);
+                        }
+                        cb(null, udpatedDevice);
+                    });
+                }
+
+            ], function (err, device) {
+                if (err) {
+                    return next(err);
+                }
+                res.status(200).send({success: 'success subscribed', device: device});
+            });
+
+        });
+        
+
+        //return next(badRequests.InvalidValue({ message: 'Not implemented' }));
     };
 
     this.unsubscribeGeoFence = function (req, res, next) {
