@@ -176,16 +176,16 @@ define([
                     //beforeSend: self.showWaiting(),
 
                     success: function () {
-                        // clean data from memory
                         self.billingModel.set({token: null});
                         //self.hideWaiting();
                         alert('Success subscription');
-                        // update user data to keep actual
+                        self.$el.find('#editGeoFenceModal').modal('show');
                         App.updateUser();
                     },
                     error: function (err) {
                         //self.hideWaiting();
                         App.error(err);
+                        self.$el.find('#editGeoFenceModal').modal('show');
                     }
                 });
             }
