@@ -33,7 +33,7 @@
                         <tr class="activate">
                     <% } %>
                 <% } %>
-                <td><%= devices[i].device.name %></td>
+                <td class="nam"><%= devices[i].device.name %></td>
                 <td class="bd">
                     <!--<% if (devices[i].device.status === DEVICE_STATUSES.SUBSCRIBED) { %>-->
                         <!--<% if(devices[i].expirationDate.months) { %>-->
@@ -56,12 +56,10 @@
                         <button class="btn btn-default setActive" value="<%= devices[i].device._id %>">activate</button>
                     <% } else if (devices[i].device.status === DEVICE_STATUSES.ACTIVE) { %>
                         <!--<a class="btn btn-default" href="#device/<%= devices[i].device._id %>">edit</a>-->
-                    <input type="button" class="setGeo" data-id="<%= devices[i].device._id %>" value="F">
                     <button class="btn btn-default setEdit" value="<%= devices[i].device._id %>">edit</button>
                     <button class="btn btn-default setDelete" value="<%= devices[i].device._id %>">delete</button>
                     <% } else if (devices[i].device.status === DEVICE_STATUSES.SUBSCRIBED) { %>
                     <!--<a class="btn btn-default" href="#device/<%= devices[i].device._id %>">edit</a>-->
-                    <input type="button" class="setGeo" data-id="<%= devices[i].device._id %>" value="F">
                     <button class="btn btn-default setEdit" value="<%= devices[i].device._id %>">edit</button>
                     <button class="btn btn-default setDelete" value="<%= devices[i].device._id %>">delete</button>
                     <% } %>
@@ -90,7 +88,7 @@
     </div>
 </div>
 
-<div class="modal container modal-lg" id="editGeoFenceModal" tabindex="-1" role="dialog" data-backdrop="static">
+<div class="modal fade container modal-lg" id="editGeoFenceModal" tabindex="-1" role="dialog" data-backdrop="static">
     <div class="modal-content">
         <div class="modal-header">
             <button type="button" class="close cancelEditDevice" aria-label="Close"><span

@@ -25,10 +25,6 @@ define([
                 name: "Billing info",
                 url: "#billingInfo",
                 title: "billing_but"
-            }, {
-                name: "Photo",
-                url: "#photoList",
-                title: "photo_list"
             }
         ],
 

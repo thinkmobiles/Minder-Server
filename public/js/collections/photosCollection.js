@@ -9,7 +9,13 @@ define([
         model: PhotoModel,
 
         url: function () {
-            return ;
+            if (this.get('id')) {
+                return "/sync/devices/" + this.get('id') + "/files";
+            }
+        },
+
+        initialize: function(){
+            this.fetch({reset: true});
         }
     });
 

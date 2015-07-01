@@ -18,7 +18,7 @@ define([
             "signUp"                    :  "signUp",
             "resetPassword/:token"      :  "resetPassword",
             "billingInfo(/:subscribe)"  :  "billingInfo",
-            "photoList"                 :  "photoList",
+            //"photoList"                 :  "photoList",
             "termsAndConditions"        :  "termsAndConditions",
             "devices"                   :  "devices",
             //"device(/:id)"            :  "device",
@@ -32,7 +32,6 @@ define([
         needAuthorize: [
             "main",
             "billingInfo",
-            "photoList",
             "device",
             "devices",
             "profile"
@@ -144,9 +143,9 @@ define([
                 subscribe: subscribe
             });
         },
-        photoList: function () {
-            this.loadWrapperView('photoList');
-        },
+        //photoList: function () {
+        //    this.loadWrapperView('photoList');
+        //},
         devices: function (page) {
             if (page) page = parseInt(page);
             this.loadWrapperView('devices', {page: page});
