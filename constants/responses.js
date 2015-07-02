@@ -1,7 +1,3 @@
-/**
- * Created by Roman on 02.04.2015.
- */
-
 module.exports = {
     PAGE_NOT_FOUND: 'Page Not Found',
     NO_SUCH_SAAS_ACCOUNT_FOUND: 'No such saas account found',
@@ -17,5 +13,10 @@ module.exports = {
     UPDATED_SUCCESS: 'was updated successfully',
     NOT_EXISTS: 'is not exist',
     REMOVE_SUCCESSFULY: 'was removed successfully',
-    YOUR_DATA_ALREADY_UPDATE: "your data already update"
+    YOUR_DATA_ALREADY_UPDATE: "your data already update",
+    
+    SET_LOCATION: 'Location saved success',
+    GEO_FENCE_LEAVE: 'leave',   //TODO: ...
+    GEO_FENCE_RETURN: 'return', //TODO: ...
+
 };

@@ -1,4 +1,6 @@
 var DEVICE_STATUSES = require('../../constants/deviceStatuses');
+var RESPONSES = require('../../constants/responses');
+
 var request = require('supertest');
 var expect = require("chai").expect;
 var async = require('async');
@@ -6,7 +8,7 @@ var Config = require('./../config');
 var testData = require('./../data/testData');
 var mongoose = require('mongoose');
 
-describe('sync', function () {
+describe('devices', function () {
     var conf = new Config();
     var db = conf.db;
     var baseUrl = conf.baseUrl;
@@ -138,105 +140,6 @@ describe('sync', function () {
 
     });
     
-    describe('PUT /location', function () {
-        var url = '/devices/locate';
-        
-        it('User can\'t update location if not logined', function (done) {
-            var data = {
-                minderId: 'minder_1',
-                deviceId: 'dev_1',
-                location: {
-                    long: 60.321,
-                    lat: 29.987
-                }
-            };
-            
-            noSessionAgent
-                .put(url)
-                .send(data)
-                .end(function (err, res) {
-                if (err) {
-                    done(err);
-                } else {
-                    expect(res.status).to.equals(401);
-                    done();
-                }
-            });
-        });
-        
-        it('User can\'t update location without param "deviceId"', function (done) {
-            var data = {
-                minderId: 'minder_1',
-                location: {
-                    long: 60.321,
-                    lat: 29.987
-                }
-            };
-            
-            userAgent1
-                .put(url)
-                .send(data)
-                .end(function (err, res) {
-                if (err) {
-                    done(err);
-                } else {
-                    expect(res.status).to.equals(400);
-                    expect(res.body).to.have.property('error');
-                    expect(res.body.error).to.contains('Not enough incoming parameters');
-                    
-                    done();
-                }
-            });
-        });
-        
-        it('User can\'t update location without param "location"', function (done) {
-            var data = {
-                minderId: 'minder_1',
-                deviceId: 'dev_1'
-            };
-            
-            userAgent1
-                .put(url)
-                .send(data)
-                .end(function (err, res) {
-                if (err) {
-                    done(err);
-                } else {
-                    expect(res.status).to.equals(400);
-                    expect(res.body).to.have.property('error');
-                    expect(res.body.error).to.contains('Not enough incoming parameters');
-                    
-                    done();
-                }
-            });
-        });
-
-        /*it('User can update location with valid data', function (done) {
-         var data = {
-         minderId: 'minder_1',
-         deviceId: 'dev_1',
-         location: {
-         long: 60.321,
-         lat: 29.987
-         }
-         };
-
-         userAgent1
-         .put(url)
-         .send(data)
-         .end(function (err, res) {
-         if (err) {
-         done(err);
-         } else {
-         expect(res.status).to.equals(200);
-         expect(res.body).to.have.property('success');
-         done();
-         }
-         });
-         });*/
-
-    });
-    
     describe('GET /devices/:id', function () {
         
         it('Admin can get devices by id', function (done) {
@@ -291,7 +194,6 @@ describe('sync', function () {
         it('Admin can update the device', function (done) {
             var devId = testData.devices[0]._id.toString();
             var url = '/devices/' + devId;
-            
             var data = {
                 name: 'new name'
             };
@@ -554,16 +456,16 @@ describe('sync', function () {
                         .post(url)
                         .end(function (err, res) {
                         var deviceModel;
-
+                        
                         if (err) {
                             return cb(err);
                         }
-
+                        
                         expect(res.status).to.equals(200);
                         expect(res.body).to.be.instanceOf(Object);
                         expect(res.body).to.be.have.property('success');
                         expect(res.body).to.be.have.property('device');
-
+                        
                         deviceModel = res.body.device;
                         
                         expect(deviceModel).to.be.instanceOf(Object);
@@ -572,9 +474,9 @@ describe('sync', function () {
                         expect(deviceModel).to.have.property('user');
                         expect(deviceModel).to.have.property('billings');
                         expect(deviceModel).to.have.property('geoFence');
-
+                        
                         cb(null, deviceModel);
-                    });    
+                    });
                 },
 
                 //check db:
@@ -583,12 +485,151 @@ describe('sync', function () {
                         if (err) {
                             return cb(err);
                         }
-
+                        
                         expect(deviceModel).to.be.instanceof(Object);
                         expect(deviceModel).to.have.property('geoFence');
                         expect(deviceModel.geoFence).to.be.instanceof(Object);
                         expect(deviceModel.geoFence).to.have.property('status');
                         expect(deviceModel.geoFence.status).to.equals(DEVICE_STATUSES.ACTIVE);
+                        
+                        cb();
+                    });
+                }
+            ], function (err) {
+                if (err) {
+                    return done(err);
+                }
+                done();
+            });
+        });
+    });
+
+    describe('PUT /location', function () {
+        var url = '/devices/locate';
+        
+        it('User can\'t update location if not logined', function (done) {
+            var data = {
+                minderId: 'minder_1',
+                deviceId: 'dev_1',
+                location: {
+                    long: 60.321,
+                    lat: 29.987
+                }
+            };
+            
+            noSessionAgent
+                .put(url)
+                .send(data)
+                .end(function (err, res) {
+                if (err) {
+                    done(err);
+                } else {
+                    expect(res.status).to.equals(401);
+                    done();
+                }
+            });
+        });
+        
+        it('User can\'t update location without param "deviceId"', function (done) {
+            var data = {
+                minderId: 'minder_1',
+                location: {
+                    long: 60.321,
+                    lat: 29.987
+                }
+            };
+            
+            userAgent1
+                .put(url)
+                .send(data)
+                .end(function (err, res) {
+                if (err) {
+                    done(err);
+                } else {
+                    expect(res.status).to.equals(400);
+                    expect(res.body).to.have.property('error');
+                    expect(res.body.error).to.contains('Not enough incoming parameters');
+                    
+                    done();
+                }
+            });
+        });
+        
+        it('User can\'t update location without param "location"', function (done) {
+            var data = {
+                minderId: 'minder_1',
+                deviceId: 'dev_1'
+            };
+            
+            userAgent1
+                .put(url)
+                .send(data)
+                .end(function (err, res) {
+                if (err) {
+                    done(err);
+                } else {
+                    expect(res.status).to.equals(400);
+                    expect(res.body).to.have.property('error');
+                    expect(res.body.error).to.contains('Not enough incoming parameters');
+                    
+                    done();
+                }
+            });
+        });
+        
+        it('User can update location with valid data', function (done) {
+            var deviceId = 'dev_9';
+            var long = 60.321;
+            var lat = 30.000;
+            var data = {
+                minderId: 'minder_1',
+                deviceId: deviceId,
+                location: {
+                    long: long,
+                    lat: lat
+                }
+            };
+            
+            async.waterfall([
+                
+                //make request:
+                function (cb) {
+                    userAgent1
+                        .put(url)
+                         .send(data)
+                         .end(function (err, res) {
+                            if (err) {
+                                return cb(err);
+                            }
+                        
+                            expect(res.status).to.equals(200);
+                            expect(res.body).to.have.property('success');
+                            expect(res.body).to.have.property('message');
+                            expect(res.body.message).to.include(RESPONSES.SET_LOCATION);
+                        
+                            cb(null, res);
+                        });
+
+                },
+
+                //check db:
+                function (res, cb) {
+                    var criteria = {
+                        deviceId: deviceId
+                    };
+
+                    DeviceModel.findOne(criteria, function (err, deviceModel) {
+                        if (err) {
+                            return cb(err);
+                        }
+                       
+                        expect(deviceModel).to.be.instanceOf(Object);
+                        expect(deviceModel).to.have.property('lastLocation');
+                        expect(deviceModel.lastLocation).to.have.property('coordinates');
+                        expect(deviceModel.lastLocation.coordinates).to.be.instanceOf(Array);
+                        expect(deviceModel.lastLocation.coordinates).to.have.length(2);
+                        expect(deviceModel.lastLocation.coordinates[0]).to.equals(long);
+                        expect(deviceModel.lastLocation.coordinates[1]).to.equals(lat);
 
                         cb();
                     });
@@ -601,6 +642,242 @@ describe('sync', function () {
                 done();
             });
         });
-    });
 
+        it('User can be informed on leave the geoFence', function (done) {
+            var deviceId = 'dev_9';
+            var long = 60.321;
+            var lat = 12.3456;
+            var data = {
+                minderId: 'minder_1',
+                deviceId: deviceId,
+                location: {
+                    long: long,
+                    lat: lat
+                }
+            };
+            
+            async.waterfall([
+                
+                //make request:
+                function (cb) {
+                    userAgent1
+                        .put(url)
+                         .send(data)
+                         .end(function (err, res) {
+                        if (err) {
+                            return cb(err);
+                        }
+                        
+                        expect(res.status).to.equals(200);
+                        expect(res.body).to.have.property('success');
+                        expect(res.body).to.have.property('message');
+                        expect(res.body.message).to.include(RESPONSES.GEO_FENCE_LEAVE);
+                        
+                        cb(null, res);
+                    });
+
+                },
+
+                //check db:
+                function (res, cb) {
+                    var criteria = {
+                        deviceId: deviceId
+                    };
+                    
+                    DeviceModel.findOne(criteria, function (err, deviceModel) {
+                        if (err) {
+                            return cb(err);
+                        }
+                        
+                        expect(deviceModel).to.be.instanceOf(Object);
+                        expect(deviceModel).to.have.property('lastLocation');
+                        expect(deviceModel.lastLocation).to.have.property('coordinates');
+                        expect(deviceModel.lastLocation.coordinates).to.be.instanceOf(Array);
+                        expect(deviceModel.lastLocation.coordinates).to.have.length(2);
+                        expect(deviceModel.lastLocation.coordinates[0]).to.equals(long);
+                        expect(deviceModel.lastLocation.coordinates[1]).to.equals(lat);
+
+                        expect(deviceModel).to.have.property('geoFence');
+                        expect(deviceModel.geoFence).to.have.property('withinFence');
+                        expect(deviceModel.geoFence.withinFence).to.equals(false);
+                        
+                        cb();
+                    });
+                }
+            ], function (err) {
+                if (err) {
+                    return done(err);
+                }
+                done();
+            });
+        });
+        
+        it('User can\'t be informed on leave the geoFence and withinFence=false', function (done) {
+            var deviceId = 'dev_9';
+            var long = 60.321;
+            var lat = 12.3456;
+            var data = {
+                minderId: 'minder_1',
+                deviceId: deviceId,
+                location: {
+                    long: long,
+                    lat: lat
+                }
+            };
+            
+            async.waterfall([
+                
+                //make request:
+                function (cb) {
+                    userAgent1
+                        .put(url)
+                         .send(data)
+                         .end(function (err, res) {
+                        if (err) {
+                            return cb(err);
+                        }
+                        
+                        expect(res.status).to.equals(200);
+                        expect(res.body).to.have.property('success');
+                        expect(res.body).to.have.property('message');
+                        expect(res.body.message).to.include(RESPONSES.SET_LOCATION);
+                        
+                        cb(null, res);
+                    });
+
+                },
+
+                //check db:
+                function (res, cb) {
+                    var criteria = {
+                        deviceId: deviceId
+                    };
+                    
+                    DeviceModel.findOne(criteria, function (err, deviceModel) {
+                        if (err) {
+                            return cb(err);
+                        }
+                        
+                        expect(deviceModel).to.be.instanceOf(Object);
+                        expect(deviceModel).to.have.property('lastLocation');
+                        expect(deviceModel.lastLocation).to.have.property('coordinates');
+                        expect(deviceModel.lastLocation.coordinates).to.be.instanceOf(Array);
+                        expect(deviceModel.lastLocation.coordinates).to.have.length(2);
+                        expect(deviceModel.lastLocation.coordinates[0]).to.equals(long);
+                        expect(deviceModel.lastLocation.coordinates[1]).to.equals(lat);
+                        
+                        expect(deviceModel).to.have.property('geoFence');
+                        expect(deviceModel.geoFence).to.have.property('withinFence');
+                        expect(deviceModel.geoFence.withinFence).to.equals(false);
+                        
+                        cb();
+                    });
+                }
+            ], function (err) {
+                if (err) {
+                    return done(err);
+                }
+                done();
+            });
+
+        });
+
+        it('User can be informed on return to the geoFence', function (done) {
+            var deviceId = 'dev_9';
+            var long = 60.321;
+            var lat = 30.000;
+            var data = {
+                minderId: 'minder_1',
+                deviceId: deviceId,
+                location: {
+                    long: long,
+                    lat: lat
+                }
+            };
+            
+            async.waterfall([
+                
+                //make request:
+                function (cb) {
+                    userAgent1
+                        .put(url)
+                         .send(data)
+                         .end(function (err, res) {
+                        if (err) {
+                            return cb(err);
+                        }
+                        
+                        expect(res.status).to.equals(200);
+                        expect(res.body).to.have.property('success');
+                        expect(res.body).to.have.property('message');
+                        expect(res.body.message).to.include(RESPONSES.GEO_FENCE_RETURN);
+                        
+                        cb(null, res);
+                    });
+
+                },
+
+                //check db:
+                function (res, cb) {
+                    var criteria = {
+                        deviceId: deviceId
+                    };
+                    
+                    DeviceModel.findOne(criteria, function (err, deviceModel) {
+                        if (err) {
+                            return cb(err);
+                        }
+                        
+                        expect(deviceModel).to.be.instanceOf(Object);
+                        expect(deviceModel).to.have.property('lastLocation');
+                        expect(deviceModel.lastLocation).to.have.property('coordinates');
+                        expect(deviceModel.lastLocation.coordinates).to.be.instanceOf(Array);
+                        expect(deviceModel.lastLocation.coordinates).to.have.length(2);
+                        expect(deviceModel.lastLocation.coordinates[0]).to.equals(long);
+                        expect(deviceModel.lastLocation.coordinates[1]).to.equals(lat);
+                        
+                        expect(deviceModel).to.have.property('geoFence');
+                        expect(deviceModel.geoFence).to.have.property('withinFence');
+                        expect(deviceModel.geoFence.withinFence).to.equals(true);
+                        
+                        cb();
+                    });
+                }
+            ], function (err) {
+                if (err) {
+                    return done(err);
+                }
+                done();
+            });
+        });
+
+        it('Can\'t inform the user on leave geoFence if enabled=false', function (done) {
+            var data = {
+                minderId: 'minder_1',
+                deviceId: 'dev_10',
+                location: {
+                    long: 60.321,
+                    lat: 29.987
+                }
+            };
+            
+            userAgent1
+                .put(url)
+                 .send(data)
+                 .end(function (err, res) {
+                if (err) {
+                    return done(err);
+                }
+                
+                expect(res.status).to.equals(200);
+                expect(res.body).to.have.property('success');
+                expect(res.body).to.have.property('message');
+                expect(res.body.message).to.include(RESPONSES.SET_LOCATION);
+
+                done();
+                
+            });
+        });
+
+    });
 });
