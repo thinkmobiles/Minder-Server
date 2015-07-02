@@ -12,7 +12,6 @@ define([
         initialize: function () {
             var self = this;
             this.collection = new TariffPlansCollection();
-
             this.stateModel = new Backbone.Model({
                 renewal: App.sessionData.get('user').billings.renewEnabled,
                 userPlan: null,
@@ -311,6 +310,7 @@ define([
         // send request to server
         subscribeHandler: function () { // handel action
             var self = this;
+            var indikat = self.stateModel.get('action').data.plan.amount;
             var stateModel = this.stateModel.toJSON();
             var data = {
                 deviceIds: stateModel.action.data.deviceIds,
@@ -324,8 +324,8 @@ define([
                 method: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify(data),
-                beforeSend: self.showWaiting(),
-                //complete: self.hideWaiting(),
+                beforeSend: indikat ? self.showWaiting() : null,
+
                 success: function () {
 
                     // clean data from memory
@@ -338,6 +338,7 @@ define([
                     self.hideWaiting();
                     alert('Success subscription');
 
+                    
                     // update user data to keep actual
                     App.updateUser();
                 },
@@ -349,16 +350,12 @@ define([
         },
 
         showWaiting: function(){
-            this.$el.find('#waitingModal').modal({
-                show: true,
-                backdrop: 'static'
-            });
+                this.$el.find('#waitingModal').modal('show');
          },
 
         hideWaiting: function(){
-            this.$el.find('#waitingModal').modal('hide');
+                this.$el.find('#waitingModal').modal('hide');
             },
-
 
         unSubscribeHandler: function () { // handel action
             var self = this;
