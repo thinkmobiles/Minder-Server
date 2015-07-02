@@ -69,7 +69,8 @@ var TestDataModule = function () {
                 status: DEVICE_STATUSES.SUBSCRIBED,
                 subscriptionDateTime: now,
                 expirationDate: new Date(),
-            }
+            },
+            status: DEVICE_STATUSES.SUBSCRIBED
         }, {
             deviceId: 'dev_2', // 1
             deviceName: 'Will be deleted by Admin',
@@ -115,6 +116,42 @@ var TestDataModule = function () {
             deviceType: DEVICE_OS.WINDOWS_PHONE,
             user: self.users[1]._id,
             status: DEVICE_STATUSES.SUBSCRIBED
+        }, {
+            deviceId: 'dev_9', // 8
+            deviceName: 'Subscribed device 4',
+            deviceType: DEVICE_OS.WINDOWS_PHONE,
+            user: self.users[0]._id,
+            status: DEVICE_STATUSES.SUBSCRIBED,
+            geoFence: {
+                enabled: true,
+                fixedLocation: {
+                    long: 60.321,
+                    lat: 30.000
+                },
+                radius: 3000, //meters
+                subscriptionId: 'A valid subscriptionId',
+                subscriptionDateTime: new Date(),
+                expirationDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
+                status: DEVICE_STATUSES.SUBSCRIBED
+            }
+        }, {
+            deviceId: 'dev_10', // 9
+            deviceName: 'Subscribed device 5',
+            deviceType: DEVICE_OS.WINDOWS_PHONE,
+            user: self.users[0]._id,
+            status: DEVICE_STATUSES.SUBSCRIBED,
+            geoFence: {
+                enabled: false,
+                fixedLocation: {
+                    long: 60.321,
+                    lat: 30.000
+                },
+                radius: 3000, //meters
+                subscriptionId: 'A valid subscriptionId',
+                subscriptionDateTime: new Date(),
+                expirationDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
+                status: DEVICE_STATUSES.SUBSCRIBED
+            }
         }];
 
 };
