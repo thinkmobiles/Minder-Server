@@ -26,14 +26,13 @@ define([
             'click .deviceCheckbox'             : 'deviceCheck', // check separate devices
             'click .setDelete'                  : 'deviceDelete',
             'click .setActive'                  : 'deviceActivate',
-            'click .setEdit'                    : 'showEditDeviceModal',
+            'click .setEdit'                    : 'testGeo',
             'click .cancelEditDevice'           : 'closeDevicesView',
             'click .customSelect .current'      : 'showPeriodList',
             'click .customSelect .list .item'   : 'choosePeriodList',
             'change #period'                    : 'periodObserver', // period observer
-            'click .setGeo'                     : 'testGeo',
-            'click #buttonSubscribe'            : 'startSubscribe',
-            'click .iconTick'                   : 'subscribeHandler'
+            //'click .setGeo'                     : 'testGeo',
+            'click #buttonSubscribe'            : 'startSubscribe'
         },
 
         initialize: function (options) {
@@ -176,16 +175,16 @@ define([
                     //beforeSend: self.showWaiting(),
 
                     success: function () {
-                        // clean data from memory
                         self.billingModel.set({token: null});
                         //self.hideWaiting();
                         alert('Success subscription');
-                        // update user data to keep actual
+                        self.$el.find('#editGeoFenceModal').modal('show');
                         App.updateUser();
                     },
                     error: function (err) {
                         //self.hideWaiting();
                         App.error(err);
+                        self.$el.find('#editGeoFenceModal').modal('show');
                     }
                 });
             }
@@ -329,11 +328,9 @@ define([
 
             var id = $(e.target).attr('value');
 
-            this.$el.find('#editDeviceModal').modal({
-                show: true,
-                backdrop: 'static'
-            }).css({
-                width: "535"
+            this.$el.find('#editDeviceModal').modal('show')
+            .css({
+                width: "1000"
             });
 
             this.devicesView = new deviceView({id: id});
@@ -341,12 +338,6 @@ define([
             this.$el.find('#modalEditContent').html(this.devicesView.el);
 
         },
-
-        //onModalHide: function (cllbk) {
-        //    this.$el.find('#editGeoFenceModal').on('hidden.bs.modal', function () {
-        //        cllbk();
-        //    });
-        //},
 
         showStripe: function () {
             this.Stripe.open({
@@ -360,8 +351,13 @@ define([
 
         testGeo: function (e) {
 
-            var id = $(e.target).attr('data-id');
+            var target = $(e.target);
+            var id = target.attr('value');
             var geoModal = this.$el.find('#editGeoFenceModal');
+            var tabBody = this.$el.find('tbody');
+
+            tabBody.find('.activeN').removeClass('activeN');
+            target.parent().siblings('.nam').addClass('activeN');
 
             if (this.devicesView){
                 this.devicesView.undelegateEvents();
@@ -370,7 +366,7 @@ define([
             this.devicesView = new GeoFenceView({id: id});
             this.$el.find('#modalEditGeoFenceContent').html(this.devicesView.el);
 
-            geoModal.off('hidden.bs.modal');
+            //geoModal.off('hidden.bs.modal');
 
             geoModal.modal('show').css({
                 width: "1000px"

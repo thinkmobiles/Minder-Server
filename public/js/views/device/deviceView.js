@@ -15,9 +15,6 @@ define([
 
             this.getDevice();
 
-            // keep actual
-            //this.listenTo(this.stateModel, 'change', this.render);
-
             this.render();
         },
 
@@ -27,7 +24,6 @@ define([
             'keypress #name'     : 'saveOnEnter'
         },
 
-        // remove the old model of this view ... and remove event listeners from it
         cleanPageData:function(){
             if (this.model) {
                 this.stopListening(this.model);
@@ -42,7 +38,6 @@ define([
             }
         },
 
-        // clean this view StateModel
         setThisStateModel:function(){
             var defaultData = {
                 errors:null,
@@ -57,12 +52,10 @@ define([
 
         },
 
-        // remove old model on router hook
         afterUpend: function () {
             this.cleanPageData();
         },
 
-        // get device by url id
         setParams: function (params) {
             this.stateModel.set(params);
             this.getDevice()
@@ -77,7 +70,6 @@ define([
 
         },
 
-        // get device from serer or from devices view collection collection
         getDevice: function () {
             var device = null;
             var self = this;
@@ -130,7 +122,6 @@ define([
 
         },
 
-        // save changes
         update: function (event) {
             var self = this;
             var errors = [];

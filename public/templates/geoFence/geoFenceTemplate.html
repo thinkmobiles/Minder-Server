@@ -1,13 +1,37 @@
-<div id="map_container">
-
+<div>
+    <ul id="modalTabs">
+        <li><a class="active" href="javascript:;">Device name</a></li>
+        <li><a href="javascript:;">Geo Fence</a></li>
+        <li><a href="javascript:;">Photos</a></li>
+    </ul>
 </div>
 
-<div id="fence_info">
-    <span><%= model.name %></span>
-    <input id="check_fence" type="checkbox" <% if (model.geoFence.enabled){%>checked<%}%> ><label for="check_fence" >Enable|Disable</label>
-    <input id="radius" type="text" value="<%= model.geoFence.radius.toFixed(2)%>" placeholder="Fence radius">
-    <input id="setRadius" type="button" value="Set">
-    <input id="saveChanges" type="button" value="Save">
+<div class="clear"></div>
+<div id="modalTabs-items">
+    <div class="modalTabs-item openTab">
+        <span>Device name:</span>
+        <input type="text" id="name" value="<%= model.name %>">
+        <button type="button" id="editButton" >Save Name</button>
+    </div>
+
+    <div class="modalTabs-item">
+        <div id="map_container">     </div>
+        <span>Geo fence:</span><br>
+        <input id="check_fence" type="checkbox" <% if (model.geoFence.enabled){%>checked<%}%> ><label for="check_fence" >Enable|Disable</label>
+        <input id="radius" type="text" value="<%= model.geoFence.radius.toFixed(2)%>" placeholder="Fence radius">
+        <input id="setRadius" type="button" value="Set">
+        <input id="saveChanges" type="button" value="Save Fence">
+    </div>
+    <div class="modalTabs-item">
+        <table>
+            <% photoColl.forEach(function(photo){ %>
+                <tr>
+                    <td><a target="_blank" href="<%= photo.url %>"><%= photo.originalName %></a></td>
+                    <td><%= photo.createdAt %></td>
+                </tr>
+            <%})%>
+        </table>
+    </div>
 </div>
 
 <div class="clear"></div>

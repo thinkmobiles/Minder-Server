@@ -5,6 +5,7 @@
 define([
     'text!templates/geoFence/geoFenceTemplate.html',
     'models/deviceModel'
+
 ], function (GeoFenceTmpl, DeviceModel) {
 
     var View;
@@ -13,9 +14,10 @@ define([
 
 
         events: {
-            "click  #setRadius"   : "changeRadius",
-            "click  #saveChanges" : "saveDevice",
-            "click  #bootTest"    : "initializeGeoMap"
+            "click  #setRadius"    : "changeRadius",
+            "click  #saveChanges"  : "saveDeviceFence",
+            "click  #editButton"   : "saveDeviceName",
+            "click  #modalTabs a"  : "changeTabs"
         },
 
         initialize: function (options) {
@@ -25,16 +27,48 @@ define([
             this.stateModel = new DeviceModel({
                 _id: id
             });
+
+            this.photosCollection = new Backbone.Collection;
+
             this.stateModel.fetch({
-                success: function(model){
-                    self.model = model;
-                    self.render();
+                success: function(){
+                    self.getPhotos();
                 },
                 error: function(err){
                     alert(err.toString);
                 }
             });
 
+        },
+
+        getPhotos : function(){
+            var self = this;
+            this.photosCollection.url = "/sync/devices/" + this.stateModel.get('_id') + "/files";
+            this.photosCollection.fetch({
+                reset : true,
+                success : function(){
+                    self.render();
+                }});
+        },
+
+        changeTabs : function(event){
+            event.preventDefault();
+            var target = $(event.target);
+            var container = $('#modalTabs');
+            var container2 = $('#modalTabs-items');
+            var n;
+
+            container.find('.active').removeClass('active');
+            target.addClass('active');
+
+            n = container.find('li').index(target.parent());
+
+            container2.find('.openTab').removeClass('openTab');
+            container2.find('.modalTabs-item').eq(n).addClass('openTab');
+
+            if (n === 1 && !this.map) {
+                this.initializeGeoMap();
+            }
         },
 
         changeRadius : function (){
@@ -48,7 +82,7 @@ define([
             $('body').removeClass('modal-open').style="";
         },
 
-        saveDevice : function(){
+        saveDeviceFence : function(){
             var self = this;
             var resCenter = this.circle.getCenter();
             if (resCenter) {
@@ -60,8 +94,8 @@ define([
                     },
                     radius  : this.$el.find('#radius').val().trim()
                 };
-                this.model.url = '/devices/' + this.model.get('_id') + '/geoFence';
-                this.model.save({geoFence: saveData}, {
+                this.stateModel.url = '/devices/' + this.stateModel.get('_id') + '/geoFence';
+                this.stateModel.save({geoFence: saveData}, {
                     wait: true,
                     success: function () {
                         self.hideDialog();
@@ -75,6 +109,23 @@ define([
             }
         },
 
+        saveDeviceName : function(){
+            var newName = this.$el.find('#name').val().trim();
+
+            if (this.stateModel.get('name') != newName){
+                this.stateModel.url = "/devices/" + this.stateModel.get('_id');
+                this.stateModel.save({name: newName}, {
+                    wait: true,
+                    success: function () {
+                        $('.activeN').text(newName);
+                    },
+                    error: function () {
+                        alert('error')
+                    }
+                });
+            }
+        },
+
         on_MapClick : function(loc){
             this.marker.setPosition(loc);
             this.circle.setCenter(loc);
@@ -82,8 +133,8 @@ define([
 
         initializeGeoMap : function(){
             var self = this;
-            var startLat=this.model.get('geoFence').fixedLocation.lat;
-            var startLng=this.model.get('geoFence').fixedLocation.long;
+            var startLat=this.stateModel.get('geoFence').fixedLocation.lat;
+            var startLng=this.stateModel.get('geoFence').fixedLocation.long;
 
             var mapOptions = {
                 center    : new google.maps.LatLng(startLat ? startLat : 0,startLng ? startLng : 0),
@@ -106,7 +157,7 @@ define([
                 strokeWeight: 1.5      ,
                 fillopacity : 1,
                 map         : this.map ,
-                radius      : +this.model.get('geoFence').radius,
+                radius      : +this.stateModel.get('geoFence').radius,
                 editable    : true,
                 clickable   : false
             };
@@ -136,13 +187,17 @@ define([
         },
 
         render: function () {
-            var modelForTMPL = this.model.toJSON();
+            var modelForTMPL = this.stateModel.toJSON();
+            var photoColl = this.photosCollection.toJSON();
 
             this.undelegateEvents();
-            this.$el.html(_.template(GeoFenceTmpl , {model : modelForTMPL}));
+            this.$el.html(_.template(GeoFenceTmpl , {
+                model : modelForTMPL,
+                photoColl : photoColl
+            }));
             this.delegateEvents();
 
-            this.initializeGeoMap();
+            //this.initializeGeoMap();
 
             return this;
         }
