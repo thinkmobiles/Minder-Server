@@ -41,13 +41,11 @@
     <Compile Include="handlers\tariffPlan.js" />
     <Compile Include="handlers\users.js" />
     <Compile Include="helpers\badRequests.js" />
-    <Compile Include="helpers\dbRegistrator.js" />
     <Compile Include="helpers\logWriter.js" />
     <Compile Include="helpers\mailer.js" />
     <Compile Include="helpers\randomPass.js" />
     <Compile Include="helpers\sessionParser.js" />
     <Compile Include="helpers\stripe.js" />
-    <Compile Include="helpers\subdomain.js" />
     <Compile Include="models\device.js" />
     <Compile Include="models\files.js" />
     <Compile Include="models\index.js" />
