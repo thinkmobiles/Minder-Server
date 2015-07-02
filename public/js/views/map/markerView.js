@@ -18,8 +18,8 @@ define(function () {
         render: function () {
             var self = this;
             if (!this.psition) {
-                var location = this.model.get('lastLocation');
-                this.psition = new google.maps.LatLng(location.lat, location.long);
+                var location = this.model.get('lastLocation').coordinates;
+                this.psition = new google.maps.LatLng(location[1], location[0]);
             }
 
             // if marker not exist create it

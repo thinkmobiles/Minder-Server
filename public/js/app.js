@@ -62,7 +62,6 @@ define([
             }
         });
 
-        // create router
         appRouter = new Router();
 
         // append router to global scope
