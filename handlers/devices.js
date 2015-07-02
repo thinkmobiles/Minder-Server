@@ -918,9 +918,23 @@ var DeviceHandler = function (db) {
         //deviceModel.lastLocation.coordinates[0] = location.long;
         //deviceModel.lastLocation.coordinates[1] = location.lat;
         //deviceModel.lastLocation.dateTime = new Date();
-        
+        var owner;
+
         async.waterfall([
             
+            //find the devices owner:
+            function (cb) { 
+                var userId = deviceModel.user;
+                UserModel.findById(userId, function (err, userModel) {
+                    if (err) {
+                        return cb(err);
+                    }
+                    owner = userModel;
+                    cb();
+                });
+            
+            },
+
             //save the location:
             function (cb) {
                 var criteria = {
@@ -939,10 +953,6 @@ var DeviceHandler = function (db) {
                     if (err) {
                         return cb(err);
                     }
-                    //console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');
-                    //console.log('>>> model');
-                    //console.log(model);
-                    //console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');
                     cb(null, model);
                 });
             },
@@ -966,7 +976,6 @@ var DeviceHandler = function (db) {
                 };
                                 
                 if (!updatedDevice.geoFence.enabled || (updatedDevice.geoFence.status !== DEVICE_STATUSES.SUBSCRIBED)) { 
-                    //return cb(null, updatedDevice, RESPONSES.SET_LOCATION); //don't need track geo fence:
                     return cb(null, updatedDevice, null); //don't need track geo fence:
                 }
 
@@ -1019,6 +1028,7 @@ var DeviceHandler = function (db) {
                     if (err) {
                         return cb(err);
                     }
+                    mailer.geoFence({user: owner, device: model});
                     cb(null, model, message);
                 });
                 

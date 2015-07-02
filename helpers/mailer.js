@@ -123,6 +123,45 @@ var MailerModule = function () {
             }
         });
     };
+    
+    this.geoFence = function (options) {
+        fs.readFile('public/templates/mailer/geoFence.html', 'utf8', function (err, template) {
+            var device = options.device;
+            var user = options.user;
+            var templateOptions;
+            var mailOptions;
+            var msg;
+
+            if (err) {
+                if (process.env.NODE_ENV !== 'production') {
+                    console.error(err);
+                }
+            } else {
+                
+                if (device.geoFence.withinFence) {
+                    msg = 'Device <b>' + device.name + '</b> was returned into the geo fence.';
+                } else { 
+                    msg = 'Device <b>' + device.name + '</b> was leaved the geo fence.';
+                }
+                    
+                templateOptions = {
+                    //user: options.user,
+                    //device: options.device,
+                    msg: msg
+                };
+                
+                mailOptions = {
+                    from: FROM,
+                    to: user.email,
+                    subject: 'Info',
+                    generateTextFromHTML: true,
+                    html: _.template(template, templateOptions)
+                };
+                
+                deliver(mailOptions);
+            }
+        });
+    };
 
     function deliver(mailOptions, callback) {
         var user = process.env.mailerUserName;
