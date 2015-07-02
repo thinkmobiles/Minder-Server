@@ -31,7 +31,7 @@ define([
             'click .customSelect .current'      : 'showPeriodList',
             'click .customSelect .list .item'   : 'choosePeriodList',
             'change #period'                    : 'periodObserver', // period observer
-            //'click .setGeo'                     : 'testGeo',
+            //'click .setGeo'                   : 'testGeo',
             'click #buttonSubscribe'            : 'startSubscribe'
         },
 

@@ -4,9 +4,10 @@
 
 define([
     'text!templates/geoFence/geoFenceTemplate.html',
-    'models/deviceModel'
+    'models/deviceModel',
+    'views/customElements/paginationView'
 
-], function (GeoFenceTmpl, DeviceModel) {
+], function (GeoFenceTmpl, DeviceModel, PaginationView) {
 
     var View;
 
@@ -29,6 +30,18 @@ define([
             });
 
             this.photosCollection = new Backbone.Collection;
+
+            this.paginatioInfo = {
+                //collection    : this.devisesCollection,
+                onPage        : 15,
+                padding       : 2,
+                page          : 1,
+                ends          : true,
+                steps         : true,
+                url           : '/sync/devices/'+id+'/files',
+                urlPagination : true,
+                isItPhoto     : id
+            };
 
             this.stateModel.fetch({
                 success: function(){
@@ -189,6 +202,11 @@ define([
         render: function () {
             var modelForTMPL = this.stateModel.toJSON();
             var photoColl = this.photosCollection.toJSON();
+            var paginatioInfo = this.paginatioInfo;
+            paginatioInfo.collection = this.photosCollection;
+
+            this.paginationView = new PaginationView(paginatioInfo);
+            this.$el.find('#pagination').append(this.paginationView.render().$el);
 
             this.undelegateEvents();
             this.$el.html(_.template(GeoFenceTmpl , {
