@@ -15,7 +15,7 @@ module.exports = (function () {
             //long: {type: Number, default: null},
             //lat: {type: Number, default: null},
             dateTime: { type: Date, default: Date.now },
-            coordinates: [Number]
+            coordinates: {type: Array, default: [0, 0]}
         },
         billings: {
             subscriptionId: {type: String, default: null},
