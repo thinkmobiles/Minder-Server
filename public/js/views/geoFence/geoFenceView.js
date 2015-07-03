@@ -4,9 +4,10 @@
 
 define([
     'text!templates/geoFence/geoFenceTemplate.html',
-    'models/deviceModel'
+    'models/deviceModel',
+    'views/photoList/photoListView'
 
-], function (GeoFenceTmpl, DeviceModel) {
+], function (GeoFenceTmpl, DeviceModel, PhotoListView) {
 
     var View;
 
@@ -28,27 +29,15 @@ define([
                 _id: id
             });
 
-            this.photosCollection = new Backbone.Collection;
-
             this.stateModel.fetch({
                 success: function(){
-                    self.getPhotos();
+                    self.render();
                 },
                 error: function(err){
                     alert(err.toString);
                 }
             });
 
-        },
-
-        getPhotos : function(){
-            var self = this;
-            this.photosCollection.url = "/sync/devices/" + this.stateModel.get('_id') + "/files";
-            this.photosCollection.fetch({
-                reset : true,
-                success : function(){
-                    self.render();
-                }});
         },
 
         changeTabs : function(event){
@@ -187,17 +176,18 @@ define([
         },
 
         render: function () {
+            var modId = this.stateModel.get('_id');
+
             var modelForTMPL = this.stateModel.toJSON();
-            var photoColl = this.photosCollection.toJSON();
 
             this.undelegateEvents();
             this.$el.html(_.template(GeoFenceTmpl , {
-                model : modelForTMPL,
-                photoColl : photoColl
+                model : modelForTMPL
             }));
             this.delegateEvents();
 
-            //this.initializeGeoMap();
+            if (this.photoListView){this.photoListView.undelegateEvents()}
+            this.photoListView = new PhotoListView({id : modId});
 
             return this;
         }

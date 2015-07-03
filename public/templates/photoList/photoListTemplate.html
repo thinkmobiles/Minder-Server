@@ -1,3 +1,10 @@
-<div>
-    <span>Hallo, world!!!</span>
-</div>
+<table>
+    <% photoColl.forEach(function(photo){ %>
+    <tr>
+        <td><a target="_blank" href="<%= photo.url %>"><%= photo.originalName %></a></td>
+        <td><%= photo.createdAt %></td>
+    </tr>
+    <%})%>
+</table>
+
+<div id="pagination"></div>

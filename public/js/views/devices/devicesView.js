@@ -31,7 +31,7 @@ define([
             'click .customSelect .current'      : 'showPeriodList',
             'click .customSelect .list .item'   : 'choosePeriodList',
             'change #period'                    : 'periodObserver', // period observer
-            //'click .setGeo'                     : 'testGeo',
+            //'click .setGeo'                   : 'testGeo',
             'click #buttonSubscribe'            : 'startSubscribe'
         },
 
@@ -172,7 +172,6 @@ define([
                     method: 'POST',
                     contentType: 'application/json',
                     data: JSON.stringify(data),
-                    //beforeSend: self.showWaiting(),
 
                     success: function () {
                         self.billingModel.set({token: null});
@@ -324,20 +323,20 @@ define([
 
 
         // open the modal
-        showEditDeviceModal: function (e) {
-
-            var id = $(e.target).attr('value');
-
-            this.$el.find('#editDeviceModal').modal('show')
-            .css({
-                width: "1000"
-            });
-
-            this.devicesView = new deviceView({id: id});
-
-            this.$el.find('#modalEditContent').html(this.devicesView.el);
-
-        },
+        //showEditDeviceModal: function (e) {
+        //
+        //    var id = $(e.target).attr('value');
+        //
+        //    this.$el.find('#editDeviceModal').modal('show')
+        //    .css({
+        //        width: "1000"
+        //    });
+        //
+        //    this.devicesView = new deviceView({id: id});
+        //
+        //    this.$el.find('#modalEditContent').html(this.devicesView.el);
+        //
+        //},
 
         showStripe: function () {
             this.Stripe.open({
