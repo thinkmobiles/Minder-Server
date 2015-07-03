@@ -257,6 +257,20 @@ var SyncHandler = function (db) {
         });
 
     };
+
+    this.getFilesCountByDevice = function (req, res, next) {
+        var deviceId = req.params.id;
+        var criteria = {
+            device: deviceId
+        };
+
+        FileModel.count(criteria).exec(function (err, filesCount) {
+            if (err) {
+                return next(err);
+            }
+            res.status(200).send({ count: filesCount });
+        });
+    };
 };
 
 module.exports = SyncHandler;
