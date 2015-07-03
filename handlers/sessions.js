@@ -28,6 +28,10 @@ var Session = function (db) {
         } else {
             req.session.rememberMe = false;
         }
+        
+        if (options && options.device) { 
+            req.session.deviceId = options.device._id;
+        }
 
         if (process.env.NODE_ENV === 'test') {
             res.status(status).send({

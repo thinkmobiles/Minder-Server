@@ -49,12 +49,25 @@ var SyncHandler = function (db) {
         var page = parseInt(params.page) || 1;
         var count = parseInt(params.count) || 10;
         var skip = 0;
-        var sort = params.sort || 'cratedAt';
+        var orderBy;
+        var order;
+        var sort;
+
+        if (params && params.sort) {
+            orderBy = params.sort
+            order = params.order || 1;
+        } else {
+            orderBy = 'createdAt';
+            order = -1;
+        }
+        
+        sort = {};
+        sort[orderBy] = order;
 
         if (page > 1) {
             skip = (page - 1 ) * count;
         }
-
+        
         FileModel.find(criteria)
             .sort(sort)
             .limit(count)
@@ -113,9 +126,11 @@ var SyncHandler = function (db) {
     this.storeFile = function (req, res, next) {
         var userId = req.session.userId;
         var options = req.body;
-        var deviceId = options.deviceId;
+        var deviceId = req.session.deviceId;
         var src = options.src;
         var originalName = options.originalName;
+        
+        console.log('>>> session', req.session);
 
         async.waterfall([
 
@@ -226,7 +241,12 @@ var SyncHandler = function (db) {
     this.getFilesByDevice = function (req, res, next) {
         var deviceId = req.params.id;
         var userId = req.session.userId;
-        //todo: ... page, count, sort ...
+        var params = req.query;
+        var page = parseInt(params.page) || 1;
+        var count = parseInt(params.count) || 10;
+        var skip = 0;
+        var sort = params.sort || 'createdAt';
+        var order = params.order || 'DESC';
 
         async.waterfall([
 
@@ -236,12 +256,9 @@ var SyncHandler = function (db) {
             },
 
             //get the file models:
-            function (cb) {
-                var criteria = {
-                    deviceId: deviceId
-                };
-
-                getTheFileModels(criteria, function (err, fileModels) {
+            function (cb) {                
+                params.deviceId = deviceId;
+                getTheFileModels(params, function (err, fileModels) {
                     if (err) {
                         return cb(err);
                     }

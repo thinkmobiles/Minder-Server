@@ -379,14 +379,29 @@ describe('Users', function () {
                 .post(url)
                 .send(data)
                 .end(function (err, res) {
+                    var user;
+                    
                     if (err) {
-                        done(err);
-                    } else {
-                        expect(res.status).to.equal(200);
-                        expect(res.body).to.have.property('success');
-                        done();
-                        s
+                        return done(err);
                     }
+
+                    expect(res.status).to.equal(200);
+                    expect(res.body).to.have.property('success');
+                    expect(res.body).to.have.property('user');
+                    expect(res.body).to.not.have.property('device');                
+                
+                    user = res.body.user;
+                    expect(user).to.be.instanceOf(Object);
+                    expect(user).to.have.property('_id');
+                    expect(user).to.have.property('email');
+                    expect(user).to.have.property('firstName');
+                    expect(user).to.have.property('lastName');
+                    expect(user).to.not.have.property('pass');                
+                    expect(user).to.not.have.property('confirmToken');                
+                    expect(user).to.not.have.property('forgotToken');                
+
+                    done();
+                        
                 });
         });
 
@@ -402,13 +417,28 @@ describe('Users', function () {
                 .set('user-agent', conf.mobileUserAgent)
                 .send(signInData)
                 .end(function (err, res) {
-                    if (err) {
-                        done(err);
-                    } else {
-                        expect(res.status).to.equal(200);
-                        expect(res.body).to.have.property('success');
-                        done();
-                    }
+                var user;
+                
+                if (err) {
+                    return done(err);
+                }
+                
+                expect(res.status).to.equal(200);
+                expect(res.body).to.have.property('success');
+                expect(res.body).to.have.property('user');
+                expect(res.body).to.not.have.property('device');
+                
+                user = res.body.user;
+                expect(user).to.be.instanceOf(Object);
+                expect(user).to.have.property('_id');
+                expect(user).to.have.property('email');
+                expect(user).to.have.property('firstName');
+                expect(user).to.have.property('lastName');
+                expect(user).to.not.have.property('pass');
+                expect(user).to.not.have.property('confirmToken');
+                expect(user).to.not.have.property('forgotToken');
+                
+                done();
                 });
         });
 

@@ -1,14 +1,23 @@
 'use strict';
 
 var CONSTANTS = require('../constants/index');
+var REG_EXP = require('../constants/regExp');
+var DEFAULT_FIELDS = {
+    _id: 1,
+    minderId: 1,
+    firstName: 1,
+    lastName: 1,
+    email: 1,
+    billings: 1,
+    role: 1,
+    confirmToken: 1
+} ;
 
 var async = require('async');
 var crypto = require("crypto");
 var mongoose = require('mongoose');
 var http = require('http');
 var querystring = require('querystring');
-
-var REG_EXP = require('../constants/regExp');
 
 var badRequests = require('../helpers/badRequests');
 var tokenGenerator = require('../helpers/randomPass');
@@ -220,7 +229,7 @@ var UserHandler = function (db) {
         var options = req.body;
         var email = options.email;
         var encryptedPass;
-        var query;
+        var criteria;
         var fields;
 
         if (!email || !options.pass) {
@@ -229,15 +238,16 @@ var UserHandler = function (db) {
 
         email = normalizeEmail(email);
         encryptedPass = getEncryptedPass(options.pass);
-        query = {
+        criteria = {
             email: email,
             pass: encryptedPass
         };
-        fields = {
-            pass: false
+        fields: {
+            pass: 0
         };
 
-        UserModel.findOne(query, fields, function (err, user) {
+        UserModel.findOne(criteria, DEFAULT_FIELDS, function (err, user) {
+            console.log(user);
             var sessionParams;
 
             if (err) {
@@ -264,14 +274,15 @@ var UserHandler = function (db) {
 
     function signInMobile(req, res, next) {
         var options = req.body;
+        var criteria = {
+            minderId: options.minderId
+        };
 
         if (!options.minderId || !options.deviceId) {
             return next(badRequests.NotEnParams({reqParams: ['minderId', 'deviceId']}));
         }
 
-        UserModel.findOne({
-            minderId: options.minderId
-        }, function (err, user) {
+        UserModel.findOne(criteria, DEFAULT_FIELDS, function (err, user) {
 
             if (err) {
                 return next(err);
@@ -296,7 +307,7 @@ var UserHandler = function (db) {
                     } else if (device) {
 
                         if (device.user.toString() === user._id.toString()) {
-                            session.register(req, res, user, {rememberMe: true});
+                            session.register(req, res, user, { rememberMe: true, device: device });
                         } else {
                             next(badRequests.AccessError());
                         }
@@ -306,13 +317,13 @@ var UserHandler = function (db) {
                         deviceData = deviceHandler.prepareDeviceData(options);
                         deviceData.deviceType = deviceHandler.getDeviceOS(req);
 
-                        deviceHandler.createDevice(deviceData, user, function (err) {
+                        deviceHandler.createDevice(deviceData, user, function (err, device) {
 
                             if (err) {
                                 return next(err);
                             }
 
-                            session.register(req, res, user, {rememberMe: true});
+                            session.register(req, res, user, {rememberMe: true, device: device});
                         });
                     }
                 });

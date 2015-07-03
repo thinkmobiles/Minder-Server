@@ -73,11 +73,13 @@ describe('Devices', function () {
                 });
         });
 
-        it('User1 can signIn', function (done) {
+        it('User1 can signIn from mobile', function (done) {
             var signInData = testData.users[0];
+            var deviceId = testData.devices[0].deviceId;
 
             signInData.pass = '1';
             signInData.rememberMe = true;
+            signInData.deviceId = deviceId;
 
             userAgent1
                 .post('/signIn')
@@ -139,37 +141,37 @@ describe('Devices', function () {
 
     describe('POST /sync', function () {
 
-        it('User can\'t sync without deviceId', function (done) {
-            var url = '/sync';
-            var data = {
-                src: conf.base64,
-                originalName: 'guitar_logo.jpg',
-                path: 'c:/images',
-                size: 2.3
-            };
+        //it('User can\'t sync without deviceId', function (done) {
+        //    var url = '/sync';
+        //    var data = {
+        //        src: conf.base64,
+        //        originalName: 'guitar_logo.jpg',
+        //        path: 'c:/images',
+        //        size: 2.3
+        //    };
 
-            userAgent1
-                .post(url)
-                .send(data)
-                .end(function (err, res) {
-                    if (err) {
-                        return done(err);
-                    }
+        //    userAgent1
+        //        .post(url)
+        //        .send(data)
+        //        .end(function (err, res) {
+        //            if (err) {
+        //                return done(err);
+        //            }
 
-                    expect(res.status).to.equals(400);
-                    expect(res.body).to.be.instanceOf(Object);
-                    expect(res.body).to.have.property('error');
-                    expect(res.body.error).to.include('Not enough incoming parameters');
-                    done();
-                });
+        //            expect(res.status).to.equals(400);
+        //            expect(res.body).to.be.instanceOf(Object);
+        //            expect(res.body).to.have.property('error');
+        //            expect(res.body.error).to.include('Not enough incoming parameters');
+        //            done();
+        //        });
 
-        });
+        //});
 
         it('Can\'t sync with other user\'s deviceId', function (done) {
             var url = '/sync';
             var deviceId = testData.devices[7]._id.toString();
             var data = {
-                deviceId: deviceId,
+                //deviceId: deviceId,
                 src: conf.base64,
                 originalName: 'guitar_logo.jpg',
                 path: 'c:/images',
@@ -220,95 +222,95 @@ describe('Devices', function () {
 
     });
 
-    describe('GET /sync/files/:fileName', function () {
+    //describe('GET /sync/files/:fileName', function () {
 
-        it('User can get the uploaded image', function (done) {
+    //    it('User can get the uploaded image', function (done) {
 
-            async.waterfall([
+    //        async.waterfall([
 
-                //save the image:
-                function (cb) {
-                    var url = '/sync';
-                    var deviceId = testData.devices[0]._id.toString();
-                    var data = {
-                        deviceId: deviceId,
-                        src: conf.base64,
-                        originalName: 'guitar_logo.jpg',
-                        path: 'c:/images',
-                        size: 2.3
-                    };
+    //            //save the image:
+    //            function (cb) {
+    //                var url = '/sync';
+    //                var deviceId = testData.devices[0]._id.toString();
+    //                var data = {
+    //                    deviceId: deviceId,
+    //                    src: conf.base64,
+    //                    originalName: 'guitar_logo.jpg',
+    //                    path: 'c:/images',
+    //                    size: 2.3
+    //                };
 
-                    userAgent1
-                        .post(url)
-                        .send(data)
-                        .end(function (err, res) {
-                            if (err) {
-                                return cb(err)
-                            }
+    //                userAgent1
+    //                    .post(url)
+    //                    .send(data)
+    //                    .end(function (err, res) {
+    //                        if (err) {
+    //                            return cb(err)
+    //                        }
 
-                            expect(res.status).to.equals(201);
-                            expect(res.body).to.be.instanceOf(Object);
-                            expect(res.body).to.have.property('success');
-                            expect(res.body).to.have.property('url');
+    //                        expect(res.status).to.equals(201);
+    //                        expect(res.body).to.be.instanceOf(Object);
+    //                        expect(res.body).to.have.property('success');
+    //                        expect(res.body).to.have.property('url');
 
-                            cb(null, res.body.url);
-                        });
-                },
+    //                        cb(null, res.body.url);
+    //                    });
+    //            },
 
-                //try to get the image:
-                function (url, cb) {
-                    var fileUrl = url;
+    //            //try to get the image:
+    //            function (url, cb) {
+    //                var fileUrl = url;
 
-                    userAgent1
-                        .get(fileUrl)
-                        .end(function (err, res) {
-                            if (err) {
-                                return cb(err)
-                            }
+    //                userAgent1
+    //                    .get(fileUrl)
+    //                    .end(function (err, res) {
+    //                        if (err) {
+    //                            return cb(err)
+    //                        }
 
-                            expect(res.status).to.equals(200);
-                            cb(null, res.body.url);
-                        });
-                }
+    //                        expect(res.status).to.equals(200);
+    //                        cb(null, res.body.url);
+    //                    });
+    //            }
 
-            ], function (err) {
-                if (err) {
-                    return done(err);
-                }
-                done();
-            });
-        });
+    //        ], function (err) {
+    //            if (err) {
+    //                return done(err);
+    //            }
+    //            done();
+    //        });
+    //    });
 
-    });
+    //});
 
-    describe('GET /sync/devices/:id/files', function () {
+    //describe('GET /sync/devices/:id/files', function () {
 
-        it('User can get the files by device\'s _id', function (done) {
-            var deviceId = testData.devices[0]._id.toString();
-            var url = '/sync/devices/' + deviceId + '/files';
+    //    it('User can get the files by device\'s _id', function (done) {
+    //        var deviceId = testData.devices[0]._id.toString();
+    //        var url = '/sync/devices/' + deviceId + '/files';
 
-            userAgent1
-                .get(url)
-                .end(function (err, res) {
-                    var fileModel;
+    //        userAgent1
+    //            .get(url)
+    //            .end(function (err, res) {
+    //                var fileModel;
 
-                    if (err) {
-                        return done(err)
-                    }
+    //                if (err) {
+    //                    return done(err)
+    //                }
 
-                    expect(res.status).to.equals(200);
-                    expect(res.body).to.be.instanceOf(Array);
-                    expect(res.body.length).to.equals(2);
+    //                expect(res.status).to.equals(200);
+    //                expect(res.body).to.be.instanceOf(Array);
+    //                expect(res.body.length).to.equals(2);
 
-                    fileModel = res.body[0];
+    //                fileModel = res.body[0];
 
-                    expect(fileModel).to.be.instanceOf(Object);
-                    expect(fileModel).to.have.property('url');
-                    expect(fileModel.url).to.include('/sync/files/');
-                    done();
-                });
-        });
+    //                expect(fileModel).to.be.instanceOf(Object);
+    //                expect(fileModel).to.have.property('url');
+    //                expect(fileModel.url).to.include('/sync/files/');
+    //                done();
+    //            });
+    //    });
 
-    });
+    //});
 
 });
