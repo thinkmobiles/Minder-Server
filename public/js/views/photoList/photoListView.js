@@ -3,25 +3,55 @@
  */
 
 define([
-    'text!templates/photoList/photoListTemplate.html'
+    'text!templates/photoList/photoListTemplate.html',
+    'views/customElements/paginationView'
 
-], function (PhotoListTmpl) {
+], function (PhotoListTmpl, PaginationView) {
 
     var View;
 
     View = Backbone.View.extend({
+        el : "#photoListContainer",
 
         events: {
 
         },
 
-        initialize: function () {
+        initialize: function (options) {
+            var id = options.id;
+            var self = this;
 
-            this.render();
+            this.photosCollection = new Backbone.Collection;
+
+            this.paginatioInfo = {
+                onPage        : 2,
+                padding       : 2,
+                page          : 1,
+                ends          : true,
+                steps         : true,
+                url           : '/sync/devices/'+id+'/files',
+                isItPhoto     : id
+            };
+
+            this.photosCollection.url = "/sync/devices/" + id + "/files";
+            this.photosCollection.fetch({
+                reset : true,
+                success : function(){
+                    self.render();
+                }});
+
+
         },
 
         render: function () {
-            this.$el.html(_.template(PhotoListTmpl));
+            var photoColl = this.photosCollection.toJSON();
+            this.$el.html(_.template(PhotoListTmpl,{photoColl : photoColl}));
+
+            var paginatioInfo = this.paginatioInfo;
+            paginatioInfo.collection = this.photosCollection;
+
+            this.paginationView = new PaginationView(paginatioInfo);
+            this.$el.find('#pagination').append(this.paginationView.render().$el);
 
             return this;
         }

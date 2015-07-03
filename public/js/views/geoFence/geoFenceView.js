@@ -5,9 +5,9 @@
 define([
     'text!templates/geoFence/geoFenceTemplate.html',
     'models/deviceModel',
-    'views/customElements/paginationView'
+    'views/photoList/photoListView'
 
-], function (GeoFenceTmpl, DeviceModel, PaginationView) {
+], function (GeoFenceTmpl, DeviceModel, PhotoListView) {
 
     var View;
 
@@ -29,39 +29,15 @@ define([
                 _id: id
             });
 
-            this.photosCollection = new Backbone.Collection;
-
-            this.paginatioInfo = {
-                //collection    : this.devisesCollection,
-                onPage        : 15,
-                padding       : 2,
-                page          : 1,
-                ends          : true,
-                steps         : true,
-                url           : '/sync/devices/'+id+'/files',
-                urlPagination : true,
-                isItPhoto     : id
-            };
-
             this.stateModel.fetch({
                 success: function(){
-                    self.getPhotos();
+                    self.render();
                 },
                 error: function(err){
                     alert(err.toString);
                 }
             });
 
-        },
-
-        getPhotos : function(){
-            var self = this;
-            this.photosCollection.url = "/sync/devices/" + this.stateModel.get('_id') + "/files";
-            this.photosCollection.fetch({
-                reset : true,
-                success : function(){
-                    self.render();
-                }});
         },
 
         changeTabs : function(event){
@@ -200,22 +176,18 @@ define([
         },
 
         render: function () {
-            var modelForTMPL = this.stateModel.toJSON();
-            var photoColl = this.photosCollection.toJSON();
-            var paginatioInfo = this.paginatioInfo;
-            paginatioInfo.collection = this.photosCollection;
+            var modId = this.stateModel.get('_id');
 
-            this.paginationView = new PaginationView(paginatioInfo);
-            this.$el.find('#pagination').append(this.paginationView.render().$el);
+            var modelForTMPL = this.stateModel.toJSON();
 
             this.undelegateEvents();
             this.$el.html(_.template(GeoFenceTmpl , {
-                model : modelForTMPL,
-                photoColl : photoColl
+                model : modelForTMPL
             }));
             this.delegateEvents();
 
-            //this.initializeGeoMap();
+            if (this.photoListView){this.photoListView.undelegateEvents()}
+            this.photoListView = new PhotoListView({id : modId});
 
             return this;
         }

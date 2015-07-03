@@ -23,16 +23,8 @@
         <input id="saveChanges" type="button" value="Save Fence">
     </div>
     <div class="modalTabs-item">
-        <table>
-            <% photoColl.forEach(function(photo){ %>
-                <tr>
-                    <td><a target="_blank" href="<%= photo.url %>"><%= photo.originalName %></a></td>
-                    <td><%= photo.createdAt %></td>
-                </tr>
-            <%})%>
-        </table>
-        <div id="forPage">
-            <div id="pagination"></div>
+        <div id="photoListContainer">
+
         </div>
     </div>
 </div>
