@@ -96,9 +96,6 @@ define([
                 this.stateModel.url = '/devices/' + this.stateModel.get('_id') + '/geoFence';
                 this.stateModel.save({geoFence: saveData}, {
                     wait: true,
-                    success: function () {
-                        self.hideDialog();
-                    },
                     error: function () {
                         alert('error')
                     }
@@ -128,8 +125,8 @@ define([
         saveDevice : function (){
             var self = this;
             var newName = this.$el.find('#name').val().trim();
-            var resCenter = this.circle.getCenter();
-            var saveData;
+            var resCenter = this.circle ? this.circle.getCenter() : false;
+            var saveData={};
 
             if (resCenter) {
                 saveData = {
