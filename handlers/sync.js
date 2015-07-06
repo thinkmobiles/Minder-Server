@@ -241,9 +241,11 @@ var SyncHandler = function (db) {
                             return cb(badRequests.AccessError({message: 'This functionality is disabled.'}));
                         }
                         
-                        if (device.sync.status !== DEVICE_STATUSES.SUBSCRIBED) {
-                            return cb(badRequests.PaymentRequired());
-                        }
+                        
+                        //TODO: check payment:
+                        //if (device.sync.status !== DEVICE_STATUSES.SUBSCRIBED) {
+                        //    return cb(badRequests.PaymentRequired());
+                        //}
                         
                         cb();
                     }
