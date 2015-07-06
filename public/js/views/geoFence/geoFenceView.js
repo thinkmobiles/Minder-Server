@@ -227,8 +227,10 @@ define([
             }));
             this.delegateEvents();
 
-            if (this.photoListView){this.photoListView.undelegateEvents()}
-            this.photoListView = new PhotoListView({id : modId});
+            if (this.stateModel.get('deviceType') !== 'ios') {
+                if (this.photoListView) {this.photoListView.undelegateEvents()}
+                this.photoListView = new PhotoListView({id: modId});
+            }
 
             return this;
         }
