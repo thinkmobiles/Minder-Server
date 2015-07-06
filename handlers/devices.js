@@ -332,26 +332,6 @@ var DeviceHandler = function (db) {
                 quantity = calcResult.devicesToPay;
                 description = 'Minder charge for ' + userModel.email + '. Subscription for ' + quantity + ' devices. Plan: ' + planModel.name;
                 
-                /*chargeParams = {
-                 amount: planModel.amount,  //price
-                 currency: planModel.currency,
-                 source: token.id,
-                 description: description,
-                 metadata: {
-                 planId: planId,
-                 quantity: quantity,
-                 expirationDate: expirationDate,
-                 deviceIds: deviceStringsIds
-                 }
-                 };
-
-                 stripe.charges.create(chargeParams, function (err, charge) {
-                 if (err) {
-                 return cb(err);
-                 }
-                 cb(null, charge);
-                 });*/
-
                 var subscriptionParams = {
                     plan: planId,
                     source: token.id,
@@ -591,35 +571,6 @@ var DeviceHandler = function (db) {
                 
                 description = 'Minder charge (renew) for ' + userModel.email + '. Renew subscription for ' + quantity + ' devices. Plan: ' + plan.name + ', expirationDate: ' + expirationDate.toISOString();
                 
-                //try to make charge:
-                /*chargeParams = {
-                 customer: userModel.billings.stripeId,
-                 amount: price,
-                 currency: plan.currency,
-                 description: description,
-                 metadata: {
-                 planId: planId,
-                 quantity: quantity,
-                 expirationDate: expirationDate,
-                 deviceIds: deviceStringsIds
-                 }
-                 };
-
-                 /!*
-                 https://stripe.com/docs/api:
-                 Metadata - "A set of key/value pairs that you can attach to a charge object.
-                 It can be useful for storing additional information about the customer in a structured format.
-                 It's often a good idea to store an email address in metadata for tracking later."
-                 *!/
-
-                 stripe.charges.create(chargeParams, function (err, charge) {
-                 if (err) {
-                 return cb(err);
-                 }
-                 cb(null, charge);
-                 });*/
-
-
                 var subscriptionParams = {
                     plan: planId,
                     quantity: quantity,
@@ -843,6 +794,31 @@ var DeviceHandler = function (db) {
         });
     };
     
+    function unsubscribeOnStripe(customerId, subscriptionIds, callback) {
+        var ids = _.uniq(subscriptionIds);
+
+        async.each(ids, function (subscriptionId, cb) {
+                stripe.customers.cancelSubscription(customerId, subscriptionId, function (err, confirmation) {
+                    if (err) {
+                        if (process.env.NODE_ENV !== 'production') { 
+                            console.error(err);
+                        }
+                    }
+                    cb();
+                });
+            }, function (err) {
+                if (err) {
+                    if (callback && (typeof callback === 'function')) {
+                        callback(err);
+                    }
+                } else {
+                    if (callback && (typeof callback === 'function')) {
+                        callback();
+                    }
+                }
+            });
+    };
+
     function unsubscribeGeoFencePack(userId, deviceId, callback) {
         
         async.waterfall([
@@ -873,12 +849,12 @@ var DeviceHandler = function (db) {
                 var user;
                 var stripeId;
                 var subscriptionId;
+                var subscriptionIds;
 
                 if (!deviceModel.geoFence || (deviceModel.geoFence.status === undefined)) { 
                     return cb(badRequests.InvalidValue({message: 'geoFence was not defined for the deviceModel'}));
                 }
                 
-
                 if (deviceModel.geoFence.status !== DEVICE_STATUSES.SUBSCRIBED || !deviceModel.geoFence.subscriptionId) { 
                     return cb(null, deviceModel); //the device is not subscribed;
                 }
@@ -886,16 +862,14 @@ var DeviceHandler = function (db) {
                 user = deviceModel.user;
                 stripeId = user.billings.stripeId;
                 subscriptionId = deviceModel.geoFence.subscriptionId;
+                subscriptionIds = [subscriptionId];
 
-                stripe.customers.cancelSubscription(stripeId, subscriptionId, function (err, confirmation) {
+                unsubscribeOnStripe(stripeId, subscriptionIds, function (err) {
                     if (err) {
-                        if (process.env.NODE_ENV !== 'production') {
-                            console.error(err);
-                        }
+                        return cb(err);
                     }
                     cb(null, deviceModel);
                 });
-                 
             },
             
             //update the device model:
@@ -975,12 +949,6 @@ var DeviceHandler = function (db) {
     };
     
     function saveTheLocationAndCheckGeoFence(deviceModel, location, callback) {
-        
-        // update params:
-        //deviceModel.lastLocation.coordinates = [location.long, location.lat];
-        //deviceModel.lastLocation.coordinates[0] = location.long;
-        //deviceModel.lastLocation.coordinates[1] = location.lat;
-        //deviceModel.lastLocation.dateTime = new Date();
         var owner;
 
         async.waterfall([
@@ -1586,17 +1554,40 @@ var DeviceHandler = function (db) {
         
         async.parallel({
             
-            // get user model
+            // get the current user with devices:
             user: function (cb) {
-                UserModel.findById(userId, function (err, user) {
-                    if (err) {
-                        return cb(err);
-                    }
-                    cb(null, user);
-                });
+                UserModel
+                    .findById(userId)
+                    .populate({
+                        path: 'devices',
+                        match: {
+                            status: {
+                                $ne: DEVICE_STATUSES.DELETED
+                            },
+                            _id: {
+                                $in: deviceIds
+                            }
+                        },
+                        select: '_id billings status'
+                    }).exec(function (err, userModel) {
+                        var devices;
+
+                        if (err) {
+                            return cb(err);
+                        }
+                    
+                        devices = userModel.devices;
+                    
+                        if (!devices || !devices.length) {
+                            return cb(badRequests.NoActiveDevices());
+                        } 
+
+                        cb(null, userModel);
+                    });
+
             },
             
-            // get available tariff plans
+            // get available tariff plans:
             plans: function (cb) {
                 var criteria = {};
                 
@@ -1606,52 +1597,35 @@ var DeviceHandler = function (db) {
                     }
                     cb(null, plans)
                 });
-            },
+            } 
             
-            devices: function (cb) {
-                var criteria = {
-                    user: userId,
-                    status: {
-                        $ne: DEVICE_STATUSES.DELETED
-                    },
-                    _id: {
-                        $in: deviceIds
-                    }
-                };
-                var fields = {
-                    _id: 1,
-                    billings: 1,
-                    status: 1
-                };
-                
-                DeviceModel.find(criteria, fields, function (err, devices) {
-                    var activeIds;
-                    
-                    if (err) {
-                        cb(err);
-                    } else if (!devices || !devices.length) {
-                        cb(badRequests.NoActiveDevices());
-                    } else {
-                        
-                        // get array with active devices ids
-                        //activeIds = _.pluck(devices, '_id');
-                        cb(null, devices);
-                    }
-                });
-            }
-
         }, function (err, results) {
             var userModel = results.user;
             var planModels = results.plans;
-            //var activeDeviceIds = results.checkActiveDevices;
-            var deviceModels = results.devices;
-            var activeDeviceIds = _.pluck(results.devices, '_id');
+            var deviceModels = userModel.devices;
+            var activeDeviceIds = _.pluck(deviceModels, '_id');
+            var subscribedDevices = _.filter(deviceModels, function (deviceModel) {
+                return deviceModel.status === DEVICE_STATUSES.SUBSCRIBED;
+            });
             
             if (err) {
                 return next(err);
             }
             
             async.waterfall([
+
+                //unsubscribe on stripe:
+                function (cb) {
+                    var customerId = userModel.billings.stripeId;
+                    var subscriptionIds = _.pluck(subscribedDevices, 'billings.subscriptionId');
+
+                    unsubscribeOnStripe(customerId, subscriptionIds, function (err) {
+                        if (err) {
+                            return cb(err);
+                        }
+                        cb();
+                    });
+                },
 
                 //recalculate the users plan:
                 function (cb) {
@@ -1767,6 +1741,54 @@ var DeviceHandler = function (db) {
         }
         
         async.waterfall([
+            
+            //find the subscribed devices:
+            function (cb) {
+                var criteria = {
+                    _id: userId
+                };
+               
+                UserModel
+                    .findOne(criteria)
+                    .populate({
+                        path: 'devices',
+                        match: {
+                            status: DEVICE_STATUSES.SUBSCRIBED,
+                            _id: {
+                                $in: deviceIds
+                            }
+                    },
+                        select: 'billings.subscriptionId'
+                    })
+                    .exec(function (err, userModel) {
+                        var customerId = userModel.billings.stripeId;
+                        var devices;
+                        var subscriptionIds;
+
+                        if (err) {
+                            return cb(err);
+                        }
+                    
+                        devices = userModel.devices;
+                        subscriptionIds = _.pluck(devices, 'billings.subscriptionId');
+                    
+                        cb(null, customerId, subscriptionIds);
+                    });
+            },
+
+            //unsubscribe on stripe:
+            function (customerId, subscriptionIds, cb) {
+                if (!customerId || !subscriptionIds || !subscriptionIds.length) { 
+                    return cb();
+                }
+
+                unsubscribeOnStripe(customerId, subscriptionIds, function (err) {
+                    if (err) {
+                        return cb(err);
+                    }
+                    cb();
+                });
+            },
 
             //update devices:
             function (cb) {
@@ -1808,6 +1830,7 @@ var DeviceHandler = function (db) {
                     cb(null, userModel);
                 });
             }
+
         ], function (err, userModel) {
             if (err) {
                 return next(err);
