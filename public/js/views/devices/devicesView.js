@@ -10,7 +10,8 @@ define([
     'config/config',
     'stripeCheckout'
 
-], function (Template, ModalTemplate, DevisesCollection, deviceMainListView, PaginationView, STATUSES, deviceView, GeoFenceView, config, StripeCheckout) {
+], function (Template, ModalTemplate, DevisesCollection, deviceMainListView, PaginationView,
+             STATUSES, deviceView, GeoFenceView, config, StripeCheckout) {
 
     var View;
     View = Backbone.View.extend({
