@@ -160,16 +160,20 @@ describe('devices', function () {
         it('User can get the device by id', function (done) {
             var devId = testData.devices[0]._id.toString();
             var url = '/devices/' + devId;
-            
+            var deviceModel;
+
             userAgent1
                 .get(url)
                 .end(function (err, res) {
                 expect(res.status).to.equals(200);
                 expect(res.body).to.be.instanceOf(Object);
-                expect(res.body).to.have.property('_id');
-                expect(res.body._id).to.equals(devId);
-                expect(res.body).to.have.property('geoFence');
-                expect(res.body.geoFence).to.be.instanceOf(Object);
+                
+                deviceModel = res.body;
+
+                expect(deviceModel).to.have.property('_id');
+                expect(deviceModel).to.have.property('geoFence');
+                expect(deviceModel._id).to.equals(devId);
+                expect(deviceModel.geoFence).to.be.instanceOf(Object);
                 done();
             });
         });

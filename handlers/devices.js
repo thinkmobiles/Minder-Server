@@ -4,7 +4,7 @@ var RESPONSES = require('../constants/responses');
 var DEVICE_OS = require('../constants/deviceOs');
 var DEVICE_STATUSES = require('../constants/deviceStatuses');
 var PLAN_TYPES = require('../constants/planTypes');
-var DEVICE_FIELDS = '_id deviceId name user status geoFence lastLocation createdAt updatedAt';
+var DEVICE_FIELDS = '_id deviceId name user status lastLocation geoFence sync createdAt updatedAt';
 
 var util = require('util');
 var _ = require('lodash');
