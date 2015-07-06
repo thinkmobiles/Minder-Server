@@ -59,8 +59,9 @@ define([
             });
 
             this.billingModel = new Backbone.Model({
-                billingId: null,
-                token: null
+                billingId : null,
+                token     : null,
+                status    : null
             });
 
             this.devisesCollection = new DevisesCollection();         // current page devices
@@ -140,15 +141,36 @@ define([
         },
 
         startSubscribe : function () {
+            var self = this;
+            var status = this.$el.find('#buttonSubscribe').attr('data-status');
             var currentId = this.$el.find('#modalEditGeoFenceContent>div').attr('id');
             var myModalWindow = this.$el.find('#editGeoFenceModal');
 
-            this.billingModel.set({billingId : currentId});
+            if (status !== '2') {
 
-            myModalWindow.on('hidden.bs.modal',this.showStripe());
-            myModalWindow.modal('hide');
+                this.billingModel.set({billingId: currentId});
 
-            myModalWindow.off('hidden.bs.modal');
+                myModalWindow.on('hidden.bs.modal', this.showStripe());
+                myModalWindow.modal('hide');
+
+                myModalWindow.off('hidden.bs.modal');
+            } else {
+                if (!confirm('This device is already subscribed ...')) {
+                    return
+                }
+                $.ajax({
+                    url: '/devices/'+currentId+'/geoFence/unsubscribe',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    success: function () {
+                        self.$el.find('#buttonSubscribe').attr('data-status','1');
+                        self.startSubscribe()
+                    },
+                    error: function (err) {
+                        App.error(err);
+                    }
+                });
+            }
         },
 
         subscribeHandler: function () {
@@ -164,22 +186,31 @@ define([
                     url: '/devices/' + myId + '/geoFence/subscribe',
                     method: 'POST',
                     contentType: 'application/json',
+                    beforeSend: self.showWaiting(),
                     data: JSON.stringify(data),
 
                     success: function () {
                         self.billingModel.set({token: null});
-                        //self.hideWaiting();
+                        self.hideWaiting();
                         alert('Success subscription');
                         self.$el.find('#editGeoFenceModal').modal('show');
                         App.updateUser();
                     },
                     error: function (err) {
-                        //self.hideWaiting();
+                        self.hideWaiting();
                         App.error(err);
                         self.$el.find('#editGeoFenceModal').modal('show');
                     }
                 });
             }
+        },
+
+        showWaiting: function(){
+            this.$el.find('#waitingModal').modal('show');
+        },
+
+        hideWaiting: function(){
+            this.$el.find('#waitingModal').modal('hide');
         },
 
         showPeriodList: function () {
