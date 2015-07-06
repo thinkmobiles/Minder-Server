@@ -220,6 +220,7 @@ define([
         render: function () {
             var modId = this.stateModel.get('_id');
             var modelForTMPL = this.stateModel.toJSON();
+            $('#buttonSubscribe').attr('data-status',modelForTMPL.geoFence.status);
 
             this.undelegateEvents();
             this.$el.html(_.template(GeoFenceTmpl , {
