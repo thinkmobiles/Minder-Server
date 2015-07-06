@@ -125,6 +125,41 @@ define([
             }
         },
 
+        saveDevice : function (){
+            var self = this;
+            var newName = this.$el.find('#name').val().trim();
+            var resCenter = this.circle.getCenter();
+            var saveData;
+
+            if (resCenter) {
+                saveData = {
+                    geoFence : {
+                        enabled: this.$el.find('#check_fence').prop('checked'),
+                        fixedLocation: {
+                            long: resCenter.lng(),
+                            lat: resCenter.lat()
+                        },
+                        radius: this.$el.find('#radius').val().trim()
+                    }
+                };
+            }
+
+            saveData.name = newName;
+            saveData.sync = {enabled : this.$el.find('#check_photo').prop('checked')};
+
+            this.stateModel.url = '/devices/' + this.stateModel.get('_id');
+            this.stateModel.save(saveData, {
+                wait: true,
+                success: function () {
+                    $('.activeN').text(newName);
+                    self.hideDialog();
+                },
+                error: function () {
+                    alert('error')
+                }
+            });
+        },
+
         on_MapClick : function(loc){
             this.marker.setPosition(loc);
             this.circle.setCenter(loc);
@@ -153,7 +188,7 @@ define([
             };
             var circleOptions = {
                 strokeColor : '#FF0000',
-                strokeWeight: 1.5      ,
+                strokeWeight: 1.5,
                 fillopacity : 1,
                 map         : this.map ,
                 radius      : +this.stateModel.get('geoFence').radius,

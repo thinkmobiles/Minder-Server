@@ -31,8 +31,8 @@ define([
             'click .customSelect .current'      : 'showPeriodList',
             'click .customSelect .list .item'   : 'choosePeriodList',
             'change #period'                    : 'periodObserver', // period observer
-            //'click .setGeo'                   : 'testGeo',
-            'click #buttonSubscribe'            : 'startSubscribe'
+            'click #buttonSubscribe'            : 'startSubscribe',
+            "click #saveAll"                    : 'saveAllButton'
         },
 
         initialize: function (options) {
@@ -129,21 +129,14 @@ define([
             this.paginationView = new PaginationView(paginationOptions);
         },
 
+        saveAllButton : function (){
+            this.devicesView.saveDevice();
+        },
+
         stripeTokenHandler: function (token) {  // handel token and start an action by type
             this.billingModel.set({
                 token: token
             });
-            //var action = this.stateModel.get('action');
-            //if (action) {
-            //    switch (action.name) {
-            //        case "subscribe":
-            //            this.subscribeHandler();
-            //            break;
-            //        case "renewal":
-            //            this.renewalHandler();
-            //            break;
-            //    }
-            //}
         },
 
         startSubscribe : function () {

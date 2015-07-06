@@ -23,6 +23,7 @@
         <input id="saveChanges" type="button" value="Save Fence">
     </div>
     <div class="modalTabs-item">
+        <input id="check_photo" type="checkbox" <% if (model.geoFence.enabled){%>checked<%}%> ><label for="check_photo" >Enable|Disable</label>
         <div id="photoListContainer">    </div>
         <div id="paginationPhoto">       </div>
     </div>
