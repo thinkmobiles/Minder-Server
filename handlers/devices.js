@@ -1256,24 +1256,54 @@ var DeviceHandler = function (db) {
         var options = req.body;
         var userId = req.session.userId;
         var id = req.params.id;
+        var geoFence = options.geoFence;
+        var sync = options.sync;
         var criteria = {
             _id: id
         };
         var update = {
-            updatedAt: new Date()
+            $set: {
+            }
         };
         
-        if (options.name) {
-            update.name = options.name;
-        }
-        
-        if (!Object.keys(update).length) {
-            return next(badRequests.NotEnParams({ reqParams: ['name'] }));
-        }
-        
+        //check permissions:
         if (!session.isAdmin(req)) {
             criteria.user = userId;
         }
+
+        if (options.name) {
+            update.$set['name'] = options.name;
+        }
+        
+        if (geoFence) {
+            if ((geoFence.enabled !== undefined)) {
+                update.$set['geoFence.enabled'] = geoFence.enabled;
+            }
+            
+            if (geoFence && geoFence.fixedLocation && (geoFence.fixedLocation.long !== undefined)) {
+                update.$set['geoFence.fixedLocation.long'] = geoFence.fixedLocation.long;
+            }
+            
+            if (geoFence && geoFence.fixedLocation && (geoFence.fixedLocation.lat !== undefined)) {
+                update.$set['geoFence.fixedLocation.lat'] = geoFence.fixedLocation.lat;
+            }
+            
+            if (geoFence.radius !== undefined) {
+                update.$set['geoFence.radius'] = geoFence.radius;
+            }
+        }
+        
+        if (sync) {
+            if (sync.enabled !== undefined) { 
+                update.$set['sync.enabled'] = sync.enabled;
+            }
+        }
+
+        if (!Object.keys(update.$set).length) {
+            return next(badRequests.NotEnParams({ message: 'There are no params for update.' }));
+        }
+        
+        update.$set.updatedAt = new Date();
         
         DeviceModel
             .findOneAndUpdate(criteria, update)
@@ -1286,7 +1316,7 @@ var DeviceHandler = function (db) {
                 res.status(200).send({ success: 'updated', model: device });
             }
         });
-
+        
     };
     
     this.updateGeoFence = function (req, res, next) {
@@ -1874,6 +1904,36 @@ var DeviceHandler = function (db) {
         });
     };
     
+    this.updateSync = function (req, res, next) {
+        var options = req.body;
+        var deviceId = req.params.id;
+        var criteria;
+        var update;
+        var enabled = options.enabled;
+
+        if (enabled === undefined) { 
+        
+        }
+
+        if (!session.isAdmin(req)) {
+            criteria.user = userId; //check permissions
+        }
+        
+        update.$set.updatedAt = new Date();
+        
+        DeviceModel
+            .findOneAndUpdate(criteria, update)
+            .exec(function (err, device) {
+            if (err) {
+                next(err);
+            } else if (!device) {
+                next(badRequests.NotFound());
+            } else {
+                res.status(200).send({ success: 'updated', model: device });
+            }
+        });
+    };
+
     this.cronJobForCheckExpirationDates = function (callback) {
         
         async.waterfall([

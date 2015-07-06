@@ -29,6 +29,7 @@ module.exports = (function () {
         size: {type: Number, default: 0},
         path: {type: String, default: ''}, //the file path on the mobile device
         //url: {type: String, default: ''},
+        fileCreatedAt: {type: Date, default: Date.now},
         createdAt: {type: Date, default: Date.now},
         updatedAt: {type: Date, default: Date.now}
     }, {collection: 'Files'});

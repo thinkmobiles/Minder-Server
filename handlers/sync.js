@@ -1,6 +1,8 @@
 'use strict';
 
 var CONSTANTS = require('../constants/index');
+var DEVICE_STATUSES = require('../constants/deviceStatuses');
+
 var mongoose = require('mongoose');
 var async = require('async');
 var _ = require('lodash');
@@ -122,6 +124,65 @@ var SyncHandler = function (db) {
             }
         });
     };
+    
+    this.saveFileStream = function (options, callback) {
+        //TODO: validate ...
+
+        async.waterfall([
+
+                //get file from request:
+                function (cb) {
+                    var file = options.file;
+                
+                    fs.readFile(file.path, function (err, data) {
+                        if (err) {
+                            return cb(err);
+                        }
+                        cb(null, data);
+                    });
+                },
+
+                //save file to storage:
+                function (fileData, cb) {
+                    var fileNams;
+                    //var name;
+                    var key;
+                    var bucket = process.env.FILES_BUCKET;
+                    var src = fileData.toString('base64');
+                    //name = options.name;
+                    key = computeKey();
+                
+                    if (process.env.NODE_ENV !== 'production') {
+                        console.log('--- Upload file ----------------');
+                        //console.log('name', name);
+                        console.log('key', key);
+                        console.log('bucket', bucket);
+                        console.log('--------------------------------');
+                    }
+                
+                                   
+                    imageUploader.uploadImage(src, key, bucket, function (err, fileName) {
+                        if (err) {
+                            return cb(err);
+                        }
+                        cb(null, key);
+                    });
+                }
+
+            ], function (err, result) {
+            
+            
+            if (err) {
+                    if (callback && (typeof callback === 'function')) {
+                        callback(err);
+                    }
+                } else {
+                    if (callback && (typeof callback === 'function')) {
+                        callback(null, result);
+                    }
+                }
+            });
+    };
 
     this.storeFile = function (req, res, next) {
         var userId = req.session.userId;
@@ -129,16 +190,23 @@ var SyncHandler = function (db) {
         var deviceId = req.session.deviceId;
         var src = options.src;
         var originalName = options.originalName;
-        
+        var fileCreatedAt = options.fileCreatedAt;
+        var size = options.size;
+        var file = req.files.file;
+
         console.log('>>> session', req.session);
 
         async.waterfall([
 
             //validate params:
             function (cb) {
+                
+                if (!deviceId) { 
+                    return cb(badRequests.AccessError({message: 'Please login from yur device', status: 403}));
+                }
 
-                if (!deviceId || !src || !originalName) {
-                    return cb(badRequests.NotEnParams({reqParams: ['deviceId', 'originalName', 'src']}));
+                if (!originalName || !fileCreatedAt || !file) {
+                    return cb(badRequests.NotEnParams({reqParams: ['originalName', 'file', 'fileCreatedAt']}));
                 }
 
                 cb();
@@ -168,7 +236,15 @@ var SyncHandler = function (db) {
                         if (!session.isAdmin(req) && (ownerId !== userId)) {
                             return cb(badRequests.AccessError());
                         }
-
+                        
+                        if (!device.sync.enabled) { 
+                            return cb(badRequests.AccessError({message: 'This functionality is disabled.'}));
+                        }
+                        
+                        if (device.sync.status !== DEVICE_STATUSES.SUBSCRIBED) {
+                            return cb(badRequests.PaymentRequired());
+                        }
+                        
                         cb();
                     }
                 });
@@ -176,7 +252,10 @@ var SyncHandler = function (db) {
 
             //save the file:
             function (cb) {
-                self.saveFile(options, function (err, key) {
+                var file = req.files.file;
+                
+                options.file = file;
+                self.saveFileStream(options, function (err, key) {
                     if (err) {
                         return cb(err);
                     }
@@ -190,7 +269,9 @@ var SyncHandler = function (db) {
                     device: deviceId,
                     originalName: originalName,
                     name: process.env.FILES_BUCKET,
-                    key: key
+                    key: key,
+                    size: size,
+                    fileCreatedAt: fileCreatedAt
                 };
 
                 var fileModel = new FileModel(saveData);
@@ -201,6 +282,23 @@ var SyncHandler = function (db) {
                     }
                     cb(null, savedModel);
                 });
+            },
+
+            //update the device sync data...
+            function (fileModel, cb) {
+                var update = {
+                    $set: {
+                        "sync.lastSyncDateTime": new Date()
+                    }
+                };
+
+                DeviceModel.findByIdAndUpdate(deviceId, update, function (err, device) {
+                    if (err) { 
+                        return cb(err);
+                    }
+                    return cb(null, fileModel);
+                });
+
             }
 
         ], function (err, fileModel) {

@@ -216,7 +216,7 @@ describe('devices', function () {
         
         it('Owner can update the geo fence options', function (done) {
             var devId = testData.devices[0]._id.toString();
-            var url = '/devices/' + devId + '/geoFence';
+            var url = '/devices/' + devId;
             var enabled = true;
             var long = 22.299042;
             var lat = 48.618308;

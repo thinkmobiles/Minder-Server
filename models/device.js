@@ -36,6 +36,14 @@ module.exports = (function () {
             status: { type: Number, required: true, default: DEVICE_STATUSES.ACTIVE }, // 1 - active | 0 - deleted | 2 - subscribed
             withinFence: {type: Boolean, default: true}
         },
+        sync: {
+            enabled: { type: Boolean, default: false },
+            lastSyncDateTime: { type: Date, default: null },
+            subscriptionId: { type: String, default: null },
+            subscriptionDateTime: { type: Date, default: null },
+            expirationDate: { type: Date, default: null },
+            status: { type: Number, required: true, default: DEVICE_STATUSES.ACTIVE }, // 1 - active | 0 - deleted | 2 - subscribed
+        },
         createdAt: {type: Date, default: Date.now},
         updatedAt: {type: Date, default: Date.now}
     }, {collection: 'Devices'});
