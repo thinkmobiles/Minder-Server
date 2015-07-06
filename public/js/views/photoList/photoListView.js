@@ -23,13 +23,10 @@ define([
             var self = this;
 
             this.photosCollection = new Backbone.Collection;
-            this.photosCollection.url = currentUrl;
-
-            this.currentPhotosCollection = new Backbone.Collection;
 
             this.stateModel = new Backbone.Model({
                 count         : 0,
-                onPage        : 15,
+                onPage        : 2,
                 padding       : 2,
                 page          : 1,
                 ends          : true,
@@ -39,23 +36,26 @@ define([
                 pages         : []
             });
 
-            this.photosCollection.fetch({
-                reset : true,
-                success : function(){
+            $.ajax({
+                url: "/sync/devices/"+ id +"/files/count",
+                type: "GET",
+                success: function (response) {
+                    self.stateModel.set({
+                        count: response.count
+                    });
                     self.getPaginationCollection();
-                }});
+                },
+                error: function (err) {
+                    App.error(err);
+                }
+            })
         },
 
         getPaginationCollection : function (){
-            var count = this.photosCollection.length;
             var self = this;
 
-            this.stateModel.set('count',count);
-
-            this.currentPhotosCollection = this.photosCollection.clone();
-            this.currentPhotosCollection.url = this.stateModel.get('url');
-
-            this.currentPhotosCollection.fetch({
+            this.photosCollection.url = this.stateModel.get('url');
+            this.photosCollection.fetch({
                 data: {
                     page : this.stateModel.get('page'),
                     count: this.stateModel.get('onPage')
@@ -72,25 +72,6 @@ define([
             });
             this.getPaginationCollection();
         },
-
-        //count: function () {
-        //    var self = this;
-        //    var id = this.stateModel.get('currentId');
-        //
-        //        $.ajax({
-        //            url: "/sync/devices/"+ id +"/files/count",
-        //            type: "GET",
-        //            success: function (response) {
-        //                self.stateModel.set({
-        //                    count: response.count
-        //                });
-        //                self.calculate();
-        //            },
-        //            error: function (err) {
-        //                App.error(err);
-        //            }
-        //        })
-        //},
 
         drawPagination: function () {
             var count  = this.stateModel.get('count') || 0;
@@ -189,10 +170,8 @@ define([
                 this.drawPagination()
             }
 
-            var photoColl = this.currentPhotosCollection.toJSON();
-            this.$el.html(_.template(PhotoListTmpl,{
-                photoColl       : photoColl
-            }));
+            var photoColl = this.photosCollection.toJSON();
+            this.$el.html(_.template(PhotoListTmpl,{photoColl: photoColl}));
 
             return this;
         }
