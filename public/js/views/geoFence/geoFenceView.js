@@ -18,7 +18,8 @@ define([
             "click  #setRadius"    : "changeRadius",
             "click  #saveChanges"  : "saveDeviceFence",
             "click  #editButton"   : "saveDeviceName",
-            "click  #modalTabs a"  : "changeTabs"
+            "click  #modalTabs a"  : "changeTabs",
+            'click  .goToPage'     : "goToPage"
         },
 
         initialize: function (options) {
@@ -38,6 +39,15 @@ define([
                 }
             });
 
+        },
+
+        goToPage: function (event) {
+            event.preventDefault();
+            var page = event.currentTarget.getAttribute('value');
+            page = parseInt(page);
+            this.photoListView.setData({
+                page: page
+            });
         },
 
         changeTabs : function(event){
@@ -177,7 +187,6 @@ define([
 
         render: function () {
             var modId = this.stateModel.get('_id');
-
             var modelForTMPL = this.stateModel.toJSON();
 
             this.undelegateEvents();
