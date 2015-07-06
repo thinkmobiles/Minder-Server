@@ -25,6 +25,7 @@ module.exports = (function () {
             renewEnabled: {type: Boolean, default: false},
             subscribedDevices: {type: Number, required: true, default: 0}
         },
+        devices: [{ type: ObjectId, ref: 'Device' }],
         createdAt: {type: Date, default: Date.now},
         updatedAt: {type: Date, default: Date.now}
     }, {collection: 'Users'});
