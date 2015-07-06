@@ -1,0 +1,9 @@
+<ul class="pagination">
+    <% if (pages.length > 0) {%>
+    <% for(page in pages) { %>
+    <li class="<% if (pages[page].clNam) {%>arrow<%}%><% if(pages[page].active) { %>active<% } %> item">
+        <a class="goToPage" value="<%= pages[page].data %>"><%= pages[page].html %></a>
+    </li>
+    <% } %>
+    <%}%>
+</ul>

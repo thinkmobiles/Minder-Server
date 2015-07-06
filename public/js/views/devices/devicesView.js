@@ -47,13 +47,13 @@ define([
             }
 
             this.stateModel = new Backbone.Model({
-                params            : {},                  // current view url params (page)
-                devices           : [],                  // devices array to render
-                checked           : false,               // global checker status
+                params            : {},                         // current view url params (page)
+                devices           : [],                         // devices array to render
+                checked           : false,                      // global checker status
                 selectedDevicesCount: 0,
-                newPlan           : null,                // user new plan by calculator
-                costForThisMonth  : 0,                   // render the cost
-                modal             : modal,               // the view mode (modal or not, bool)
+                newPlan           : null,                       // user new plan by calculator
+                costForThisMonth  : 0,                          // render the cost
+                modal             : modal,                      // the view mode (modal or not, bool)
                 period            : user.billings.planPeriod || 'month', // for subscription (for calculator),
                 search            : ''
             });
@@ -82,7 +82,7 @@ define([
                 key: config.stripePublicKey,
                 image: '/images/logoForPaiments.jpg',
                 token: function (token) {
-                    self.stripeTokenHandler(token); ////// singe!!! coll when token is generated ... for all actions!
+                    self.stripeTokenHandler(token);       // singe!!! coll when token is generated ... for all actions!
                 },
                 email: App.sessionData.get('user').email,
                 panelLabel: 'Subscribe'
