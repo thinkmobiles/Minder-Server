@@ -6,14 +6,12 @@ module.exports = (function () {
     var ObjectId = mongoose.Schema.Types.ObjectId;
 
     var deviceSchema = mongoose.Schema({
-        user: {type: ObjectId, ref: 'Users'},
+        user: {type: ObjectId, ref: 'User'},
         deviceId: {type: String, required: true, unique: true},
         deviceType: {type: String, required: true},
         name: {type: String, default: 'Device name'},
         status: {type: Number, required: true, default: DEVICE_STATUSES.ACTIVE}, // 1 - active | 0 - deleted | 2 - subscribed
         lastLocation: {
-            //long: {type: Number, default: null},
-            //lat: {type: Number, default: null},
             dateTime: { type: Date, default: Date.now },
             coordinates: {type: Array, default: [0, 0]}
         },

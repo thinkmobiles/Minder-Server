@@ -7,7 +7,8 @@ module.exports = {
     INVALID_COMPANY_NAME: 'Invalid CompanyName or CompanyName is Empty ',
     IS_ALREADY_USED: 'Email is already used',
     INTERNAL_ERROR: 'Internal server error',
-
+    DEVICE_WAS_NOT_FOUND: 'The device was not found',
+    
     WAS_CREATED: 'was created successfully',
     SAVING_ERROR: 'saving error',
     UPDATED_SUCCESS: 'was updated successfully',

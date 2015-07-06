@@ -13,7 +13,7 @@ var mongoose = require('mongoose');
 var badRequests = require('../helpers/badRequests');
 var logWriter = require('../helpers/logWriter')();
 var SessionHandler = require('../handlers/sessions');
-//var calculateTariff = require('../public/js/libs/costCounter');
+
 var calculateTariff = require('../public/js/libs/costCounter_2');
 var moment = require('moment');
 var stripe = require('stripe')(process.env.STRIPE_PRIVATE_KEY);
@@ -844,19 +844,82 @@ var DeviceHandler = function (db) {
     };
     
     function unsubscribeGeoFencePack(userId, deviceId, callback) {
-        var criteria = {
-            _id: deviceId,
-            user: userId
-        };
-        var update = {
-            $set: {
-                'geoFence.status': DEVICE_STATUSES.ACTIVE,
-                updatedAt: new Date()
-            }
-        };
-        var fields = DEVICE_FIELDS;
         
-        DeviceModel.findOneAndUpdate(criteria, update, fields, function (err, deviceModel) {
+        async.waterfall([
+            
+            //find the device:
+            function (cb) {
+                var criteria = {
+                    _id: deviceId
+                };
+
+                DeviceModel
+                    .findOne(criteria)
+                    .populate('user')
+                    .exec(function (err, device) {
+                        if (err) {
+                            return cb(err);
+                        } else if (!device) {
+                            cb(badRequests.NotFound({message: RESPONSES.DEVICE_WAS_NOT_FOUND})); 
+                        } else {
+                            cb(null, device);
+                        }
+                });
+            },
+
+            //cancel the subscription on stripe (There are max. 25 active subscriptions / customer): 
+            //https://groups.google.com/a/lists.stripe.com/forum/#!topic/api-discuss/hcJGxd_n7qc
+            function(deviceModel, cb) {
+                var user;
+                var stripeId;
+                var subscriptionId;
+
+                if (!deviceModel.geoFence || (deviceModel.geoFence.status === undefined)) { 
+                    return cb(badRequests.InvalidValue({message: 'geoFence was not defined for the deviceModel'}));
+                }
+                
+
+                if (deviceModel.geoFence.status !== DEVICE_STATUSES.SUBSCRIBED || !deviceModel.geoFence.subscriptionId) { 
+                    return cb(null, deviceModel); //the device is not subscribed;
+                }
+                
+                user = deviceModel.user;
+                stripeId = user.billings.stripeId;
+                subscriptionId = deviceModel.geoFence.subscriptionId;
+
+                stripe.customers.cancelSubscription(stripeId, subscriptionId, function (err, confirmation) {
+                    if (err) {
+                        if (process.env.NODE_ENV !== 'production') {
+                            console.error(err);
+                        }
+                    }
+                    cb(null, deviceModel);
+                });
+                 
+            },
+            
+            //update the device model:
+            function (deviceModel, cb) {
+                var criteria = {
+                    _id: deviceId
+                };
+                var update = {
+                    $set: {
+                        'geoFence.status': DEVICE_STATUSES.ACTIVE,
+                        updatedAt: new Date()
+                    }
+                };
+                var fields = DEVICE_FIELDS;
+
+                DeviceModel.findOneAndUpdate(criteria, update, fields, function (err, deviceModel) {
+                    if (err) {
+                        return cb(err);
+                    }
+                    cb(null, deviceModel);
+                });
+            }
+
+        ], function (err, deviceModel) { 
             if (err) {
                 if (callback && (typeof callback === 'function')) {
                     callback(err);
@@ -1217,18 +1280,9 @@ var DeviceHandler = function (db) {
         var criteria = {
             _id: id
         };
-        //var fields = {
-        //    deviceId: 1,
-        //    name: 1,
-        //    user: 1,
-        //    geoFence: 1,
-        //    createdAt: 1,
-        //    updatedAt: 1
-        //};
-        var fields = DEVICE_FIELDS;
         
         DeviceModel
-            .findOne(criteria, fields, function (err, deviceModel) {
+            .findOne(criteria, DEVICE_FIELDS, function (err, deviceModel) {
             var ownerId;
             
             if (err) {
@@ -1891,11 +1945,9 @@ var DeviceHandler = function (db) {
     };
     
     this.unsubscribeGeoFence = function (req, res, next) {
-        //return next(badRequests.InvalidValue({message: 'Not implemented'}));
-        
         var userId = req.session.userId;
         var deviceId = req.params.id;
-        
+
         unsubscribeGeoFencePack(userId, deviceId, function (err, deviceModel) {
             if (err) {
                 return next(err);

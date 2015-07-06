@@ -27,4 +27,14 @@ cursor.forEach(function ( device ) {
     db.Devices.update(criteria, update);
 });
 
+db.Devices.update({}, {$set: {"geoFence": {"enabled": false}}}, {multi: true});
+db.Devices.update({}, {$set: {"sync": {
+    "enabled": false
+    "radius": 3000,
+    "fixedLocation": {
+        long: 0,
+        lat: 0
+    }
+}}}, {multi: true});
+
 print('>>> ... success');
