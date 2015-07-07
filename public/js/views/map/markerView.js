@@ -8,7 +8,6 @@ define(function () {
             this.render();
         },
 
-        // remove marker from map
         removeMarker: function () {
             if (this.marker) {
                 this.marker.setMap(null);
@@ -22,18 +21,16 @@ define(function () {
                 this.psition = new google.maps.LatLng(location[1], location[0]);
             }
 
-            // if marker not exist create it
             if (!this.marker) {
                 this.marker = new google.maps.Marker({
-                    map: App.map,
-                    icon: {
+                    map  : App.map,
+                    icon : {
                         url: '/images/markers/default.png'
                     },
                     title: this.model.get('name')
                 });
             }
 
-            // update marker position
             this.marker.setPosition(this.psition);
 
             google.maps.event.addListener(self.marker, 'click', function () {

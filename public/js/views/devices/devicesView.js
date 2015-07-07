@@ -5,57 +5,64 @@ define([
     'views/device/deviceMainListView',
     'views/customElements/paginationView',
     'constants/statuses',
-    'views/device/deviceView',
     'views/geoFence/geoFenceView',
     'config/config',
     'stripeCheckout'
 
-], function (Template, ModalTemplate, DevisesCollection, deviceMainListView, PaginationView,
-             STATUSES, deviceView, GeoFenceView, config, StripeCheckout) {
+], function (
+    Template,
+    ModalTemplate,
+    DevisesCollection,
+    deviceMainListView,
+    PaginationView,
+    STATUSES,
+    GeoFenceView,
+    config,
+    StripeCheckout)  {
 
     var View;
     View = Backbone.View.extend({
 
 
-        isNew: true, // prevent query duplication
+        isNew: true,
 
         events: {
-            'click #globalDevicesChecker'       : 'globalCheckTrigger', // check all devices
-            'click .goSearch'                   : 'search',
-            'keypress #search'                  : 'searchOnEnter',
-            'click .clearSearch'                : 'clearSearch',
-            'click .deviceCheckbox'             : 'deviceCheck', // check separate devices
-            'click .setDelete'                  : 'deviceDelete',
-            'click .setActive'                  : 'deviceActivate',
-            'click .setEdit'                    : 'testGeo',
-            'click .cancelEditDevice'           : 'closeDevicesView',
-            'click .customSelect .current'      : 'showPeriodList',
-            'click .customSelect .list .item'   : 'choosePeriodList',
-            'change #period'                    : 'periodObserver', // period observer
-            'click #buttonSubscribe'            : 'startSubscribe',
-            "click #saveAll"                    : 'saveAllButton'
+            'keypress #search'                     : 'searchOnEnter',
+            'click    #globalDevicesChecker'       : 'globalCheckTrigger',
+            'change   #period'                     : 'periodObserver',
+            'click    #buttonSubscribe'            : 'startSubscribe',
+            'click    #saveAll'                    : 'saveAllButton',
+            'click    .goSearch'                   : 'search',
+            'click    .clearSearch'                : 'clearSearch',
+            'click    .deviceCheckbox'             : 'deviceCheck',
+            'click    .setDelete'                  : 'deviceDelete',
+            'click    .setActive'                  : 'deviceActivate',
+            'click    .setEdit'                    : 'testGeo',
+            'click    .cancelEditDevice'           : 'closeDevicesView',
+            'click    .customSelect .current'      : 'showPeriodList',
+            'click    .customSelect .list .item'   : 'choosePeriodList'
+
         },
 
         initialize: function (options) {
             var self = this;
-            var modal = false; // modal window status property
-            var paginationOptions; // pagination settings
+            var modal = false;
+            var paginationOptions;
             var user = App.sessionData.get('user');
 
             if (options) {
-                // set modal status
                 modal = options.modal || false;
             }
 
             this.stateModel = new Backbone.Model({
-                params            : {},                         // current view url params (page)
-                devices           : [],                         // devices array to render
-                checked           : false,                      // global checker status
+                params            : {},
+                devices           : [],
+                checked           : false,
                 selectedDevicesCount: 0,
-                newPlan           : null,                       // user new plan by calculator
-                costForThisMonth  : 0,                          // render the cost
-                modal             : modal,                      // the view mode (modal or not, bool)
-                period            : user.billings.planPeriod || 'month', // for subscription (for calculator),
+                newPlan           : null,
+                costForThisMonth  : 0,
+                modal             : modal,
+                period            : user.billings.planPeriod || 'month',
                 search            : ''
             });
 
@@ -65,9 +72,8 @@ define([
                 status    : null
             });
 
-            this.devisesCollection = new DevisesCollection();         // current page devices
-
-            this.selectedDevicesCollection = new DevisesCollection(); // all selected devices on all pages
+            this.devisesCollection = new DevisesCollection();
+            this.selectedDevicesCollection = new DevisesCollection();
 
             paginationOptions = {
                 collection    : this.devisesCollection,
@@ -81,21 +87,17 @@ define([
             };
 
             this.Stripe = StripeCheckout.configure({
-                key: config.stripePublicKey,
-                image: '/images/logoForPaiments.jpg',
-                token: function (token) {
-                    self.stripeTokenHandler(token);       // singe!!! coll when token is generated ... for all actions!
+                key       : config.stripePublicKey,
+                image     : '/images/logoForPaiments.jpg',
+                token     : function (token) {
+                    self.stripeTokenHandler(token);
                 },
-                email: App.sessionData.get('user').email,
+                email     : App.sessionData.get('user').email,
                 panelLabel: 'Subscribe'
             });
 
             this.listenTo(this.billingModel, 'change:token', this.subscribeHandler);
-
-            // if the page is change fetch new models
             this.listenTo(this.stateModel, 'change:params', this.handleParams);
-
-            // keep data actual
             this.listenTo(this.devisesCollection, 'sync remove', this.render);
 
             if (modal) {
@@ -127,7 +129,6 @@ define([
                 };
             }
 
-            // create pagination to control devices collection
             this.paginationView = new PaginationView(paginationOptions);
         },
 
@@ -135,7 +136,7 @@ define([
             this.devicesView.saveDevice();
         },
 
-        stripeTokenHandler: function (token) {  // handel token and start an action by type
+        stripeTokenHandler: function (token) {
             this.billingModel.set({
                 token: token
             });
@@ -143,7 +144,7 @@ define([
 
         startSubscribe : function () {
             var self = this;
-            var status = this.$el.find('#buttonSubscribe').attr('data-status');
+            var status    = this.$el.find('#buttonSubscribe').attr('data-status');
             var currentId = this.$el.find('#modalEditGeoFenceContent>div').attr('id');
             var myModalWindow = this.$el.find('#editGeoFenceModal');
 
@@ -160,9 +161,10 @@ define([
                     return
                 }
                 $.ajax({
-                    url: '/devices/'+currentId+'/geoFence/unsubscribe',
-                    method: 'POST',
-                    contentType: 'application/json',
+                    url         : '/devices/'+currentId+'/geoFence/unsubscribe',
+                    method      : 'POST',
+                    contentType : 'application/json',
+
                     success: function () {
                         self.$el.find('#buttonSubscribe').attr('data-status','1');
                         self.startSubscribe()
@@ -184,13 +186,14 @@ define([
 
             if (myToken) {
                 $.ajax({
-                    url: '/devices/' + myId + '/geoFence/subscribe',
-                    method: 'POST',
+                    url        : '/devices/' + myId + '/geoFence/subscribe',
+                    method     : 'POST',
                     contentType: 'application/json',
-                    beforeSend: self.showWaiting(),
-                    data: JSON.stringify(data),
+                    beforeSend : self.showWaiting(),
+                    data       : JSON.stringify(data),
 
                     success: function () {
+                        self.$el.find('#buttonSubscribe').attr('data-status','2');
                         self.billingModel.set({token: null});
                         self.hideWaiting();
                         alert('Success subscription');
@@ -233,15 +236,12 @@ define([
             }
         },
 
-        // update period, keep actual
         periodObserver: function () {
             this.stateModel.set({
                 period: this.$('#period').val()
             });
         },
 
-        // select and unSelect devices
-        // add / remove from selected devices collection
         deviceCheck: function (event) {
             var self = this;
             this.devisesCollection.map(function (model) {
@@ -266,8 +266,8 @@ define([
 
         updateUserData: function () {
             $.ajax({
-                url: "/currentUser",
-                type: "GET",
+                url    : "/currentUser",
+                type   : "GET",
                 success: function (data) {
                     App.sessionData.set({
                         user: data
@@ -279,7 +279,6 @@ define([
             });
         },
 
-        // set device deleted
         deviceDelete: function (event) {
             if (!confirm('Are you sure you want to delete this device?')) {
                 return
@@ -299,7 +298,6 @@ define([
             });
         },
 
-        // set deleted device active again
         deviceActivate: function (event) {
             var self = this;
             this.devisesCollection.map(function (model) {
@@ -316,8 +314,6 @@ define([
             });
         },
 
-        // create devices array ro render
-        // and check is selected or not
         updateDevicesData: function () {
             var self = this;
             var devices = [];
@@ -328,40 +324,24 @@ define([
                 });
                 if (deviceSelected) {
                     devices.push({
-                        device: device.toJSON(),
-                        selected: true
+                        device   : device.toJSON(),
+                        selected : true
                     })
                 } else {
                     devices.push({
-                        device: device.toJSON(),
-                        selected: false
+                        device   : device.toJSON(),
+                        selected : false
                     })
                 }
             });
 
             var selectedDevicesCount = this.selectedDevicesCollection.length;
             this.stateModel.set({
-                selectedDevicesCount: selectedDevicesCount,
-                devices: devices
+                selectedDevicesCount : selectedDevicesCount,
+                devices              : devices
             });
         },
 
-
-        // open the modal
-        //showEditDeviceModal: function (e) {
-        //
-        //    var id = $(e.target).attr('value');
-        //
-        //    this.$el.find('#editDeviceModal').modal('show')
-        //    .css({
-        //        width: "1000"
-        //    });
-        //
-        //    this.devicesView = new deviceView({id: id});
-        //
-        //    this.$el.find('#modalEditContent').html(this.devicesView.el);
-        //
-        //},
 
         showStripe: function () {
             this.Stripe.open({
@@ -374,10 +354,12 @@ define([
         },
 
         testGeo: function (e) {
+            var geoModal = this.$el.find('#editGeoFenceModal');
+
+            if (geoModal.attr('aria-hidden') === 'false'){return}
 
             var target = $(e.target);
             var id = target.attr('value');
-            var geoModal = this.$el.find('#editGeoFenceModal');
             var tabBody = this.$el.find('tbody');
 
             tabBody.find('.activeN').removeClass('activeN');
@@ -389,8 +371,6 @@ define([
 
             this.devicesView = new GeoFenceView({id: id});
             this.$el.find('#modalEditGeoFenceContent').html(this.devicesView.el);
-
-            //geoModal.off('hidden.bs.modal');
 
             geoModal.modal('show').css({
                 width: "1000px"
@@ -408,7 +388,6 @@ define([
             }
         },
 
-        // calculate plan for user to preview
         calculatePlan: function () {
             var self = this;
             var sessionData = App.sessionData.toJSON();
@@ -443,7 +422,6 @@ define([
             });
         },
 
-        // set search filter for pagination
         search: function (event) {
             event.preventDefault();
             var search = this.$el.find('#search').val().trim();
@@ -453,12 +431,12 @@ define([
                     search: search
                 });
                 this.paginationView.setData({
-                    name: search,
+                    name  : search,
                     status: [
                         STATUSES.ACTIVE,
                         STATUSES.SUBSCRIBED
                     ],
-                    sort: '-status billings.expirationDate name'
+                    sort  : '-status billings.expirationDate name'
                 });
             } else {
 
@@ -466,8 +444,8 @@ define([
                     search: search
                 });
                 this.paginationView.setData({
-                    name: search,
-                    sort: '-status billings.expirationDate name'
+                    name  : search,
+                    sort  : '-status billings.expirationDate name'
                 });
             }
         },
@@ -477,18 +455,16 @@ define([
             this.search(event);
         },
 
-        // if not new view update devices (keep data actual)
         afterUpend: function () {
             if (this.isNew) {
                 this.isNew = false;
                 return
             }
-            this.paginationView.refresh(); // refresh current page
+            this.paginationView.refresh();
             this.render();
+
         },
 
-        // observes global checker and add or remove all
-        // objects from page to checked collection
         globalCheckTrigger: function () {
             var checked = this.$el.find('#globalDevicesChecker').prop('checked');
             var checkedDevices = [];
@@ -505,12 +481,10 @@ define([
             }
         },
 
-        // set the page parameter for pagination
         setParams: function (params) {
             this.stateModel.set({params: params});
         },
 
-        // set page if exist (wil fetch data)
         handleParams: function () {
             var params = this.stateModel.get('params');
 
@@ -523,7 +497,6 @@ define([
             }
         },
 
-        // get delta date
         getDateUntil: function (now, until) {
             var months = moment(until).diff(moment(now), 'months');
 
@@ -534,13 +507,11 @@ define([
             now.setDate(now.getDate() + (7 * weeks));
 
             var days = moment(until).diff(now, 'days');
-            var result = {
-                months : months,
-                weeks  : weeks,
-                days   : days
-            };
 
-            return result
+            return {    months : months,
+                        weeks  : weeks,
+                        days   : days
+                   }
         },
 
         render: function () {
@@ -553,7 +524,6 @@ define([
 
             data.DEVICE_STATUSES = STATUSES;
 
-            // set template
             if (data.modal) {
                 this.$el.html(_.template(ModalTemplate, data));
                 this.myChecked();
@@ -566,7 +536,6 @@ define([
             }
 
             this.$el.find('#pagination').append(this.paginationView.render().$el);
-
 
             return this;
         }

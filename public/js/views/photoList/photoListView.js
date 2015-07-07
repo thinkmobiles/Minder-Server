@@ -37,8 +37,9 @@ define([
             });
 
             $.ajax({
-                url: "/sync/devices/"+ id +"/files/count",
-                type: "GET",
+                url   : "/sync/devices/"+ id +"/files/count",
+                type  : "GET",
+
                 success: function (response) {
                     self.stateModel.set({
                         count: response.count
@@ -104,23 +105,23 @@ define([
             } else {
                 if (ends) {
                     pages.push({
-                        html: "&lt;&lt;first",
-                        data: 1,
-                        clNam: true
+                        html  : "&lt;&lt;first",
+                        data  : 1,
+                        clNam : true
                     });
                 }
                 if (steps) {
                     if (page < 2) {
                         pages.push({
-                            html: "&lt;&lt;prev",
-                            data: 1,
-                            clNam: true
+                            html  : "&lt;&lt;prev",
+                            data  : 1,
+                            clNam : true
                         });
                     } else {
                         pages.push({
-                            html: "&lt;&lt;prev",
-                            data: page - 1,
-                            clNam: true
+                            html  : "&lt;&lt;prev",
+                            data  : page - 1,
+                            clNam : true
                         });
                     }
 
@@ -137,15 +138,15 @@ define([
                 if (steps) {
                     if (page < allPages) {
                         pages.push({
-                            html: 'next&gt;&gt;',
-                            data: page + 1,
-                            clNam: true
+                            html  : 'next&gt;&gt;',
+                            data  : page + 1,
+                            clNam : true
                         });
                     } else {
                         pages.push({
-                            html: 'next&gt;&gt;',
-                            data: allPages,
-                            clNam: true
+                            html  : 'next&gt;&gt;',
+                            data  : allPages,
+                            clNam : true
                         });
                     }
 
@@ -153,9 +154,9 @@ define([
 
                 if (ends) {
                     pages.push({
-                        html: 'last&gt;&gt;',
-                        data: allPages,
-                        clNam: true
+                        html  : 'last&gt;&gt;',
+                        data  : allPages,
+                        clNam : true
                     });
                 }
                 this.stateModel.set({

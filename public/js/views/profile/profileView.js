@@ -3,7 +3,10 @@ define([
     'text!templates/profile/profileTemplate.html',
     'custom',
     'validation'
-], function (router, template, Custom, validation) {
+], function (router,
+             template,
+             Custom,
+             validation) {
 
     var View;
     View = Backbone.View.extend({
@@ -25,20 +28,19 @@ define([
             "focusin .form-control": "clearField"
         },
 
-        // set default data
         setDefaultStateModel: function () {
             var user = App.sessionData.toJSON().user;
 
             var defaultData = {
-                email: user.email || '',
-                password: '',
-                newPassword: '',
+                email          : user.email || '',
+                password       : '',
+                newPassword    : '',
                 confirmPassword: '',
-                firstName: user.firstName || '',
-                lastName: user.lastName || '',
-                errors: false,
-                messages: false,
-                errObj:false
+                firstName      : user.firstName || '',
+                lastName       : user.lastName || '',
+                errors         : false,
+                messages       : false,
+                errObj         : false
             };
 
             if (this.stateModel) {
@@ -54,43 +56,38 @@ define([
             closEl.find('.alert-danger').remove();
         },
 
-        // set default data when reopen the page
         afterUpend: function () {
             this.setDefaultStateModel();
         },
 
-        // validate and snd set data on server
         changeProfile: function (event) {
             event.preventDefault();
 
-            var self = this;
+            var self   = this;
             var errors = [];
             var messages = [];
-            var errObj = {};
+            var errObj  = {};
             var errCount=0;
             var data;
 
             var stateModelUpdate = {
-                errors: false,
-                messages: false,
-                errObj: false,
-                email: this.$el.find("#email").val().trim(),
-                firstName: this.$el.find("#firstName").val().trim(),
-                lastName: this.$el.find("#lastName").val().trim(),
-                password: this.$el.find("#password").val().trim(),
-                newPassword: this.$el.find("#newPassword").val().trim(),
+                errors         : false,
+                messages       : false,
+                errObj         : false,
+                email          : this.$el.find("#email").val().trim(),
+                firstName      : this.$el.find("#firstName").val().trim(),
+                lastName       : this.$el.find("#lastName").val().trim(),
+                password       : this.$el.find("#password").val().trim(),
+                newPassword    : this.$el.find("#newPassword").val().trim(),
                 confirmPassword: this.$el.find("#confirmPassword").val().trim()
             };
 
-            // update state data
             this.stateModel.set(stateModelUpdate);
 
-            // validations
             validation.checkEmailField(errObj, true, stateModelUpdate.email, 'email');
             validation.checkNameField(errObj, true, stateModelUpdate.firstName, 'firstName');
             validation.checkNameField(errObj, true, stateModelUpdate.lastName, 'lastName');
             if (stateModelUpdate.newPassword || stateModelUpdate.password) {
-                // if need validate passwords
                 validation.checkPasswordField(errObj, true, stateModelUpdate.password, 'password');
                 validation.checkPasswordField(errObj, true, stateModelUpdate.newPassword, 'newPassword');
                 validation.checkPasswordField(errObj, true, stateModelUpdate.confirmPassword, 'confirmPassword');
@@ -115,15 +112,14 @@ define([
                 }
                 this.stateModel.set(stateModelUpdate);
 
-                // if errors prevent request
                 return this;
             }
 
             data = {
-                email: stateModelUpdate.email,
-                password: stateModelUpdate.password,
-                firstName: stateModelUpdate.firstName,
-                lastName: stateModelUpdate.lastName
+                email     : stateModelUpdate.email,
+                password  : stateModelUpdate.password,
+                firstName : stateModelUpdate.firstName,
+                lastName  : stateModelUpdate.lastName
             };
 
             if (stateModelUpdate.newPassword) {
@@ -136,12 +132,12 @@ define([
                 data: data,
                 success: function (response) {
                     self.stateModel.set({
-                        password: '',
-                        newPassword: '',
+                        password       : '',
+                        newPassword    : '',
                         confirmPassword: '',
-                        errors: false,
-                        messages: false,
-                        errObj: false
+                        errors         : false,
+                        messages       : false,
+                        errObj         : false
                     });
 
                     alert('Profile updated successfully');
@@ -151,13 +147,12 @@ define([
                     App.router.navigate("main", {trigger: true});
                 },
                 error: function (err) {
-                    //App.error(err);
 
                     self.stateModel.set({
-                        errors: [err.responseJSON.error],
-                        password: '',
+                        errors         : [err.responseJSON.error],
+                        password       : '',
                         confirmPassword: '',
-                        newPassword: ''
+                        newPassword    : ''
                     });
                 }
             });
@@ -168,7 +163,6 @@ define([
         render: function () {
             var data = App.sessionData.toJSON().user;
 
-            // concat user old and new data
             data = _.extend(data, this.stateModel.toJSON());
 
             this.$el.html(_.template(template, data));

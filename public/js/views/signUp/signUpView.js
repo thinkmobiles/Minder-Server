@@ -20,11 +20,11 @@ define([
 
 
         events: {
-            "submit #loginForm": "signUp",
-            "click .signUpButton": "signUp",
-            "focusin .form-control": "clearField",
-            "click #captcha": "clearField",
-            "click .customCheckbox": "clearField"
+            "submit #loginForm"     : "signUp",
+            "click .signUpButton"   : "signUp",
+            "focusin .form-control" : "clearField",
+            "click #captcha"        : "clearField",
+            "click .customCheckbox" : "clearField"
         },
 
         clearField: function (event){
@@ -38,23 +38,17 @@ define([
             container.find('.alert-danger').remove();
         },
 
-        //clearChekField: function(){
-        //    var target = $(event.target);
-        //    target.sibling('.alert-danger').remove();
-        //},
-
-        //reset the data
         setDefaultData: function () {
             var defaultData = {
-                email: '',
-                password: '',
-                confirmPassword: '',
-                firstName: '',
-                lastName: '',
-                iAcceptConditions: false,
-                errors: false,
-                messages: false,
-                errObj: false
+                email             : '',
+                password          : '',
+                confirmPassword   : '',
+                firstName         : '',
+                lastName          : '',
+                iAcceptConditions : false,
+                errors            : false,
+                messages          : false,
+                errObj            : false
             };
             if (this.stateModel) {
                 this.stateModel.set(defaultData);
@@ -64,7 +58,6 @@ define([
         },
 
         afterUpend: function () {
-            //update page when reopened
             this.setDefaultData();
             this.render();
         },
@@ -78,26 +71,26 @@ define([
             var errors = [];
             var messages = [];
             var errObj = {
-                email:[],
+                email      :[],
                 condAndTerm:[],
-                captcha:[]
+                captcha    :[]
             };
 
             var captchaData;
 
             captchaData = {
-                challenge: Recaptcha.get_challenge(),
-                response: Recaptcha.get_response()
+                challenge : Recaptcha.get_challenge(),
+                response  : Recaptcha.get_response()
             };
 
             var stateModelUpdate = {
-                errors: false,
-                messages: false,
-                errObj: false,
-                email: this.$el.find("#email").val().trim(),
-                firstName: this.$el.find("#firstName").val().trim(),
-                lastName: this.$el.find("#lastName").val().trim(),
-                password: this.$el.find("#password").val().trim(),
+                errors         : false,
+                messages       : false,
+                errObj         : false,
+                email          : this.$el.find("#email").val().trim(),
+                firstName      : this.$el.find("#firstName").val().trim(),
+                lastName       : this.$el.find("#lastName").val().trim(),
+                password       : this.$el.find("#password").val().trim(),
                 confirmPassword: this.$el.find("#confirmPassword").val().trim(),
                 iAcceptConditions: this.$el.find("#iAcceptConditions").prop('checked')
             };
@@ -106,7 +99,6 @@ define([
             this.stateModel.set(stateModelUpdate);
 
             if (!stateModelUpdate.email || !validation.validEmail(stateModelUpdate.email)) {
-                //messages.push('Email is invalid');
                 errObj.email.push('Password is not equal to confirm password');
             }
 
@@ -116,12 +108,10 @@ define([
             validation.checkPasswordField(errObj, true, stateModelUpdate.confirmPassword, 'confirmPassword');
 
             if (stateModelUpdate.password !== stateModelUpdate.confirmPassword) {
-                //messages.push('Password is not equal to confirm password');
                 errObj.confirmPassword.push('Password is not equal to confirm password');
             }
 
             if (!stateModelUpdate.iAcceptConditions) {
-                //messages.push('Terms and conditions is not checked');
                 errObj.condAndTerm.push('Terms and conditions is not checked');
             }
 
@@ -148,23 +138,23 @@ define([
                 return this;
             }
             $.ajax({
-                url: "/signUp",
-                type: "POST",
-                data: {
-                    email: stateModelUpdate.email,
-                    pass: stateModelUpdate.password,
-                    firstName: stateModelUpdate.firstName,
-                    lastName: stateModelUpdate.lastName,
+                url  : "/signUp",
+                type : "POST",
+                data : {
+                    email     : stateModelUpdate.email,
+                    pass      : stateModelUpdate.password,
+                    firstName : stateModelUpdate.firstName,
+                    lastName  : stateModelUpdate.lastName,
                     captchaChallenge: captchaData.challenge,
-                    captchaResponse: captchaData.response
+                    captchaResponse : captchaData.response
                 },
                 success: function () {
                     self.stateModel.set({
-                        password: '',
+                        password       : '',
                         confirmPassword: '',
-                        email: '',
-                        firstName: '',
-                        lastName: '',
+                        email          : '',
+                        firstName      : '',
+                        lastName       : '',
                         iAcceptConditions: false
                     });
                     App.router.navigate("confirm", {trigger: true});
@@ -172,8 +162,8 @@ define([
                 error: function (err) {
                     //App.error(err);
                     self.stateModel.set({
-                        errors: [err.responseJSON.error],
-                        password: null,
+                        errors     : [err.responseJSON.error],
+                        password   : null,
                         confirmPassword: null
                     });
 
@@ -186,8 +176,8 @@ define([
             this.$el.html(_.template(template, this.stateModel.toJSON()));
 
             Recaptcha.create(config.recaptchaSiteKey, 'captcha', {
-                tabindex: 4,
-                theme: "clean"
+                tabindex : 4,
+                theme    : "clean"
             });
 
             return this;

@@ -17,12 +17,12 @@ define([
         },
 
         checkLogin: function(){
-            var token = this.token;
-            var thisEl=this.$el;
+            var token  = this.token;
+            var thisEl = this.$el;
 
             $.ajax({
-                url: "/confirmEmail/"+token,
-                type: "GET",
+                url  : "/confirmEmail/" + token,
+                type : "GET",
                 success: function () {
                     thisEl.find('#confirm_email').text('Your account has been activated!');
                 },

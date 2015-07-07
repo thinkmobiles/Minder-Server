@@ -10,26 +10,24 @@ define([
         initialize: function () {
             this.setDefaultData();
 
-            // keep data actual
             this.listenTo(this.stateModel, 'change', this.render);
 
             this.render();
         },
 
         events: {
-            "submit #loginForm": "login",
-            "click .login-button": "login"
+            "submit #loginForm"    : "login",
+            "click .login-button"  : "login"
         },
 
-        //reset the data
         setDefaultData: function () {
             var defaultData = {
-                rememberMe:false,
-                email: '',
-                password: '',
-                errors: false,
-                messages: false,
-                errObj: false
+                rememberMe  :false,
+                email       : '',
+                password    : '',
+                errors      : false,
+                messages    : false,
+                errObj      : false
             };
 
             if (this.stateModel) {
@@ -40,7 +38,6 @@ define([
         },
 
         afterUpend: function () {
-            //update page when reopened
             this.setDefaultData();
             this.render();
         },
@@ -55,16 +52,15 @@ define([
             var errObj = {};
 
             var stateModelUpdate = {
-                errors: false,
-                messages: false,
-                email: this.$el.find("#email").val().trim(),
-                password: this.$el.find("#password").val().trim(),
-                rememberMe: this.$el.find('#rememberMe').prop('checked')
+                errors     : false,
+                messages   : false,
+                email      : this.$el.find("#email").val().trim(),
+                password   : this.$el.find("#password").val().trim(),
+                rememberMe : this.$el.find('#rememberMe').prop('checked')
             };
 
             this.stateModel.set(stateModelUpdate);
 
-            // validation
             validation.checkEmailField(messages, true, stateModelUpdate.email, 'Email');
             validation.checkPasswordField(errObj, true, stateModelUpdate.password, 'Password');
 
@@ -82,44 +78,41 @@ define([
                     stateModelUpdate.messages = messages;
                 }
                 this.stateModel.set(stateModelUpdate);
-                // if errors prevent request
                 return this;
             }
             $.ajax({
-                url: "/signIn",
-                type: "POST",
+                url     : "/signIn",
+                type    : "POST",
                 dataType: 'json',
-                data: {
-                    email: stateModelUpdate.email,
-                    pass: stateModelUpdate.password,
-                    rememberMe : stateModelUpdate.rememberMe
+                data:{
+                    email     : stateModelUpdate.email,
+                    pass      : stateModelUpdate.password,
+                    rememberMe: stateModelUpdate.rememberMe
                 },
                 success: function (response) {
                     App.sessionData.set({
-                        authorized: true,
-                        admin: false,
-                        user: response.user
+                        authorized : true,
+                        admin      : false,
+                        user       : response.user
                     });
                     App.router.navigate("main", {trigger: true});
                     self.stateModel.set({
-                        password: '',
-                        errors: false,
-                        messages: false,
-                        email: ''
+                        password  : '',
+                        errors    : false,
+                        messages  : false,
+                        email     : ''
                     });
                 },
                 error: function (err) {
                     App.sessionData.set({
-                        authorized: false,
-                        admin: false,
-                        user: null
+                        authorized : false,
+                        admin      : false,
+                        user       : null
                     });
 
-                    //App.error(err);
-
                     self.stateModel.set({
-                        errors: [err.responseJSON.error],
-                        password: null
+                        errors     : [err.responseJSON.error],
+                        password   : null
                     });
                 }
             });

@@ -8,30 +8,27 @@ define([
         initialize: function (options) {
             var self = this;
 
-            // set the default page if it not set
             if (options.page < 1) {
                 options.page = 1;
             }
 
-            // set the settings of pagination
             this.stateModel = new Backbone.Model({
-                count: 0, // count of items in collection
-                onPage: options.onPage || 10, // set the items on 1 page
-                page: options.page || 1, // set the page number
-                padding: options.padding || 3, // set the padding before and after the page
-                url: options.url || '', // set the url to go
-                urlPagination: options.urlPagination || false, // make the pagination reload the page by router
-                pages: [], // pages array for template
-                ends: options.ends, // if true - quick ends linc
-                steps: options.steps, //if true - quick nav linc
-                data: options.data // filters for server
+                count         : 0,
+                onPage        : options.onPage  || 10,
+                page          : options.page    || 1,
+                padding       : options.padding || 3,
+                url           : options.url     || '',
+                urlPagination : options.urlPagination || false,
+                ends          : options.ends,
+                steps         : options.steps,
+                data          : options.data,
+                pages         : []
             });
 
-            this.collection = options.collection; // collection to control
+            this.collection = options.collection;
 
-            self.count(); // cont the pages and fetch the current
+            self.count();
 
-            // cont the pages and fetch the current when the page parameter is changing
             this.stateModel.on('change:page', function () {
                 self.count();
             });
@@ -40,14 +37,10 @@ define([
         tagName: 'nav',
 
         events: {
-            'click .goToPage': 'goToPage'
+            'click .goToPage' : 'goToPage'
         },
 
-        // go to page in not url mode
         goToPage: function (event) {
-
-            //$('#globalDevicesChecker').prop('checked', true);
-
             event.preventDefault();
             var page = event.currentTarget.getAttribute('value');
             page = parseInt(page);
@@ -56,13 +49,13 @@ define([
             });
         },
 
-        // get pages count
         count: function () {
             var self = this;
             $.ajax({
-                url: "/devices/count",
-                type: "GET",
-                data: this.getFilters(),
+                url   : "/devices/count",
+                type  : "GET",
+                data  : this.getFilters(),
+
                 success: function (response) {
                     self.stateModel.set({
                         count: response.count
@@ -75,39 +68,35 @@ define([
             });
         },
 
-        // prepare filters for fetch
         getFilters: function () {
             return _.extend({
-                page: this.stateModel.get('page'),
-                count: this.stateModel.get('onPage')
+                page  : this.stateModel.get('page'),
+                count : this.stateModel.get('onPage')
             }, this.stateModel.get('data'));
         },
 
-        // fetch the data
         loadPage: function () {
             this.collection.fetch({
                 data: this.getFilters()
             });
         },
 
-        // refresh the current page if the parent view is need
         refresh: function () {
             this.count();
         },
 
-        // generate pages array logic
         calculate: function () {
-            var count = this.stateModel.get('count') || 0;
+            var count  = this.stateModel.get('count') || 0;
             var onPage = this.stateModel.get('onPage');
             var paddingBefore = this.stateModel.get('padding');
-            var paddingAfter = this.stateModel.get('padding');
-            var allPages = Math.ceil(count / onPage);
+            var paddingAfter  = this.stateModel.get('padding');
+            var allPages      = Math.ceil(count / onPage);
             var pages = [];
             var start = 1;
-            var end = 1;
-            var ends = this.stateModel.get('ends');
+            var end   = 1;
+            var ends  = this.stateModel.get('ends');
             var steps = this.stateModel.get('steps');
-            var page = this.stateModel.get('page');
+            var page  = this.stateModel.get('page');
 
             if ((page - paddingBefore) < 1) {
                 start = 1;
@@ -127,23 +116,23 @@ define([
             } else {
                 if (ends) {
                     pages.push({
-                        html: "&lt;&lt;first",
-                        data: 1,
-                        clNam: true
+                        html  : "&lt;&lt;first",
+                        data  : 1,
+                        clNam : true
                     });
                 }
                 if (steps) {
                     if (page < 2) {
                         pages.push({
-                            html: "&lt;&lt;prev",
-                            data: 1,
-                            clNam: true
+                            html  : "&lt;&lt;prev",
+                            data  : 1,
+                            clNam : true
                         });
                     } else {
                         pages.push({
-                            html: "&lt;&lt;prev",
-                            data: page - 1,
-                            clNam: true
+                            html  : "&lt;&lt;prev",
+                            data  : page - 1,
+                            clNam : true
                         });
                     }
 
@@ -151,24 +140,24 @@ define([
 
                 for (; start <= end; start++) {
                     pages.push({
-                        html: start,
-                        data: start,
-                        active: start === page
+                        html   : start,
+                        data   : start,
+                        active : start === page
                     });
                 }
 
                 if (steps) {
                     if (page < allPages) {
                         pages.push({
-                            html: 'next&gt;&gt;',
-                            data: page + 1,
-                            clNam: true
+                            html  : 'next&gt;&gt;',
+                            data  : page + 1,
+                            clNam : true
                         });
                     } else {
                         pages.push({
-                            html: 'next&gt;&gt;',
-                            data: allPages,
-                            clNam: true
+                            html  : 'next&gt;&gt;',
+                            data  : allPages,
+                            clNam : true
                         });
                     }
 
@@ -176,20 +165,20 @@ define([
 
                 if (ends) {
                     pages.push({
-                        html: 'last&gt;&gt;',
-                        data: allPages,
-                        clNam: true
+                        html   : 'last&gt;&gt;',
+                        data   : allPages,
+                        clNam  : true
                     });
                 }
                 this.stateModel.set({
                     pages: pages
                 });
             }
-            this.loadPage(); // fetch
-            this.render(); // render
+
+            this.loadPage();
+            this.render();
         },
 
-        // set the  filters by parent view (for search)
         setData: function (data) {
             this.stateModel.set({
                 data: data,

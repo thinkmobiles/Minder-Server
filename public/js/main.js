@@ -11,25 +11,24 @@ var App = {
 
 require.config({
     paths: {
-        jQuery: './libs/jquery-2.1.0.min.map',
-        //costCounter: './libs/costCounter',
-        costCounter: './libs/costCounter_2',
-        Underscore: './libs/underscore-min.map.1.6.0',
-        Bootstrap: './libs/bootstrap.min',
-        Backbone: './libs/backbone-min.map.1.1.2',
-        less: './libs/less.min',
-        templates: '../templates', // templates dir not error
-        text: './libs/text',
-        common: 'common',
-        recaptcha: "//www.google.com/recaptcha/api/js/recaptcha_ajax", // google recaptcha v1
-        stripeCheckout: '//checkout.stripe.com/checkout' // stripe modal
+        jQuery        : './libs/jquery-2.1.0.min.map',
+        costCounter   : './libs/costCounter_2',
+        Underscore    : './libs/underscore-min.map.1.6.0',
+        Bootstrap     : './libs/bootstrap.min',
+        Backbone      : './libs/backbone-min.map.1.1.2',
+        less          : './libs/less.min',
+        templates     : '../templates',
+        text          : './libs/text',
+        common        : 'common',
+        recaptcha     : "//www.google.com/recaptcha/api/js/recaptcha_ajax",
+        stripeCheckout: '//checkout.stripe.com/checkout'
     },
     shim: {
-        'ajaxForm': ['jQuery'],
-        'Bootstrap': ['jQuery'],
-        'Backbone': ['Underscore', 'jQuery'],
-        'app': ['Backbone', 'less', 'Bootstrap', 'costCounter'],
-        "recaptcha": {
+        'ajaxForm'    : ['jQuery'],
+        'Bootstrap'   : ['jQuery'],
+        'Backbone'    : ['Underscore', 'jQuery'],
+        'app'         : ['Backbone', 'less', 'Bootstrap', 'costCounter'],
+        "recaptcha"   : {
             exports: 'Recaptcha'
         },
         "stripeCheckout": {
@@ -40,7 +39,6 @@ require.config({
 
 require(['app'], function (app) {
 
-    // global error handler
     App.error = function (xhr) {
         if (xhr) {
             if (xhr.status === 401 || xhr.status === 403) {
@@ -49,8 +47,8 @@ require(['app'], function (app) {
                         Backbone.history.navigate("login", {trigger: true});
                     }
                     App.sessionData.set({
-                        authorized: false,
-                        user: null
+                        authorized : false,
+                        user       : null
                     });
                 } else {
                     alert("You do not have permission to perform this action");
@@ -67,10 +65,11 @@ require(['app'], function (app) {
         }
     };
 
-    App.updateUser = function () {  //update user data when subscription is change
+    App.updateUser = function () {
         $.ajax({
-            url: "/currentUser",
-            type: "GET",
+            url   : "/currentUser",
+            type  : "GET",
+
             success: function (data) {
                 App.sessionData.set({
                     user: data
