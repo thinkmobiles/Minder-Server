@@ -1,10 +1,10 @@
 define(function () {
 
-    // check authorization
     var checkLogin = function (callback) {
         $.ajax({
-            url: "/currentUser",
-            type: "GET",
+            url  : "/currentUser",
+            type : "GET",
+
             success: function (data) {
                 return callback(null, data);
             },

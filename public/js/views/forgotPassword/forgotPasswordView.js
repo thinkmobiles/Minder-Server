@@ -10,42 +10,36 @@ define([
         initialize: function () {
 
             this.stateModel = new Backbone.Model({
-                email: '',
-                errors: false,
-                messages: false
+                email    : '',
+                errors   : false,
+                messages : false
             });
 
-            // keep data actual
             this.listenTo(this.stateModel, 'change', this.render);
 
             this.render();
         },
 
         events: {
-            "submit #sendMailForm": "sendMail",
-            "click .sendMailButton": "sendMail"
+            "submit #sendMailForm"   : "sendMail",
+            "click .sendMailButton"  : "sendMail"
         },
 
         sendMail: function (event) {
             event.preventDefault();
 
             var self = this;
-
-            // messages for user
             var errors = [];
             var messages = [];
 
-            // delete previous messages
-            // and get actual data
             var stateModelUpdate = {
-                errors: false,
-                messages: false,
-                email: this.$el.find("#email").val().trim()
+                errors   : false,
+                messages : false,
+                email    : this.$el.find("#email").val().trim()
             };
 
             this.stateModel.set(stateModelUpdate);
 
-            // stack of validations ...
             if (!stateModelUpdate.email || !validation.validEmail(stateModelUpdate.email)) {
                 messages.push('Email is invalid');
             }
@@ -61,7 +55,6 @@ define([
                 return this;
             }
 
-            // if ok send query
             $.ajax({
                 url: "/forgotPassword",
                 type: "POST",
@@ -71,23 +64,22 @@ define([
                 success: function () {
                     alert('Email send');
                     self.stateModel.set({
-                        email: '',
-                        errors: false,
-                        messages: false
+                        email    : '',
+                        errors   : false,
+                        messages : false
                     });
                     App.router.navigate('login', {
-                        trigger: true
+                        trigger  : true
                     })
                 },
                 error: function (err) {
                     self.stateModel.set({
-                        errors: false,
-                        messages: false
+                        errors   : false,
+                        messages : false
                     });
-                    //App.error(err);
                     self.stateModel.set({
-                        errors: [err.responseJSON.error],
-                        email: ''
+                        errors   : [err.responseJSON.error],
+                        email    : ''
                     });
                 }
             });

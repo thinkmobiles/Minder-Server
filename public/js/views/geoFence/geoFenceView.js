@@ -82,7 +82,6 @@ define([
         },
 
         saveDeviceFence : function(){
-            var self = this;
             var resCenter = this.circle.getCenter();
             if (resCenter) {
                 var saveData = {
@@ -134,7 +133,7 @@ define([
                         enabled: this.$el.find('#check_fence').prop('checked'),
                         fixedLocation: {
                             long: resCenter.lng(),
-                            lat: resCenter.lat()
+                            lat : resCenter.lat()
                         },
                         radius: this.$el.find('#radius').val().trim()
                     }
@@ -146,7 +145,7 @@ define([
 
             this.stateModel.url = '/devices/' + this.stateModel.get('_id');
             this.stateModel.save(saveData, {
-                wait: true,
+                wait   : true,
                 success: function () {
                     $('.activeN').text(newName);
                     self.hideDialog();
@@ -166,6 +165,8 @@ define([
             var self = this;
             var startLat=this.stateModel.get('geoFence').fixedLocation.lat;
             var startLng=this.stateModel.get('geoFence').fixedLocation.long;
+            var markerOptions;
+            var circleOptions;
 
             var mapOptions = {
                 center    : new google.maps.LatLng(startLat ? startLat : 0,startLng ? startLng : 0),
@@ -177,13 +178,13 @@ define([
 
             this.map = new google.maps.Map(document.getElementById("map_container"), mapOptions);
 
-            var markerOptions={
+            markerOptions={
                 map: self.map,
                 icon: {
                     url: '/images/markers/default.png'
                 }
             };
-            var circleOptions = {
+            circleOptions = {
                 strokeColor : '#FF0000',
                 strokeWeight: 1.5,
                 fillopacity : 1,

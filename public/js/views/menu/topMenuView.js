@@ -4,55 +4,49 @@ define([
 
     var View;
     View = Backbone.View.extend({
+
         el: '#topMenu',
 
         events: {
-            'click #logOut': 'logout',
-            'click .topMenuItem' :'changeTab'
+            'click #logOut'       : 'logout',
+            'click .topMenuItem'  : 'changeTab'
         },
 
-        // if authorized items
         topMenuLeftItemsRaw: [
             {
-                name: "Home",
-                url: "#main",
-                title: "homepage_but"
+                name   : "Home",
+                url    : "#main",
+                title  : "homepage_but"
             }, {
-                name: "Devices",
-                url: "#devices",
-                title: "devices_but"
+                name   : "Devices",
+                url    : "#devices",
+                title  : "devices_but"
             }, {
-                name: "Billing info",
-                url: "#billingInfo",
-                title: "billing_but"
+                name   : "Billing info",
+                url    : "#billingInfo",
+                title  : "billing_but"
             }
         ],
-
         topMenuRightDropdownItemsRaw: [
             {
-                name: "Profile",
-                url: "#profile",
-                title: "User profile"
+                name   : "Profile",
+                url    : "#profile",
+                title  : "User profile"
             }
         ],
-
-        // if !authorized items
         topRightMenuItemsRaw: [
             {
-                name: "Sign in",
-                url: "#login",
-                title: "signin_but"
+                name   : "Sign in",
+                url    : "#login",
+                title  : "signin_but"
             }, {
-                name: "Sign up",
-                url: "#signUp",
-                title: "Signup_but"
+                name   : "Sign up",
+                url    : "#signUp",
+                title  : "Signup_but"
             }
         ],
 
         initialize: function () {
-            // keep menu actual
-            this.activeButton=window.location.hash;
-
             this.listenTo(App.sessionData, 'change:authorized', this.render);
             this.listenTo(App.sessionData, 'change:user', this.render);
 
@@ -67,19 +61,16 @@ define([
 
         },
 
-        // logout action
         logout: function () {
             $.ajax({
-                url: "/signOut",
-                type: "POST",
+                url  : "/signOut",
+                type : "POST",
+
                 success: function () {
-                    // remove user data
-                    // and trigger other views to clean up
-                    // and block routs
                     App.sessionData.set({
-                        authorized: false,
-                        admin: false,
-                        user: null
+                        authorized : false,
+                        admin      : false,
+                        user       : null
                     });
                     App.router.navigate("login", {trigger: true});
                 },
@@ -89,7 +80,6 @@ define([
             });
         },
 
-        // if the user name is to long cut it
         prettifyString: function (string, size) {
             if (!size) {
                 size = 20;
@@ -103,15 +93,15 @@ define([
         render: function () {
             var authorized = App.sessionData.get('authorized');
             var user = App.sessionData.get('user');
+            var activeButton = window.location.hash;
             var data = {
-                top: this.topMenuLeftItemsRaw,
-                dropDown: this.topMenuRightDropdownItemsRaw,
-                topRight: this.topRightMenuItemsRaw,
-                authorized: authorized,
-                actButt: this.activeButton
+                top        : this.topMenuLeftItemsRaw,
+                dropDown   : this.topMenuRightDropdownItemsRaw,
+                topRight   : this.topRightMenuItemsRaw,
+                authorized : authorized,
+                actButt    : activeButton
             };
 
-            // if the user name is to long cut it
             if (user) {
                 data.username = this.prettifyString(user.firstName + ' ' + user.lastName, 20);
             }

@@ -15,16 +15,16 @@ define([
         },
 
         events: {
-            "submit #resetPasswordForm": "resetPassword",
-            "click .resetPasswordFormSubmit": "resetPassword"
+            "submit #resetPasswordForm"      : "resetPassword",
+            "click .resetPasswordFormSubmit" : "resetPassword"
         },
 
         setDefaultStateModel: function () {
             var defaultData = {
-                newPassword: '',
+                newPassword    : '',
                 confirmPassword: '',
-                errors: false,
-                messages: false
+                errors         : false,
+                messages       : false
             };
 
             if (this.stateModel) {
@@ -52,15 +52,14 @@ define([
             var messages = [];
 
             var stateModelUpdate = {
-                errors: false,
-                messages: false,
-                newPassword: this.$el.find("#newPassword").val().trim(),
+                errors         : false,
+                messages       : false,
+                newPassword    : this.$el.find("#newPassword").val().trim(),
                 confirmPassword: this.$el.find("#confirmPassword").val().trim()
             };
 
             this.stateModel.set(stateModelUpdate);
 
-            // validations
             validation.checkPasswordField(messages, true, stateModelUpdate.newPassword, 'New password');
             validation.checkPasswordField(messages, true, stateModelUpdate.confirmPassword, 'Confirm password');
 
@@ -77,14 +76,13 @@ define([
                 }
                 this.stateModel.set(stateModelUpdate);
 
-                // if errors prevent request
                 return this;
             }
             $.ajax({
-                url: "/resetPassword",
-                type: "POST",
-                data: {
-                    token: self.stateModel.get('token'),
+                url    : "/resetPassword",
+                type   : "POST",
+                data   : {
+                    token   : self.stateModel.get('token'),
                     password: stateModelUpdate.newPassword
                 },
                 success: function () {

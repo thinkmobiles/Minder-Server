@@ -1,6 +1,8 @@
 define(['validation'], function (validation) {
     var Model = Backbone.Model.extend({
+
         idAttribute: "_id",
+
         url: function () {
             return "/devices/" + this.get('_id');
         },
