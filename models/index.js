@@ -21,6 +21,17 @@ Array.prototype.toObjectId = function () {
     return _arrayOfID;
 };
 
+Array.prototype.toStringObjectIds = function () {
+    var arr = this.map(function (_objectId) {
+        if (_objectId instanceof ObjectId) {
+            return _objectId.toString();
+        } else {
+            throw new Error({ message: 'Incorrect value for ObjectId' });
+        }
+    });
+    return arr;
+};
+
 module.exports = (function () {
     require('./device.js');
     require('./user.js');
