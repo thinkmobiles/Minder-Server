@@ -29,12 +29,34 @@ cursor.forEach(function ( device ) {
 
 db.Devices.update({}, {$set: {"geoFence": {"enabled": false}}}, {multi: true});
 db.Devices.update({}, {$set: {"sync": {
-    "enabled": false
+    "enabled": false,
     "radius": 3000,
     "fixedLocation": {
         long: 0,
         lat: 0
     }
 }}}, {multi: true});
+
+
+var users = db.Devices.aggregate([{
+    $group: {
+        _id: "$user", 
+        count: {$sum: 1}, 
+        devices: {$push:"$_id"}
+    }
+}]);
+
+users.forEach(function (user) {
+    var criteria = {
+        _id: user._id
+    };
+    var update = {
+        $set: {
+            devices: user.devices
+        }
+    }
+    
+    db.Users.update(criteria, update, {mutli: true});
+});
 
 print('>>> ... success');
