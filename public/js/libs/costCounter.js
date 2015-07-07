@@ -1,12 +1,12 @@
 (function () {
     function costCounter(data, cb) {
-        var subscribedDevices = data.user.billings.subscribedDevices;
+        var subscribedDevices    = data.user.billings.subscribedDevices;
         var selectedDevicesCount = data.selectedDevicesCount;
         var forCounter = data.forCounter;
-        var plans = data.plans;
+        var plans      = data.plans;
         var devicesToPay = 0;
         var plan;
-        var date = data.date;
+        var date   = data.date;
         var period = data.period || 'month';
         var maxDevicesForUser = 0;
         var expirationDate;
@@ -26,10 +26,10 @@
         }
 
         result = {
-            amount: 0,
-            devicesToPay: 0,
-            subscribedDevices: subscribedDevices,
-            maxDevices: 0,
+            amount              : 0,
+            devicesToPay        : 0,
+            subscribedDevices   : subscribedDevices,
+            maxDevices          : 0,
             selectedDevicesCount: selectedDevicesCount
         };
 
@@ -62,15 +62,15 @@
         result.devicesToPay = devicesToPay;
 
         if (plan) {
-            result.amount = devicesToPay * plan.amount;
-            result.plan = plan.name;
+            result.amount   = devicesToPay * plan.amount;
+            result.plan     = plan.name;
             result.planData = plan;
-            result.planId = plan.id;
-            result.plan_id = plan._id;
-            result.period = period;
-            result.maxDevices = plan.metadata.maxDevices;
+            result.planId   = plan.id;
+            result.plan_id  = plan._id;
+            result.period   = period;
+            result.maxDevices        = plan.metadata.maxDevices;
             result.subscribedDevices = subscribedDevices;
-            result.expirationDate = expirationDate;
+            result.expirationDate    = expirationDate;
         }
 
         cb(null, result);

@@ -3,10 +3,12 @@ define([
     'text!templates/profile/profileTemplate.html',
     'custom',
     'validation'
-], function (router,
-             template,
-             Custom,
-             validation) {
+], function (
+    router,
+    template,
+    Custom,
+    validation)  {
+
 
     var View;
     View = Backbone.View.extend({

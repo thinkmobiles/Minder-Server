@@ -8,7 +8,6 @@ define([
     'views/geoFence/geoFenceView',
     'config/config',
     'stripeCheckout'
-
 ], function (
     Template,
     ModalTemplate,

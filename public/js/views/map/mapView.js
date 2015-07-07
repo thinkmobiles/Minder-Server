@@ -5,6 +5,7 @@ define([
 
     var View;
     View = Backbone.View.extend({
+
         el: '#map',
 
         initialize: function () {
@@ -20,8 +21,8 @@ define([
                 center        : new google.maps.LatLng(0, 0),
                 zoom          : 2,
                 mapTypeId     : google.maps.MapTypeId.ROADMAP,
-                minZoom       :2,
-                streetViewControl:false
+                minZoom       : 2,
+                streetViewControl: false
             };
 
             this.map = new google.maps.Map(document.getElementById("map"), mapOptions);

@@ -113,8 +113,8 @@ define([
 
 
             this.paginationView.setData({
-                status: STATUSES.SUBSCRIBED,
-                name: ''
+                status : STATUSES.SUBSCRIBED,
+                name   : ''
             });
 
         },

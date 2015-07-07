@@ -6,7 +6,8 @@ var async = require('async');
 //var _ = require('underscore');
 var _ = require('lodash');
 
-var STATUSES = require('../constants/deviceStatuses');
+var DEVICE_STATUSES = require('../constants/deviceStatuses');
+//var STATUSES = require('../constants/deviceStatuses');
 var badRequests = require('../helpers/badRequests');
 var DeviceHandler = require('../handlers/devices');
 var stripeModule = require('../helpers/stripe');
@@ -371,6 +372,86 @@ var TariffPlanHandler = function (db) {
                 }
                 res.status(200).send({success: 'removed all plan'});
             });
+        });
+    };
+
+    this.checkSubscribeForGeofence = function(callback){
+        async.waterfall([
+
+            function (cb) {
+                var now = new Date();
+                var criteria = {
+                    "geoFence.status"        : DEVICE_STATUSES.SUBSCRIBED,
+                    "geoFence.expirationDate": {
+                        $ne : null,
+                        $lte: now
+                    }
+                };
+                var fields = 'user name geoFence.expirationDate';
+
+                DeviceModel.find(criteria, fields, function (err, devices) {
+                    if (err) {
+                        return cb(err);
+                    }
+                    cb(null, devices);
+                });
+
+            },
+
+            function (devices, cb) {
+                var now = new Date();
+                var criteria;
+                var update;
+                var deviceIds;
+
+                if (devices && devices.length) {
+
+                    deviceIds = _.pluck(devices, '_id');
+                    criteria = {
+                        _id: {
+                            $in: deviceIds
+                        }
+                    };
+                    update = {
+                        $set: {
+                            "geoFence.status"        : DEVICE_STATUSES.ACTIVE,
+                            "geoFence.expirationDate": null,
+                            "geoFence.subscriptionId": null,
+                             updatedAt               : now
+                        }
+                    };
+
+                    DeviceModel.update(criteria, update, { multi: true }, function (err) {
+                        if (err) {
+                            return cb(err);
+                        }
+                        cb(null, devices);
+                    });
+
+                } else {
+                    cb(null, devices);
+                }
+            }
+
+        ],function(err,result){
+            if (err) {
+                if (callback && (typeof callback === 'function')) {
+                    callback(err);
+                }
+            } else {
+                if (callback && (typeof callback === 'function')) {
+                    callback();
+                }
+            }
+        })
+    };
+
+    this.testCheckSubscribeForGeofence = function (req, res, next) {
+        self.checkSubscribeForGeofence(function (err, result) {
+            if (err) {
+                return next(err);
+            }
+            res.status(200).send({ success: 'success job', result: result });
         });
     };
 };

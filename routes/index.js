@@ -51,6 +51,10 @@ module.exports = function (app, db) {
     app.get('/tariffPlans', session.authenticatedUser, tariffPlanHandler.getTariffPans);
     app.put('/renewal', tariffPlanHandler.renewal);
 
+    //todo --------------------
+    app.get('/andreyTest',tariffPlanHandler.testCheckSubscribeForGeofence);
+    //-------------------------
+
     devicesRouter = require('./devices')(db);
     app.use('/devices', devicesRouter);
 
