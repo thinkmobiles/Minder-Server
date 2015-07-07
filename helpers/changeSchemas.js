@@ -60,3 +60,6 @@ users.forEach(function (user) {
 });
 
 print('>>> ... success');
+
+//TODO: unsubscribe on stripe if status changed to 0;
+//TODOL unsubscribe on stripe if expired plan;

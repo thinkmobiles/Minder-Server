@@ -56,7 +56,7 @@ db.once('open', function() {
         next();
     };
     app.use(allowCrossDomain);
-
+    
     app.use(express.static(__dirname + '/public'));
     app.engine('html', consolidate.swig);
     app.set('views', __dirname + '/public/static');
