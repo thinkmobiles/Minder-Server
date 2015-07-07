@@ -1447,24 +1447,48 @@ var DeviceHandler = function (db) {
                     criteria.user = userId;
                 }
                 
-                DeviceModel.findOne(criteria, function (err, device) {
-                    
-                    if (err) {
-                        return cb(err);
-                    } else if (!device) {
-                        return cb(badRequests.NotFound());
-                    }
-                    
-                    cb(null, device);
-                });
+                DeviceModel
+                    .findOne(criteria)
+                    .populate('user')
+                    .exec(function (err, deviceModel) {
+                        if (err) {
+                            return cb(err);
+                        } else if (!deviceModel) {
+                            return cb(badRequests.NotFound());
+                        }
+                        cb(null, deviceModel);
+                    });
             },
 
             //check the current status and unsubscribe on stripe if need;
-            //function (deviceModel, cb) {
-            //    if (deviceModel.status !== DEVICE_STATUSES.SUBSCRIBED || !deviceModel.billings.subscriptionId) { 
-                    
-            //    }
-            //},
+            function (deviceModel, cb) {
+                var findParams;
+
+                if (deviceModel.status !== DEVICE_STATUSES.SUBSCRIBED || !deviceModel.billings.subscriptionId) { 
+                    return cb(null, deviceModel);
+                }
+                
+                findParams = {
+                    deviceIds: [deviceId]
+                };
+                findSubscriptionIdsToUnsubscribe(findParams, function (err, subscriptionIds) {
+                    var userModel;
+                    var customerId;
+
+                    if (err) {
+                        return cb(err);
+                    }
+
+                    userModel = deviceModel.user;
+                    customerId = userModel.billings.stripeId;
+                    unsubscribeOnStripe(customerId, subscriptionIds, function (err) {
+                        if (err) {
+                            return cb(err);
+                        }
+                        cb(null, deviceModel);
+                    });
+                });
+            },
 
             //update the device:
             function (deviceModel, cb) {
@@ -1491,7 +1515,7 @@ var DeviceHandler = function (db) {
                 if (oldDeviceStatus === DEVICE_STATUSES.SUBSCRIBED) {
                     
                     updateParams = {
-                        userId: updatedDeviceModel.user.toString(),
+                        userModel: updatedDeviceModel.user,
                         quantity: -1 //decrement the subscribed devices counter;
                     };
                     
