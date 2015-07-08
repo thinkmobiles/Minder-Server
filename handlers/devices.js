@@ -1297,6 +1297,29 @@ var DeviceHandler = function (db) {
         });
     };
     
+    this.getCurrentDevice = function (req, res, next) {
+        var deviceId = req.session.deviceId;
+        var criteria;
+
+        if (!deviceId) {
+            return cb(badRequests.AccessError({ message: 'Please login from yur device', status: 403 }));
+        }
+        
+        criteria = {
+            _id: deviceId
+        };
+        
+        DeviceModel.findOne(criteria, DEVICE_FIELDS, function (err, deviceModel) {
+            if (err) {
+                return next(err);
+            } else if (!deviceModel) { 
+                return next(badRequests.NotFound());
+            } else { 
+                res.status(200).send(deviceModel);
+            }
+        });
+    };
+
     this.updateDevice = function (req, res, next) {
         var options = req.body;
         var userId = req.session.userId;

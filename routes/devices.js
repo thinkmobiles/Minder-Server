@@ -12,6 +12,7 @@ module.exports = function (db) {
     router.get('/cron', session.authenticatedUser, deviceHandler.testCronJobForCheckExpirationDates);                       //TODO: use for tests
     router.get('/notifications', session.authenticatedUser, deviceHandler.testCronJobForNotifications); //TODO: use for tests
 
+    router.get('/currentDevice', session.authenticatedUser, deviceHandler.getCurrentDevice);
     router.put('/locate', session.authenticatedUser, deviceHandler.setLocation);
     router.get('/', session.authenticatedUser, deviceHandler.getDevices);
     router.get('/count', session.authenticatedUser, deviceHandler.countDevices);
