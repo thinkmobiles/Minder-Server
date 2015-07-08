@@ -194,8 +194,6 @@ var SyncHandler = function (db) {
         var size = options.size;
         var file = req.files.file;
 
-        console.log('>>> session', req.session);
-
         async.waterfall([
 
             //validate params:

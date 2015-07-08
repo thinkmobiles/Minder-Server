@@ -10,7 +10,8 @@ var DEFAULT_FIELDS = {
     email: 1,
     billings: 1,
     role: 1,
-    confirmToken: 1
+    confirmToken: 1,
+    devices: 1
 } ;
 
 var async = require('async');
@@ -274,61 +275,124 @@ var UserHandler = function (db) {
 
     function signInMobile(req, res, next) {
         var options = req.body;
-        var criteria = {
-            minderId: options.minderId
-        };
-
+        
         if (!options.minderId || !options.deviceId) {
             return next(badRequests.NotEnParams({reqParams: ['minderId', 'deviceId']}));
         }
+        
+        async.waterfall([
+            
+            //try to find the user:
+            function (cb) {
+                var userCriteria = {
+                    minderId: options.minderId
+                };
+                var deviceCriteria = {
+                    deviceId: options.deviceId
+                };
 
-        UserModel.findOne(criteria, DEFAULT_FIELDS, function (err, user) {
+                UserModel.findOne(userCriteria, DEFAULT_FIELDS)
+                    .populate({
+                        path: 'devices',
+                        match: deviceCriteria,
+                        select: '_id deviceId'
+                    }).exec(function (err, user) {
 
+                        if (err) {
+                            return cb(err);
+                        }
+                    
+                        if (!user) {
+                            return cb(badRequests.SignInError({ message: 'Incorrect Minder ID' }));
+                        }
+                    
+                        if (user && user.confirmToken) {
+                            return cb(badRequests.UnconfirmedEmail());
+                        }
+                    
+                        if (user && user.devices && user.devices.length) {
+                            cb(null, user, user.devices[0]);
+                        } else { 
+                            cb(null, user, null);
+                        }
+
+                    });
+            },
+
+            //create the device if need:
+            function (userModel, deviceModel, cb) {
+                var deviceData;
+
+                if (userModel && deviceModel) { 
+                    return cb(null, userModel, deviceModel);
+                }
+                
+                deviceData = deviceHandler.prepareDeviceData(options);
+                deviceData.deviceType = deviceHandler.getDeviceOS(req);
+                
+                deviceHandler.createDevice(deviceData, userModel, function (err, createdDevice) {
+                    if (err) {
+                        return cb(err);
+                    }
+                    cb(null, userModel, createdDevice);
+                });
+            },
+
+        ], function (err, userModel, deviceModel) {
             if (err) {
                 return next(err);
             }
-
-            if (!user) {
-                return next(badRequests.SignInError({message: 'Incorrect Minder ID'}));
-            }
-
-            if (user && user.confirmToken) {
-                return next(badRequests.UnconfirmedEmail());
-            }
-
-            DeviceModel
-                .findOne({
-                    deviceId: options.deviceId
-                }, function (err, device) {
-                    var deviceData;
-
-                    if (err) {
-                        return next(err);
-                    } else if (device) {
-
-                        if (device.user.toString() === user._id.toString()) {
-                            session.register(req, res, user, { rememberMe: true, device: device });
-                        } else {
-                            next(badRequests.AccessError());
-                        }
-
-                    } else {
-                        //create device;
-                        deviceData = deviceHandler.prepareDeviceData(options);
-                        deviceData.deviceType = deviceHandler.getDeviceOS(req);
-
-                        deviceHandler.createDevice(deviceData, user, function (err, device) {
-
-                            if (err) {
-                                return next(err);
-                            }
-
-                            session.register(req, res, user, {rememberMe: true, device: device});
-                        });
-                    }
-                });
-
+            session.register(req, res, userModel, { rememberMe: true, device: deviceModel });
         });
+        
+
+        //UserModel.findOne(criteria, DEFAULT_FIELDS, function (err, user) {
+
+        //    if (err) {
+        //        return next(err);
+        //    }
+
+        //    if (!user) {
+        //        return next(badRequests.SignInError({message: 'Incorrect Minder ID'}));
+        //    }
+
+        //    if (user && user.confirmToken) {
+        //        return next(badRequests.UnconfirmedEmail());
+        //    }
+
+        //    DeviceModel
+        //        .findOne({
+        //            deviceId: options.deviceId
+        //        }, function (err, device) {
+        //            var deviceData;
+
+        //            if (err) {
+        //                return next(err);
+        //            } else if (device) {
+
+        //                if (device.user.toString() === user._id.toString()) {
+        //                    session.register(req, res, user, { rememberMe: true, device: device });
+        //                } else {
+        //                    next(badRequests.AccessError());
+        //                }
+
+        //            } else {
+        //                //create device;
+        //                deviceData = deviceHandler.prepareDeviceData(options);
+        //                deviceData.deviceType = deviceHandler.getDeviceOS(req);
+
+        //                deviceHandler.createDevice(deviceData, user, function (err, device) {
+
+        //                    if (err) {
+        //                        return next(err);
+        //                    }
+
+        //                    session.register(req, res, user, {rememberMe: true, device: device});
+        //                });
+        //            }
+        //        });
+
+        //});
     };
 
     this.signUp = function (req, res, next) {
