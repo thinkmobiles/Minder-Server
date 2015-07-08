@@ -2,8 +2,11 @@
 var path = require('path');
 
 process.env.HOST = 'http://134.249.164.53:8877';
+//process.env.HOST = 'http://134.249.164.53:8829';
 process.env.PORT = 8877;
-process.env.DB_HOST = 'localhost';
+//process.env.PORT = 8829;
+//process.env.DB_HOST = 'localhost';
+process.env.DB_HOST = '192.168.88.250';
 process.env.DB_NAME = 'minderDev';
 
 /*process.env.mailerService = 'Gmail';
