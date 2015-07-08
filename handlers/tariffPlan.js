@@ -378,24 +378,57 @@ var TariffPlanHandler = function (db) {
     this.checkSubscribeForGeofence = function(callback){
         async.waterfall([
 
+            //function (cb) {
+            //    var now = new Date();
+            //    var criteria = {
+            //        "geoFence.status"        : DEVICE_STATUSES.SUBSCRIBED,
+            //        "geoFence.expirationDate": {
+            //            $ne : null,
+            //            $lte: now
+            //        }
+            //    };
+            //    var fields = 'user name geoFence.expirationDate';
+            //
+            //    DeviceModel.find(criteria, fields, function (err, devices) {
+            //        if (err) {
+            //            return cb(err);
+            //        }
+            //        cb(null, devices);
+            //    });
+            //
+            //},
+
             function (cb) {
                 var now = new Date();
-                var criteria = {
-                    "geoFence.status"        : DEVICE_STATUSES.SUBSCRIBED,
-                    "geoFence.expirationDate": {
-                        $ne : null,
-                        $lte: now
-                    }
-                };
-                var fields = 'user name geoFence.expirationDate';
 
-                DeviceModel.find(criteria, fields, function (err, devices) {
+                DeviceModel.aggregate([{
+                    $match: {
+                        "geoFence.status": DEVICE_STATUSES.SUBSCRIBED,
+                        "geoFence.expirationDate": {
+                            $ne: null,
+                            $lte: now
+                        }
+                    }
+                }, {
+                    $group: {
+                        _id: "$user",
+                        devices : {
+                            $push : {
+                                _id : "$_id",
+                                geoFence : "$geoFence"
+                            }
+                        }
+                    }
+                }]).exec(function (err, rows) {
+                    var userIds;
+
                     if (err) {
                         return cb(err);
                     }
-                    cb(null, devices);
-                });
 
+                    userIds = _.pluck(rows, '_id');
+                    cb(null, userIds);
+                });
             },
 
             function (devices, cb) {

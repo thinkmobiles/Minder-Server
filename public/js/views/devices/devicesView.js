@@ -354,6 +354,7 @@ define([
 
         testGeo: function (e) {
             var geoModal = this.$el.find('#editGeoFenceModal');
+            geoModal.find('#buttonSubscribe').attr('data-status','');
 
             if (geoModal.attr('aria-hidden') === 'false'){return}
 
