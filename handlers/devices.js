@@ -818,6 +818,8 @@ var DeviceHandler = function (db) {
                 }
             });
     };
+    
+    this.unsubscribeOnStripe = unsubscribeOnStripe;
 
     function unsubscribeGeoFencePack(userId, deviceId, callback) {
         
