@@ -2559,6 +2559,147 @@ var DeviceHandler = function (db) {
             });
         });
     };
+
+    this.checkSubscribeForGeofence = function(callback){
+        async.waterfall([
+
+            //select expired subscription
+            function (cb) {
+                var now = new Date();
+
+                DeviceModel.aggregate([{
+                    $match: {
+                        "geoFence.status": DEVICE_STATUSES.SUBSCRIBED,
+                        "geoFence.expirationDate": {
+                            $ne: null,
+                            $lte: now
+                        }
+                    }
+                }, {
+                    $group: {
+                        _id: "$user",
+                        devices : {
+                            $push : {
+                                _id : "$_id",
+                                subscriptionId : "$geoFence.subscriptionId"
+                            }
+                        }
+                    }
+                }]).exec(function (err, devices) {
+
+                    if (err) {
+                        return cb(err);
+                    }
+
+                    cb(null, devices);
+                });
+            },
+
+            //unsubscribe devices on Stripe
+            function (devices, cb) {
+                var devicesIds=[];
+
+                async.each(devices, function (obj, clbck) {
+                    var customerId;
+                    var criteria;
+                    var userId = obj._id;
+                    var subscribeIds = _.pluck(obj.devices, "subscriptionId");
+                    var deviceId = _.pluck(obj.devices,"_id");
+
+
+                    devicesIds = _.union(devicesIds,deviceId);
+                    criteria = {
+                        _id : userId
+                    };
+
+                    UserModel.findOne(criteria,"billings.stripeId",function(err,user){
+                        if (err){
+                            if (process.env.NODE_ENV !== "production") {
+                                console.log(err);
+                            }
+                            clbck();
+                        } else if(!user){
+                            if (process.env.NODE_ENV !== "production") {
+                                console.log('User not found');
+                            }
+                            clbck();
+                        } else{
+                            customerId = user.billings.stripeId;
+                            self.unsubscribeOnStripe(customerId, subscribeIds, function (err) {
+                                if (err) {
+                                    console.error(err);
+                                }
+                                clbck();
+                            });
+                        }
+
+                    });
+
+
+                }, function (err) {
+                    if (err) {
+                        return cb(err);
+                    }
+                    cb(null,devicesIds);
+                });
+
+            },
+
+            //unsubscribe expired subscriptions
+            function (devicesIds, cb) {
+                var now = new Date();
+                var criteria;
+                var update;
+
+                if (devicesIds && devicesIds.length) {
+
+                    criteria = {
+                        _id: {
+                            $in: devicesIds
+                        }
+                    };
+                    update = {
+                        $set: {
+                            "geoFence.status"        : DEVICE_STATUSES.ACTIVE,
+                            "geoFence.expirationDate": null,
+                            "geoFence.subscriptionId": null,
+                             updatedAt               : now
+                        }
+                    };
+
+                    DeviceModel.update(criteria, update, { multi: true }, function (err,result) {
+                        if (err) {
+                            return cb(err);
+                        }
+                        cb(null,result);
+                    });
+
+                } else {
+                    cb();
+                }
+            }
+
+        ],function(err,result){
+            if (err) {
+                if (callback && (typeof callback === 'function')) {
+                    callback(err);
+                }
+            } else {
+                if (callback && (typeof callback === 'function')) {
+                    callback(null,result);
+                }
+            }
+        })
+    };
+
+    this.testCheckSubscribeForGeofence = function (req, res, next) {
+        self.checkSubscribeForGeofence(function (err, result) {
+            if (err) {
+                return next(err);
+            }
+            res.status(200).send({ success: 'success job', result: result });
+        });
+    };
     
     this.testCronJobForCheckExpirationDates = function (req, res, next) {
         self.cronJobForCheckExpirationDates(function (err, result) {
