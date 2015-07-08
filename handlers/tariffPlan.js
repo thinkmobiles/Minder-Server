@@ -378,26 +378,6 @@ var TariffPlanHandler = function (db) {
     this.checkSubscribeForGeofence = function(callback){
         async.waterfall([
 
-            //function (cb) {
-            //    var now = new Date();
-            //    var criteria = {
-            //        "geoFence.status"        : DEVICE_STATUSES.SUBSCRIBED,
-            //        "geoFence.expirationDate": {
-            //            $ne : null,
-            //            $lte: now
-            //        }
-            //    };
-            //    var fields = 'user name geoFence.expirationDate';
-            //
-            //    DeviceModel.find(criteria, fields, function (err, devices) {
-            //        if (err) {
-            //            return cb(err);
-            //        }
-            //        cb(null, devices);
-            //    });
-            //
-            //},
-
             function (cb) {
                 var now = new Date();
 
@@ -415,34 +395,79 @@ var TariffPlanHandler = function (db) {
                         devices : {
                             $push : {
                                 _id : "$_id",
-                                geoFence : "$geoFence"
+                                subscriptionId : "$geoFence.subscriptionId"
                             }
                         }
                     }
-                }]).exec(function (err, rows) {
-                    var userIds;
+                }]).exec(function (err, devices) {
 
                     if (err) {
                         return cb(err);
                     }
 
-                    userIds = _.pluck(rows, '_id');
-                    cb(null, userIds);
+                    cb(null, devices);
                 });
             },
 
             function (devices, cb) {
+                var devicesIds=[];
+
+                async.each(devices, function (obj, clbck) {
+                    var customerId;
+                    var criteria;
+                    var userId = obj._id;
+                    var subscribeIds = _.pluck(obj.devices, "subscriptionId");
+                    var deviceId = _.pluck(obj.devices,"_id");
+
+
+                    devicesIds = _.union(devicesIds,deviceId);
+                    criteria = {
+                        _id : userId
+                    };
+
+                    UserModel.findOne(criteria,"billings.stripeId",function(err,user){
+                       if (err){
+                           if (process.env.NODE_ENV !== "production") {
+                               console.log(err);
+                           }
+                           clbck();
+                       } else if(!user){
+                           if (process.env.NODE_ENV !== "production") {
+                               console.log('User wasn`t found');
+                           }
+                           clbck();
+                       } else{
+                           customerId = user.billings.stripeId;
+                           deviceHandler.unsubscribeOnStripe(customerId, subscribeIds, function (err) {
+                               if (err) {
+                                   console.error(err);
+                               }
+                               clbck();
+                           });
+                       }
+
+                    });
+
+
+                }, function (err) {
+                    if (err) {
+                        return cb(err);
+                    }
+                    cb(null,devicesIds);
+                });
+
+            },
+
+            function (devicesIds, cb) {
                 var now = new Date();
                 var criteria;
                 var update;
-                var deviceIds;
 
-                if (devices && devices.length) {
+                if (devicesIds && devicesIds.length) {
 
-                    deviceIds = _.pluck(devices, '_id');
                     criteria = {
                         _id: {
-                            $in: deviceIds
+                            $in: devicesIds
                         }
                     };
                     update = {
@@ -454,15 +479,15 @@ var TariffPlanHandler = function (db) {
                         }
                     };
 
-                    DeviceModel.update(criteria, update, { multi: true }, function (err) {
+                    DeviceModel.update(criteria, update, { multi: true }, function (err,result) {
                         if (err) {
                             return cb(err);
                         }
-                        cb(null, devices);
+                        cb(null,result);
                     });
 
                 } else {
-                    cb(null, devices);
+                    cb();
                 }
             }
 
@@ -473,7 +498,7 @@ var TariffPlanHandler = function (db) {
                 }
             } else {
                 if (callback && (typeof callback === 'function')) {
-                    callback();
+                    callback(null,result);
                 }
             }
         })
