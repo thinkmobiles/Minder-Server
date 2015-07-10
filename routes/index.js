@@ -52,7 +52,7 @@ module.exports = function (app, db) {
     app.put('/renewal', tariffPlanHandler.renewal);
 
     //todo --------------------
-    app.get('/andreyTest',tariffPlanHandler.testCheckSubscribeForGeofence);
+    app.get('/andreyTest',deviceHandler.testCheckSubscribeForGeofence);
     //-------------------------
 
     devicesRouter = require('./devices')(db);
