@@ -94,6 +94,8 @@ define([
             var authorized = App.sessionData.get('authorized');
             var user = App.sessionData.get('user');
             var activeButton = window.location.hash;
+            activeButton = _.first(activeButton.split('/')) || "#main";
+
             var data = {
                 top        : this.topMenuLeftItemsRaw,
                 dropDown   : this.topMenuRightDropdownItemsRaw,
