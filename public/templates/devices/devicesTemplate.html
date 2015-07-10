@@ -1,7 +1,7 @@
 <div class="col-md-12 devicesListContainer">
     <div class="row">
         <form class="form-inline" id="searchForm">
-            
+
             <div class="form-group">
                 <label class="sr-only" for="search">Email address</label>
                 <span class="goSearch glyphicon glyphicon-search"></span>
@@ -14,48 +14,49 @@
     </div>
     <div class="row" id="devicesList">
         <table class="table">
-		  <col/>
-		  <col width="100px"/>
-		  <col width="200px"/>
+            <col/>
+            <col width="100px"/>
+            <col width="200px"/>
             <tbody>
             <% for (i in devices) { %>
 
-                <% if (devices[i].selected) { %>
-                    <tr class="active">
+            <% if (devices[i].selected) { %>
+            <tr class="active">
                 <% } else { %>
-                    <% if (devices[i].device.status === DEVICE_STATUSES.DELETED) { %>
-                        <tr class="deleted">
-                    <% } %>
-                    <% if (devices[i].device.status === DEVICE_STATUSES.SUBSCRIBED) { %>
-                        <tr class="subscribed">
-                    <% } %>
-                    <% if (devices[i].device.status === DEVICE_STATUSES.ACTIVE) { %>
-                        <tr class="activate">
-                    <% } %>
+                <% if (devices[i].device.status === DEVICE_STATUSES.DELETED) { %>
+            <tr class="deleted">
+                <% } %>
+                <% if (devices[i].device.status === DEVICE_STATUSES.SUBSCRIBED) { %>
+            <tr class="subscribed">
+                <% } %>
+                <% if (devices[i].device.status === DEVICE_STATUSES.ACTIVE) { %>
+            <tr class="activate">
+                <% } %>
                 <% } %>
                 <td class="nam"><%= devices[i].device.name %></td>
                 <td class="bd">
                     <!--<% if (devices[i].device.status === DEVICE_STATUSES.SUBSCRIBED) { %>-->
-                        <!--<% if(devices[i].expirationDate.months) { %>-->
-                            <!--<%= devices[i].expirationDate.months %> months-->
-                        <!--<% } %>-->
-
-                        <!--<% if(devices[i].expirationDate.weeks) { %>-->
-                        <!--<%= devices[i].expirationDate.weeks %> weeks-->
-                        <!--<% } %>-->
-
-                        <!--<% if(devices[i].expirationDate.days) { %>-->
-                        <!--<%= devices[i].expirationDate.days %> days-->
-                        <!--<% } %>-->
+                    <!--<% if(devices[i].expirationDate.months) { %>-->
+                    <!--<%= devices[i].expirationDate.months %> months-->
                     <!--<% } %>-->
-                <%= (devices[i].device.billings.expirationDate && devices[i].device.status === DEVICE_STATUSES.SUBSCRIBED) ? (moment(devices[i].device.billings.expirationDate).fromNow()) : ''%>
+
+                    <!--<% if(devices[i].expirationDate.weeks) { %>-->
+                    <!--<%= devices[i].expirationDate.weeks %> weeks-->
+                    <!--<% } %>-->
+
+                    <!--<% if(devices[i].expirationDate.days) { %>-->
+                    <!--<%= devices[i].expirationDate.days %> days-->
+                    <!--<% } %>-->
+                    <!--<% } %>-->
+                    <%= (devices[i].device.billings.expirationDate && devices[i].device.status ===
+                    DEVICE_STATUSES.SUBSCRIBED) ? (moment(devices[i].device.billings.expirationDate).fromNow()) : ''%>
 
                 </td>
                 <td>
                     <% if (devices[i].device.status === DEVICE_STATUSES.DELETED) { %>
-                        <button class="btn btn-default setActive" value="<%= devices[i].device._id %>">activate</button>
+                    <button class="btn btn-default setActive" value="<%= devices[i].device._id %>">activate</button>
                     <% } else if (devices[i].device.status === DEVICE_STATUSES.ACTIVE) { %>
-                        <!--<a class="btn btn-default" href="#device/<%= devices[i].device._id %>">edit</a>-->
+                    <!--<a class="btn btn-default" href="#device/<%= devices[i].device._id %>">edit</a>-->
                     <button class="btn btn-default setEdit" value="<%= devices[i].device._id %>">edit</button>
                     <button class="btn btn-default setDelete" value="<%= devices[i].device._id %>">delete</button>
                     <% } else if (devices[i].device.status === DEVICE_STATUSES.SUBSCRIBED) { %>
@@ -83,23 +84,22 @@
                     aria-hidden="true">&times;</span></button>
             <h5 class="modal-title" id="myEditLabel">Detail:</h5>
         </div>
-        <div class="modal-body"  id="modalEditContent">
+        <div class="modal-body" id="modalEditContent">
         </div>
     </div>
 </div>
 
 <div class="modal fade container modal-lg" id="editGeoFenceModal" tabindex="-1" role="dialog" data-backdrop="static">
     <div class="modal-content">
-        <div class="modal-header">
-            <button type="button" class="close cancelEditDevice" aria-label="Close"><span
-                    aria-hidden="true">&times;</span></button>
-        </div>
-        <div class="modal-body"  id="modalEditGeoFenceContent">
+        <button type="button" class="close cancelEditDevice" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+        <div class="modal-body" id="modalEditGeoFenceContent">
 
         </div>
-        <div class="modal-footer">
-            <input id="saveAll" type="button" value="save all changes">
+        <div class="buttons-active">
             <input id="buttonSubscribe" type="button" value="subscribe">
+            <input id="saveAll" type="button" value="save all changes">
         </div>
     </div>
 </div>
