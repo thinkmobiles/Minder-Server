@@ -16,11 +16,13 @@
 
     <div class="modalTabs-item">
         <div id="map_container"></div>
-        <span>Geo fence:</span><br>
-        <input id="check_fence" type="checkbox" <% if (model.geoFence.enabled){%>checked<%}%> ><label for="check_fence" >Enable|Disable</label>
-        <input id="radius" type="text" value="<%= model.geoFence.radius.toFixed(2)%>" placeholder="Fence radius">
-        <input id="setRadius" type="button" value="Set">
-        <input id="saveChanges" type="button" value="Save Fence">
+        <div class="radius-block">
+            <span>Geo fence:</span><br>
+            <input id="check_fence" type="checkbox" <% if (model.geoFence.enabled){%>checked<%}%> ><label for="check_fence" >Enable|Disable</label>
+            <input id="radius" type="text" value="<%= model.geoFence.radius.toFixed(2)%>" placeholder="Fence radius">
+            <input id="setRadius" type="button" value="Set">
+            <input id="saveChanges" type="button" value="Save Fence">
+        </div>
     </div>
     <div class="modalTabs-item">
         <% if (model.deviceType !== "ios") {%>
