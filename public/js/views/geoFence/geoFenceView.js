@@ -71,8 +71,17 @@ define([
         },
 
         changeRadius : function (){
-            var radius = this.$el.find('#radius').val().trim();
-            this.circle.setRadius(+radius);
+            var radiusEl = this.$el.find('#radius');
+            var radius = +radiusEl.val().trim();
+            if ((!radius && radius!==0) || radius<0){
+                alert('Not valid value of radius');
+                radiusEl.val(this.stateModel.get('geoFence').radius);
+                return;
+            }
+            if (radius === 0){
+                radiusEl.val('0.00');
+            }
+            this.circle.setRadius(radius);
         },
 
         hideDialog: function () {
@@ -83,6 +92,8 @@ define([
 
         saveDeviceFence : function(){
             var resCenter = this.circle.getCenter();
+            var radiusVal = this.$el.find('#radius').val().trim();
+
             if (resCenter) {
                 var saveData = {
                     enabled: this.$el.find('#check_fence').prop('checked'),
@@ -90,17 +101,20 @@ define([
                         long: resCenter.lng(),
                         lat : resCenter.lat()
                     },
-                    radius  : this.$el.find('#radius').val().trim()
+                    radius  : radiusVal!=='' ? radiusVal : '0'
                 };
                 this.stateModel.url = '/devices/' + this.stateModel.get('_id') + '/geoFence';
                 this.stateModel.save({geoFence: saveData}, {
                     wait: true,
+                    success: function (){
+                        alert('success')
+                    },
                     error: function () {
-                        alert('error')
+                        alert('Please , check your entries')
                     }
                 });
             } else {
-                alert('Enter some data');
+                alert('Click on the map and select the area');
             }
         },
 

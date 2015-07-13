@@ -140,16 +140,19 @@ define([
                 contentType : 'application/json',
                 data        : JSON.stringify(data),
                 method      : 'PUT',
+                beforeSend  : self.showWaiting(),
 
                 success: function () {
                     self.stateModel.set({
                         token  : null,
                         action : null
                     });
-                    App.updateUser();
+                    self.hideWaiting();
                     alert('Updated successful!');
+                    App.updateUser();
                 },
                 error: function (err) {
+                    self.hideWaiting();
                     App.error(err)
                 }
             });
@@ -317,16 +320,19 @@ define([
                 method      : 'POST',
                 contentType : 'application/json',
                 data        : JSON.stringify(data),
+                beforeSend  : self.showWaiting(),
 
                 success: function () {
                     self.stateModel.set({
                         token  : null,
                         action : null
                     });
+                    self.hideWaiting();
                     alert('Success unsubscribe');
                     App.updateUser();
                 },
                 error: function (err) {
+                    self.hideWaiting();
                     App.error(err);
                 }
             });

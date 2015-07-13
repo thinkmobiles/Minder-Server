@@ -43,7 +43,6 @@
 
             <td>
               <% if (devices[i].device.status === DEVICE_STATUSES.DELETED) { %>
-              <!--<input disabled type="checkbox" name="device" class="deviceCheckbox" value="<%= devices[i].device._id %>" <% if(devices[i].selected) { %>checked<% } %> >-->
               <% } else { %>
               <input type="checkbox" name="device" class="deviceCheckbox customCheckbox" id="device<%= i%>" value="<%= devices[i].device._id %>"
 					 <%

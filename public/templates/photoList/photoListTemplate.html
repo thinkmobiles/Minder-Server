@@ -1,8 +1,12 @@
 <table>
-    <% photoColl.forEach(function(device){ %>
-    <tr>
-        <td><a target="_blank" href="<%= device.url %>"><%= device.originalName %></a></td>
-        <td><%= device.createdAt %></td>
-    </tr>
-    <%})%>
+    <% if (photoColl.length>0) {%>
+        <% photoColl.forEach(function(device){ %>
+        <tr>
+            <td><a target="_blank" href="<%= device.url %>"><%= device.originalName %></a></td>
+            <td><%= device.createdAt %></td>
+        </tr>
+        <%})%>
+    <%} else {%>
+        <span>For this device have no photo</span>
+    <%}%>
 </table>
