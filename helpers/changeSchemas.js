@@ -20,44 +20,44 @@ cursor.forEach(function ( device ) {
     var update = {$set: {
         'lastLocation.coordinates': [lng, lat]
     },$unset: {
-        'lastLocation.long': 1,
-        'lastLocation.lat': 1
+        'lastLocation.long': Math.random()*50,
+        'lastLocation.lat': Math.random()*50
     }};
     
     db.Devices.update(criteria, update);
 });
 
-db.Devices.update({}, {$set: {"geoFence": {"enabled": false}}}, {multi: true});
-db.Devices.update({}, {$set: {"sync": {
-    "enabled": false,
-    "radius": 3000,
-    "fixedLocation": {
-        long: 0,
-        lat: 0
-    }
-}}}, {multi: true});
+//db.Devices.update({}, {$set: {"geoFence": {"enabled": false}}}, {multi: true});
+//db.Devices.update({}, {$set: {"sync": {
+//    "enabled": false,
+//    "radius": 3000,
+//    "fixedLocation": {
+//        long: 0,
+//        lat: 0
+//    }
+//}}}, {multi: true});
 
 
-var users = db.Devices.aggregate([{
-    $group: {
-        _id: "$user", 
-        count: {$sum: 1}, 
-        devices: {$push:"$_id"}
-    }
-}]);
+//var users = db.Devices.aggregate([{
+//    $group: {
+//        _id: "$user",
+//        count: {$sum: 1},
+//        devices: {$push:"$_id"}
+//    }
+//}]);
 
-users.forEach(function (user) {
-    var criteria = {
-        _id: user._id
-    };
-    var update = {
-        $set: {
-            devices: user.devices
-        }
-    }
-    
-    db.Users.update(criteria, update, {mutli: true});
-});
+//users.forEach(function (user) {
+//    var criteria = {
+//        _id: user._id
+//    };
+//    var update = {
+//        $set: {
+//            devices: user.devices
+//        }
+//    }
+//
+//    db.Users.update(criteria, update, {mutli: true});
+//});
 
 print('>>> ... success');
 
