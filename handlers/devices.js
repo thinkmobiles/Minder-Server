@@ -1727,7 +1727,7 @@ var DeviceHandler = function (db) {
                     if (err) {
                         return cb(err);
                     }
-                    cb(null, plans)
+                    cb(null, plans);
                 });
             } 
             
@@ -1739,6 +1739,7 @@ var DeviceHandler = function (db) {
             var subscribedDevices = _.filter(deviceModels, function (deviceModel) {
                 return deviceModel.status === DEVICE_STATUSES.SUBSCRIBED;
             });
+            var subscribedDeviceIds = _.pluck(subscribedDevices, '_id');
             
             if (err) {
                 return next(err);
@@ -1748,14 +1749,33 @@ var DeviceHandler = function (db) {
 
                 //unsubscribe on stripe:
                 function (cb) {
-                    var customerId = userModel.billings.stripeId;
-                    var subscriptionIds = _.pluck(subscribedDevices, 'billings.subscriptionId');
+                    var params;
 
-                    unsubscribeOnStripe(customerId, subscriptionIds, function (err) {
+                    if (!subscribedDevices || !subscribedDevices.length) {
+                        return cb();
+                    }
+                    
+                    params = {
+                        deviceIds: deviceIds
+                    };
+
+                    findSubscriptionIdsToUnsubscribe(params, function (err, subscriptionIds) {
+                        var customerId = userModel.billings.stripeId;
+                        
                         if (err) {
                             return cb(err);
                         }
-                        cb();
+                        
+                        if (!subscriptionIds || !subscriptionIds.length) {
+                            return cb();
+                        }
+                        
+                        unsubscribeOnStripe(customerId, subscriptionIds, function (err) {
+                            if (err) {
+                                return cb(err);
+                            }
+                            cb();
+                        });
                     });
                 },
 

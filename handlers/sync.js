@@ -193,7 +193,7 @@ var SyncHandler = function (db) {
         var fileCreatedAt = options.fileCreatedAt;
         var size = options.size;
         var file = req.files.file;
-
+       
         async.waterfall([
 
             //validate params:
@@ -204,7 +204,7 @@ var SyncHandler = function (db) {
                 }
 
                 if (!originalName || !fileCreatedAt || !file) {
-                    return cb(badRequests.NotEnParams({reqParams: ['originalName', 'file', 'fileCreatedAt']}));
+                    return cb(badRequests.NotEnParams({reqParams: ['originalName', 'originalName', 'fileCreatedAt']}));
                 }
 
                 cb();
@@ -239,11 +239,10 @@ var SyncHandler = function (db) {
                             return cb(badRequests.AccessError({message: 'This functionality is disabled.'}));
                         }
                         
-                        
                         //TODO: check payment:
-                        //if (device.sync.status !== DEVICE_STATUSES.SUBSCRIBED) {
-                        //    return cb(badRequests.PaymentRequired());
-                        //}
+                        if (device.sync.status !== DEVICE_STATUSES.SUBSCRIBED) {
+                            return cb(badRequests.PaymentRequired());
+                        }
                         
                         cb();
                     }
