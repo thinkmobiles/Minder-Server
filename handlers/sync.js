@@ -187,18 +187,13 @@ var SyncHandler = function (db) {
     this.storeFile = function (req, res, next) {
         var userId = req.session.userId;
         var options = req.body;
-        var deviceId = req.session.deviceId || "556591073048b12c78000002"; //TODO remove
+        var deviceId = req.session.deviceId;
         var src = options.src;
         var originalName = options.originalName;
         var fileCreatedAt = options.fileCreatedAt;
         var size = options.size;
         var file = req.files.file;
-        
-        console.log('----------------------');
-        console.log(JSON.stringify(options));
-        console.log(file);
-        console.log('----------------------');
-
+       
         async.waterfall([
 
             //validate params:
@@ -236,19 +231,18 @@ var SyncHandler = function (db) {
 
                         ownerId = device.user.toString();
 
-                        //if (!session.isAdmin(req) && (ownerId !== userId)) {
-                        //    return cb(badRequests.AccessError());
-                        //}
+                        if (!session.isAdmin(req) && (ownerId !== userId)) {
+                            return cb(badRequests.AccessError());
+                        }
                         
-                        //if (!device.sync.enabled) { 
-                        //    return cb(badRequests.AccessError({message: 'This functionality is disabled.'}));
-                        //}
-                        
+                        if (!device.sync.enabled) { 
+                            return cb(badRequests.AccessError({message: 'This functionality is disabled.'}));
+                        }
                         
                         //TODO: check payment:
-                        //if (device.sync.status !== DEVICE_STATUSES.SUBSCRIBED) {
-                        //    return cb(badRequests.PaymentRequired());
-                        //}
+                        if (device.sync.status !== DEVICE_STATUSES.SUBSCRIBED) {
+                            return cb(badRequests.PaymentRequired());
+                        }
                         
                         cb();
                     }
