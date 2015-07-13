@@ -35,19 +35,6 @@
                 <% } %>
                 <td class="nam"><%= devices[i].device.name %></td>
                 <td class="bd">
-                    <!--<% if (devices[i].device.status === DEVICE_STATUSES.SUBSCRIBED) { %>-->
-                    <!--<% if(devices[i].expirationDate.months) { %>-->
-                    <!--<%= devices[i].expirationDate.months %> months-->
-                    <!--<% } %>-->
-
-                    <!--<% if(devices[i].expirationDate.weeks) { %>-->
-                    <!--<%= devices[i].expirationDate.weeks %> weeks-->
-                    <!--<% } %>-->
-
-                    <!--<% if(devices[i].expirationDate.days) { %>-->
-                    <!--<%= devices[i].expirationDate.days %> days-->
-                    <!--<% } %>-->
-                    <!--<% } %>-->
                     <%= (devices[i].device.billings.expirationDate && devices[i].device.status ===
                     DEVICE_STATUSES.SUBSCRIBED) ? (moment(devices[i].device.billings.expirationDate).fromNow()) : ''%>
 
@@ -56,7 +43,6 @@
                     <% if (devices[i].device.status === DEVICE_STATUSES.DELETED) { %>
                     <button class="btn btn-default setActive" value="<%= devices[i].device._id %>">activate</button>
                     <% } else if (devices[i].device.status === DEVICE_STATUSES.ACTIVE) { %>
-                    <!--<a class="btn btn-default" href="#device/<%= devices[i].device._id %>">edit</a>-->
                     <button class="btn btn-default setEdit" value="<%= devices[i].device._id %>">edit</button>
                     <button class="btn btn-default setDelete" value="<%= devices[i].device._id %>">delete</button>
                     <% } else if (devices[i].device.status === DEVICE_STATUSES.SUBSCRIBED) { %>
@@ -98,8 +84,8 @@
 
         </div>
         <div class="buttons-active">
-            <input id="buttonSubscribe" type="button" value="subscribe">
             <input id="saveAll" type="button" value="save all changes">
+            <input id="buttonSubscribe" type="button" value="subscribe">
         </div>
     </div>
 </div>

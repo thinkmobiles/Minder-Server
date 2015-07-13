@@ -111,7 +111,6 @@
     <Compile Include="public\js\views\customElements\mapInfowindow.js" />
     <Compile Include="public\js\views\customElements\paginationView.js" />
     <Compile Include="public\js\views\device\deviceMainListView.js" />
-    <Compile Include="public\js\views\device\deviceView.js" />
     <Compile Include="public\js\views\devices\devicesView.js" />
     <Compile Include="public\js\views\forgotPassword\forgotPasswordView.js" />
     <Compile Include="public\js\views\geoFence\geoFenceView.js" />
@@ -130,7 +129,6 @@
     <Content Include="public\templates\customElements\mapInfowindowTemplate.html" />
     <Content Include="public\templates\customElements\paginationTemplate.html" />
     <Content Include="public\templates\device\deviceMainListTemplate.html" />
-    <Content Include="public\templates\device\deviceTemplate.html" />
     <Content Include="public\templates\devices\devicesModalTemplate.html" />
     <Content Include="public\templates\devices\devicesTemplate.html" />
     <Content Include="public\templates\forgotPassword\forgotPasswordTemplate.html" />
@@ -185,7 +183,6 @@
     <Folder Include="public\js\views\confirm" />
     <Folder Include="public\js\views\confirmEmail" />
     <Folder Include="public\js\views\customElements" />
-    <Folder Include="public\js\views\device" />
     <Folder Include="public\js\views\devices" />
     <Folder Include="public\js\views\forgotPassword" />
     <Folder Include="public\js\views\geoFence" />
@@ -204,7 +201,6 @@
     <Folder Include="public\templates\confirm" />
     <Folder Include="public\templates\confirmEmail" />
     <Folder Include="public\templates\customElements" />
-    <Folder Include="public\templates\device" />
     <Folder Include="public\templates\devices" />
     <Folder Include="public\templates\forgotPassword" />
     <Folder Include="public\templates\geoFence" />
