@@ -65,8 +65,11 @@ define([
             container2.find('.openTab').removeClass('openTab');
             container2.find('.modalTabs-item').eq(n).addClass('openTab');
 
-            if (n === 1 && !this.map) {
-                this.initializeGeoMap();
+            if (n === 1) {
+                if (!this.map){this.initializeGeoMap()}
+                $('#buttonSubscribe').show();
+            } else {
+                $('#buttonSubscribe').hide();
             }
         },
 
@@ -74,7 +77,7 @@ define([
             var radiusEl = this.$el.find('#radius');
             var radius = +radiusEl.val().trim();
             if ((!radius && radius!==0) || radius<0){
-                alert('Not valid value of radius');
+                alert('Incorrect value for radius!');
                 radiusEl.val(this.stateModel.get('geoFence').radius);
                 return;
             }
@@ -92,7 +95,9 @@ define([
 
         saveDeviceFence : function(){
             var resCenter = this.circle.getCenter();
-            var radiusVal = this.$el.find('#radius').val().trim();
+            var radiusVal = this.circle.getRadius();
+
+            this.$el.find('#radius').val(radiusVal.toFixed(2));
 
             if (resCenter) {
                 var saveData = {
@@ -101,13 +106,13 @@ define([
                         long: resCenter.lng(),
                         lat : resCenter.lat()
                     },
-                    radius  : radiusVal!=='' ? radiusVal : '0'
+                    radius  : radiusVal
                 };
                 this.stateModel.url = '/devices/' + this.stateModel.get('_id') + '/geoFence';
                 this.stateModel.save({geoFence: saveData}, {
                     wait: true,
                     success: function (){
-                        alert('success')
+                        alert('Successfully saved.')
                     },
                     error: function () {
                         alert('Please , check your entries')
@@ -138,8 +143,15 @@ define([
         saveDevice : function (){
             var self = this;
             var newName = this.$el.find('#name').val().trim();
-            var resCenter = this.circle ? this.circle.getCenter() : false;
+            var resCenter;
+            var resRadius;
             var saveData={};
+            if (this.circle){
+                resCenter = this.circle.getCenter();
+                resRadius = this.circle.getRadius();
+            } else {
+                resCenter = false;
+            }
 
             if (resCenter) {
                 saveData = {
@@ -149,7 +161,7 @@ define([
                             long: resCenter.lng(),
                             lat : resCenter.lat()
                         },
-                        radius: this.$el.find('#radius').val().trim()
+                        radius: resRadius
                     }
                 };
             }
