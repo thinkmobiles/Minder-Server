@@ -373,7 +373,7 @@ define([
             this.$el.find('#modalEditGeoFenceContent').html(this.devicesView.el);
 
             geoModal.modal('show').css({
-                width: "1000px"
+                width: "800px"
             });
         },
 

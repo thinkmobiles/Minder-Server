@@ -9,24 +9,26 @@
 <div class="clear"></div>
 <div id="modalTabs-items">
     <div class="modalTabs-item openTab">
-        <span>Device name:</span>
-        <input type="text" id="name" value="<%= model.name %>">
+        <div class="deviceName">Device name:</div>
+        <input type="text" id="name" class="deviceNameInput" value="<%= model.name %>">
         <button type="button" id="editButton" >Save Name</button>
     </div>
 
     <div class="modalTabs-item">
-        <div id="map_container">     </div>
-        <span>Geo fence:</span><br>
-        <input id="check_fence" type="checkbox" <% if (model.geoFence.enabled){%>checked<%}%> ><label for="check_fence" >Enable|Disable</label>
-        <input id="radius" type="text" value="<%= model.geoFence.radius.toFixed(2)%>" placeholder="Fence radius">
-        <input id="setRadius" type="button" value="Set">
-        <input id="saveChanges" type="button" value="Save Fence">
+        <div id="map_container"></div>
+        <div class="radius-block">
+            <span>Geo fence:</span><br>
+            <input id="check_fence" type="checkbox" <% if (model.geoFence.enabled){%>checked<%}%> ><label for="check_fence" >Enable|Disable</label>
+            <input id="radius" type="text" value="<%= model.geoFence.radius.toFixed(2)%>" placeholder="Fence radius">
+            <input id="setRadius" type="button" value="Set">
+            <input id="saveChanges" type="button" value="Save Fence">
+        </div>
     </div>
     <div class="modalTabs-item">
         <% if (model.deviceType !== "ios") {%>
             <input id="check_photo" type="checkbox" <% if (model.sync.enabled){%>checked<%}%> ><label for="check_photo" >Enable|Disable</label>
-            <div id="photoListContainer">    </div>
-            <div id="paginationPhoto">       </div>
+            <div id="photoListContainer"></div>
+            <div id="paginationPhoto"></div>
         <%} else {%>
             <span>Sorry, but your device OS does not support this service</span>
         <%}%>
