@@ -184,6 +184,7 @@
     <Folder Include="public\js\views\confirmEmail" />
     <Folder Include="public\js\views\customElements" />
     <Folder Include="public\js\views\devices" />
+    <Folder Include="public\js\views\device\" />
     <Folder Include="public\js\views\forgotPassword" />
     <Folder Include="public\js\views\geoFence" />
     <Folder Include="public\js\views\login" />
@@ -202,6 +203,7 @@
     <Folder Include="public\templates\confirmEmail" />
     <Folder Include="public\templates\customElements" />
     <Folder Include="public\templates\devices" />
+    <Folder Include="public\templates\device\" />
     <Folder Include="public\templates\forgotPassword" />
     <Folder Include="public\templates\geoFence" />
     <Folder Include="public\templates\login" />

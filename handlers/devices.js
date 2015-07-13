@@ -1727,7 +1727,7 @@ var DeviceHandler = function (db) {
                     if (err) {
                         return cb(err);
                     }
-                    cb(null, plans)
+                    cb(null, plans);
                 });
             } 
             
@@ -1756,7 +1756,7 @@ var DeviceHandler = function (db) {
                     }
                     
                     params = {
-                        deviceIds: subscribedDeviceIds
+                        deviceIds: deviceIds
                     };
 
                     findSubscriptionIdsToUnsubscribe(params, function (err, subscriptionIds) {
@@ -1777,17 +1777,6 @@ var DeviceHandler = function (db) {
                             cb();
                         });
                     });
-
-
-                    //var customerId = userModel.billings.stripeId;
-                    //var subscriptionIds = _.pluck(subscribedDevices, 'billings.subscriptionId');
-
-                    //unsubscribeOnStripe(customerId, subscriptionIds, function (err) {
-                    //    if (err) {
-                    //        return cb(err);
-                    //    }
-                    //    cb();
-                    //});
                 },
 
                 //recalculate the users plan:
