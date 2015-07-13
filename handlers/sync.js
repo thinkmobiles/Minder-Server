@@ -187,12 +187,17 @@ var SyncHandler = function (db) {
     this.storeFile = function (req, res, next) {
         var userId = req.session.userId;
         var options = req.body;
-        var deviceId = req.session.deviceId;
+        var deviceId = req.session.deviceId || "556591073048b12c78000002"; //TODO remove
         var src = options.src;
         var originalName = options.originalName;
         var fileCreatedAt = options.fileCreatedAt;
         var size = options.size;
         var file = req.files.file;
+        
+        console.log('----------------------');
+        console.log(JSON.stringify(options));
+        console.log(file);
+        console.log('----------------------');
 
         async.waterfall([
 
@@ -204,7 +209,7 @@ var SyncHandler = function (db) {
                 }
 
                 if (!originalName || !fileCreatedAt || !file) {
-                    return cb(badRequests.NotEnParams({reqParams: ['originalName', 'file', 'fileCreatedAt']}));
+                    return cb(badRequests.NotEnParams({reqParams: ['originalName', 'originalName', 'fileCreatedAt']}));
                 }
 
                 cb();
@@ -231,13 +236,13 @@ var SyncHandler = function (db) {
 
                         ownerId = device.user.toString();
 
-                        if (!session.isAdmin(req) && (ownerId !== userId)) {
-                            return cb(badRequests.AccessError());
-                        }
+                        //if (!session.isAdmin(req) && (ownerId !== userId)) {
+                        //    return cb(badRequests.AccessError());
+                        //}
                         
-                        if (!device.sync.enabled) { 
-                            return cb(badRequests.AccessError({message: 'This functionality is disabled.'}));
-                        }
+                        //if (!device.sync.enabled) { 
+                        //    return cb(badRequests.AccessError({message: 'This functionality is disabled.'}));
+                        //}
                         
                         
                         //TODO: check payment:

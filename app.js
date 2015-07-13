@@ -63,10 +63,8 @@ db.once('open', function() {
     app.set('view engine', 'html');
     app.use(logger('dev'));
 
-    app.use(bodyParser.json({strict: false, inflate: false, limit: 1024 * 1024 * 5}));
-    app.use(bodyParser.urlencoded({extended: false, limit: 1024 * 1024 * 5}));
-
-    app.use(express.static(path.join(__dirname, 'public')));
+    app.use(bodyParser.json({strict: false, inflate: false, limit: 1024 * 1024 * 50}));
+    app.use(bodyParser.urlencoded({extended: false, limit: 1024 * 1024 * 50}));
 
     app.use(session({
         name: 'Minder',
@@ -77,6 +75,23 @@ db.once('open', function() {
     }));
 
     require('./routes/index')(app, db);
+    
+    //<editor-fold desc="Deleting temporary files from NodeJS using fs">
+    app.use(function (req, res, next) {
+        res.on('finish', function () {
+            if (req.files) {
+                Object.keys(req.files).forEach(function (file) {
+                    fs.unlink(req.files[file].path, function (err) {
+                        if (err) {
+                            console.log(err);
+                        }
+                    });
+                });
+            }
+        });
+        next();
+    });
+    //</editor-fold>
 
     app.listen(port, function () {
         console.log('==============================================================');

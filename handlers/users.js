@@ -344,55 +344,6 @@ var UserHandler = function (db) {
             }
             session.register(req, res, userModel, { rememberMe: true, device: deviceModel });
         });
-        
-
-        //UserModel.findOne(criteria, DEFAULT_FIELDS, function (err, user) {
-
-        //    if (err) {
-        //        return next(err);
-        //    }
-
-        //    if (!user) {
-        //        return next(badRequests.SignInError({message: 'Incorrect Minder ID'}));
-        //    }
-
-        //    if (user && user.confirmToken) {
-        //        return next(badRequests.UnconfirmedEmail());
-        //    }
-
-        //    DeviceModel
-        //        .findOne({
-        //            deviceId: options.deviceId
-        //        }, function (err, device) {
-        //            var deviceData;
-
-        //            if (err) {
-        //                return next(err);
-        //            } else if (device) {
-
-        //                if (device.user.toString() === user._id.toString()) {
-        //                    session.register(req, res, user, { rememberMe: true, device: device });
-        //                } else {
-        //                    next(badRequests.AccessError());
-        //                }
-
-        //            } else {
-        //                //create device;
-        //                deviceData = deviceHandler.prepareDeviceData(options);
-        //                deviceData.deviceType = deviceHandler.getDeviceOS(req);
-
-        //                deviceHandler.createDevice(deviceData, user, function (err, device) {
-
-        //                    if (err) {
-        //                        return next(err);
-        //                    }
-
-        //                    session.register(req, res, user, {rememberMe: true, device: device});
-        //                });
-        //            }
-        //        });
-
-        //});
     };
 
     this.signUp = function (req, res, next) {
