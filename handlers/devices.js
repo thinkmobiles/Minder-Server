@@ -1341,7 +1341,7 @@ var DeviceHandler = function (db) {
             criteria.user = userId;
         }
 
-        if (options.name) {
+        if (options.name !== undefined) {
             update.$set['name'] = options.name;
         }
         
