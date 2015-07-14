@@ -111,6 +111,7 @@ define([
             event.preventDefault();
             event.stopImmediatePropagation();
 
+            this.$el.find('#search').val('');
 
             this.paginationView.setData({
                 status : STATUSES.SUBSCRIBED,
