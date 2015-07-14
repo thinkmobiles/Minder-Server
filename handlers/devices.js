@@ -1763,18 +1763,28 @@ var DeviceHandler = function (db) {
                         var customerId = userModel.billings.stripeId;
                         
                         if (err) {
-                            return cb(err);
+                            if (process.env.NODE_ENV !== 'production') {
+                                console.error(err);
+                            }
+                            return;// cb(err);
                         }
                         
+                        //---------------------------------------------
+                        cb(); //don't wait to unscubscribe on stripe:
+                        //---------------------------------------------
+
                         if (!subscriptionIds || !subscriptionIds.length) {
-                            return cb();
+                            return;// cb();
                         }
                         
                         unsubscribeOnStripe(customerId, subscriptionIds, function (err) {
                             if (err) {
-                                return cb(err);
+                                if (process.env.NODE_ENV !== 'production') {
+                                    console.error(err);
+                                }
+                                return;
                             }
-                            cb();
+                            //cb();
                         });
                     });
                 },
@@ -1940,20 +1950,48 @@ var DeviceHandler = function (db) {
 
                 findSubscriptionIdsToUnsubscribe(params, function (err, subscriptionIds) {
                     if (err) {
-                        return cb(err);
+                        if (process.env.NODE_ENV !== 'production') {
+                            console.error(err);
+                        }
+                        return;// cb(err);
                     }
                     
-                    if (!subscriptionIds || !subscriptionIds.length) { 
-                        return cb();
+                    //---------------------------------------------
+                    cb(); //don't wait to unscubscribe on stripe:
+                    //---------------------------------------------
+                    
+                    if (!subscriptionIds || !subscriptionIds.length) {
+                        return;// cb();
                     }
                     
                     unsubscribeOnStripe(customerId, subscriptionIds, function (err) {
-                        if (err) { 
-                            return cb(err);
+                        if (err) {
+                            if (process.env.NODE_ENV !== 'production') {
+                                console.error(err);
+                            }
+                            return;
                         }
-                        cb();
+                        //cb();
                     });
                 });
+
+
+                //findSubscriptionIdsToUnsubscribe(params, function (err, subscriptionIds) {
+                //    if (err) {
+                //        return cb(err);
+                //    }
+                    
+                //    if (!subscriptionIds || !subscriptionIds.length) { 
+                //        return cb();
+                //    }
+                    
+                //    unsubscribeOnStripe(customerId, subscriptionIds, function (err) {
+                //        if (err) { 
+                //            return cb(err);
+                //        }
+                //        cb();
+                //    });
+                //});
             },
 
             //update devices:
