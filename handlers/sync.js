@@ -98,19 +98,10 @@ var SyncHandler = function (db) {
         var name;
         var key;
         var bucket = process.env.FILES_BUCKET;
-        //TODO: validate ...
 
         src = options.src;
         name = options.name;
         key = computeKey();
-
-        if (process.env.NODE_ENV !== 'production') {
-            console.log('--- Upload file ----------------');
-            console.log('name', name);
-            console.log('key', key);
-            console.log('bucket', bucket);
-            console.log('--------------------------------');
-        }
 
         imageUploader.uploadImage(src, key, bucket, function (err, fileName) {
             if (err) {
@@ -126,7 +117,6 @@ var SyncHandler = function (db) {
     };
     
     this.saveFileStream = function (options, callback) {
-        //TODO: validate ...
 
         async.waterfall([
 
@@ -237,11 +227,6 @@ var SyncHandler = function (db) {
                         
                         if (!device.sync.enabled) { 
                             return cb(badRequests.AccessError({message: 'This functionality is disabled.'}));
-                        }
-                        
-                        //TODO: check payment:
-                        if (device.sync.status !== DEVICE_STATUSES.SUBSCRIBED) {
-                            return cb(badRequests.PaymentRequired());
                         }
                         
                         cb();
