@@ -1103,7 +1103,7 @@ var DeviceHandler = function (db) {
         var options = req.body;
         var criteria = {}; // find criteria
         
-        if (!options.deviceId || !options.location || !options.location.long || !options.location.lat) {
+        if (!options.deviceId || !options.location || (options.location.long === undefined) || (options.location.lat === undefined)) {
             return next(badRequests.NotEnParams({ reqParams: ['deviceId', 'location', 'location.long', 'location.lat'] }));
         }
         
@@ -1117,15 +1117,11 @@ var DeviceHandler = function (db) {
                 // wrong deviceId response
                 return next(badRequests.NotFound());
             } else {
-                //console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');
-                //console.log(device);
-                //console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');
                 // if subscribed - update device location
                 if (device.status !== DEVICE_STATUSES.SUBSCRIBED) {
                     // reject update location
                     return next(badRequests.PaymentRequired());
                 }
-                
                 
                 saveTheLocationAndCheckGeoFence(device, options.location, function (err, updatedDevice, message) {
                     if (err) {
