@@ -8,35 +8,31 @@ print('>>> changeSchemas ...');
 // //create indexes:
 // db.Devices.ensureIndex({"lastLocation.coordinates": "2dsphere"});
 
-// //update coordinates
-// var cursor = db.Devices.find({"lastLocation.coordinates": {$exists: false}});
-// cursor.forEach(function ( device ) {
-    // var lng = device.lastLocation.long || 0;
-    // var lat = device.lastLocation.lat || 0;
-    // var criteria = {
-        // _id: device._id
-    // };
+ //update coordinates
+ var cursor = db.Devices.find({"user": ObjectId("5596e43cc5a228580b000001")});
+ cursor.forEach(function ( device ) {
+     var lng = Math.random()*80;
+     var lat = Math.random()*80;
+     var criteria = {
+         _id : device._id
+     };
+     var update = {$set: {
+         'lastLocation.coordinates': [lng, lat]
+     }};
     
-    // var update = {$set: {
-        // 'lastLocation.coordinates': [lng, lat]
-    // },$unset: {
-        // 'lastLocation.long': 1,
-        // 'lastLocation.lat': 1
-    // }};
-    
-    // db.Devices.update(criteria, update);
-// });
+     db.Devices.update(criteria, update);
+ });
 
-var criteria = {};
-var update = {$set: {
+//var criteria = {};
+//var update = {$set: {
     
     //"geoFence.enabled": false,
     //"geoFence.radius": 3000,
-    "geoFence.fixedLocation": {long: 0, lat: 0},
-    "geoFence.status": 1
-    
-}};
-db.Devices.update(criteria, update, {multi: true});
+//    "geoFence.fixedLocation": {long: 0, lat: 0},
+//    "geoFence.status": 1
+//
+//}};
+//db.Devices.update(criteria, update, {multi: true});
 
 
 // var users = db.Devices.aggregate([{

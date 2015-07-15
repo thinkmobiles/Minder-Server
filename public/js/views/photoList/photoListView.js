@@ -26,7 +26,7 @@ define([
 
             this.stateModel = new Backbone.Model({
                 count         : 0,
-                onPage        : 2,
+                onPage        : 15,
                 padding       : 2,
                 page          : 1,
                 ends          : true,
