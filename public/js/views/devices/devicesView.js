@@ -156,7 +156,7 @@ define([
 
                 myModalWindow.off('hidden.bs.modal');
             } else {
-                if (!confirm('This device is already subscribed ...')) {
+                if (!confirm('This device is already subscribed, if you subscribe to resubscription, you will lose the previous one. Do you agree?')) {
                     return
                 }
                 $.ajax({
