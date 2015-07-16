@@ -456,10 +456,14 @@ define([
         },
 
         afterUpend: function () {
+            $(".loggedMenu").find('.active').removeClass('active');
+            $("#devices_but").addClass('active');
+
             if (this.isNew) {
                 this.isNew = false;
                 return
             }
+
             this.paginationView.refresh();
             this.render();
 

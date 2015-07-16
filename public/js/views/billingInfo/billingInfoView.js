@@ -338,6 +338,11 @@ define([
             });
         },
 
+        afterUpend: function(){
+            $(".loggedMenu").find('.active').removeClass('active');
+            $("#billing_but").addClass('active');
+        },
+
         render: function () {
             var self = this;
             var data = this.stateModel.toJSON();
