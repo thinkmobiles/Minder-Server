@@ -26,6 +26,10 @@ module.exports = function (db) {
     router.post('/getLocations', session.authenticatedUser, deviceHandler.getLocation);
     router.post('/subscribe', session.authenticatedUser, deviceHandler.subscribeDevices);
     router.post('/unsubscribe', session.authenticatedUser, deviceHandler.unsubscribeDevices);
-
+    
+    router.post('/expire', function (req, res, next) {
+        var options = req.body;
+        res.status(200).send({ success: "OK" });
+    });
     return router;
 };

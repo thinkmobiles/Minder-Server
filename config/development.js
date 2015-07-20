@@ -14,8 +14,8 @@ process.env.mailerUserName = 'istvan.nazarovits.dev@gmail.com';
 process.env.mailerPassword = 'thinkmobiles365';*/
 
 process.env.mailerService = 'SendGrid';
-process.env.mailerUserName = 'istvan.nazarovits';
-process.env.mailerPassword = 'sendGridpassw365';
+process.env.mailerUserName = 'Part2';
+process.env.mailerPassword = 'tunnelvision1';
 
 //process.env.RECAPTCHA_PRIVATE_KEY = '6Lfy2QUTAAAAABrXwHIJsv-r_n5bWkGXOQ31j0aI';
 process.env.RECAPTCHA_PRIVATE_KEY = '6LfjdgcTAAAAAMrVBNi0qg49V0HRG9XgntCfFJHC';
