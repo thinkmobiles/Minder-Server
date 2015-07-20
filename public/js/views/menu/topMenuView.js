@@ -9,7 +9,7 @@ define([
 
         events: {
             'click #logOut'       : 'logout',
-            'click .topMenuItem'  : 'changeTab'
+            //'click .topMenuItem'  : 'changeTab'
         },
 
         topMenuLeftItemsRaw: [
@@ -53,13 +53,13 @@ define([
             this.render();
         },
 
-        changeTab: function(event) {
-            var holder = $(event.target);
-            var closestEl = holder.closest('.loggedMenu');
-            closestEl.find(".active").removeClass("active");
-            holder.addClass("active");
-
-        },
+        //changeTab: function(event) {
+        //    var holder = $(event.target);
+        //    var closestEl = holder.closest('.loggedMenu');
+        //    closestEl.find(".active").removeClass("active");
+        //    holder.addClass("active");
+        //
+        //},
 
         logout: function () {
             $.ajax({
@@ -93,15 +93,15 @@ define([
         render: function () {
             var authorized = App.sessionData.get('authorized');
             var user = App.sessionData.get('user');
-            var activeButton = window.location.hash;
-            activeButton = _.first(activeButton.split('/')) || "#main";
+            //var activeButton = window.location.hash;
+            //activeButton = _.first(activeButton.split('/')) || "#main";
 
             var data = {
                 top        : this.topMenuLeftItemsRaw,
                 dropDown   : this.topMenuRightDropdownItemsRaw,
                 topRight   : this.topRightMenuItemsRaw,
-                authorized : authorized,
-                actButt    : activeButton
+                authorized : authorized
+                //actButt    : activeButton
             };
 
             if (user) {

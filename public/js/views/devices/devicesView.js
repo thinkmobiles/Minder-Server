@@ -156,7 +156,7 @@ define([
 
                 myModalWindow.off('hidden.bs.modal');
             } else {
-                if (!confirm('This device is already subscribed ...')) {
+                if (!confirm('This device is already subscribed, if you subscribe to resubscription, you will lose the previous one. Do you agree?')) {
                     return
                 }
                 $.ajax({
@@ -456,10 +456,14 @@ define([
         },
 
         afterUpend: function () {
+            $(".loggedMenu").find('.active').removeClass('active');
+            $("#devices_but").addClass('active');
+
             if (this.isNew) {
                 this.isNew = false;
                 return
             }
+
             this.paginationView.refresh();
             this.render();
 

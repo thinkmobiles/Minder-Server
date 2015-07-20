@@ -81,6 +81,9 @@ define([
         afterUpend: function () {
             var center;
 
+            $(".loggedMenu").find('.active').removeClass('active');
+            $("#homepage_but").addClass('active');
+
             if (App.map) {
                 center = App.map.getCenter();
                 google.maps.event.trigger(App.map, "resize");
